@@ -1222,6 +1222,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "moete"
+version = "0.1.0"
+dependencies = [
+ "env_logger",
+ "log",
+ "poise",
+ "reqwest 0.12.23",
+ "serde",
+ "serde_json",
+ "serenity",
+ "tokio",
+ "toml",
+]
+
+[[package]]
 name = "native-tls"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1632,21 +1647,6 @@ dependencies = [
  "libc",
  "untrusted",
  "windows-sys 0.52.0",
-]
-
-[[package]]
-name = "rust_ground_zero"
-version = "0.1.0"
-dependencies = [
- "env_logger",
- "log",
- "poise",
- "reqwest 0.12.23",
- "serde",
- "serde_json",
- "serenity",
- "tokio",
- "toml",
 ]
 
 [[package]]
