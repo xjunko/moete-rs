@@ -2,4 +2,4 @@
 /target
 
 # dev
-*.toml
+config.toml
