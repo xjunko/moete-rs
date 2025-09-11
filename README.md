@@ -8,6 +8,9 @@ cuz i wanted to try rust, thats why.
 - rust
 - discord bot 
 
+## note
+this rewrite is probably gonna take a while as i have to learn the language and it's quirks at the same time.
+
 ## running
 ```
 DISCORD_TOKEN=... cargo run
