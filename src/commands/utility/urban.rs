@@ -47,8 +47,14 @@ impl Urban {
     }
 }
 
+/// Finds a term on Urban Dictionary and returns the definition(s).
 #[poise::command(prefix_command)]
-pub async fn urban(ctx: Context<'_>, #[rest] term: String) -> Result<(), Error> {
+pub async fn urban(
+    ctx: Context<'_>,
+    #[description = "The term to search for"]
+    #[rest]
+    term: String,
+) -> Result<(), Error> {
     match Urban::get(&term).await {
         Ok(urban_definitions) => {
             let pages: Vec<String> = urban_definitions.into_iter().map(|def|format!(
