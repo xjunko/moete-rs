@@ -1,6 +1,7 @@
 use std::path::Path;
 
-use super::Error;
+use crate::Error;
+use log::info;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -10,13 +11,15 @@ static CONFIG_PATH: &str = "config.toml";
 
 #[derive(Serialize, Deserialize)]
 pub struct Config {
-    discord: Discord,
+    pub discord: Discord,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Discord {
-    name: String,
-    status: Vec<String>,
+    pub name: String,
+    pub token: String,
+    pub status: Vec<String>,
+    pub prefix: Vec<String>,
 }
 
 impl Config {
@@ -34,7 +37,8 @@ impl Config {
             if let Err(reason) = default_config.save() {
                 error!("Failed to save file: {reason:?}");
             }
-            panic!("Fill out the config with the correct values");
+            info!("Fill out the config with the correct values");
+            std::process::exit(0);
         }
 
         let conf_content = std::fs::read_to_string(conf_path).expect("Failed to read config.toml");
@@ -46,7 +50,9 @@ impl Config {
         Self {
             discord: Discord {
                 name: String::from("Moete"),
+                token: String::from("DISCORD_TOKEN"),
                 status: vec!["hello world!".into()],
+                prefix: vec![";".into()],
             },
         }
     }
