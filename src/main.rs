@@ -1,16 +1,14 @@
-mod config;
+mod builtins;
+mod commands;
 mod state;
-pub use state::State;
 
 use poise::serenity_prelude as serenity;
 use std::sync::Arc;
 
 use log::info;
 
-mod commands;
-
 type Error = Box<dyn std::error::Error + Send + Sync>;
-type Context<'a> = poise::Context<'a, State, Error>;
+type Context<'a> = poise::Context<'a, state::State, Error>;
 
 async fn on_ready(_ctx: &serenity::Context, ready: &serenity::Ready) -> Result<(), Error> {
     info!("Logged in as {}", ready.user.name);
@@ -21,7 +19,31 @@ async fn on_ready(_ctx: &serenity::Context, ready: &serenity::Ready) -> Result<(
 async fn main() -> Result<(), Error> {
     env_logger::init();
 
-    let token = std::env::var("DISCORD_TOKEN").expect("DISCORD_TOKEN must be set");
+    let mut state = state::State::create();
+
+    let token = state.config.discord.token.clone();
+
+    // get all the required param
+    let prefix = state
+        .config
+        .discord
+        .prefix
+        .get(0)
+        .expect("No prefix set")
+        .clone();
+
+    // abit ugly but whatevs
+    let prefixes: Vec<poise::Prefix> = state
+        .config
+        .discord
+        .prefix
+        .iter()
+        .map(|s| {
+            // this leaks memory, but it only does so during startup, should be fine.
+            poise::Prefix::Literal(Box::leak(s.clone().into_boxed_str()))
+        })
+        .collect();
+
     let intents = serenity::GatewayIntents::all();
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
@@ -36,7 +58,8 @@ async fn main() -> Result<(), Error> {
                 })
             },
             prefix_options: poise::PrefixFrameworkOptions {
-                prefix: Some(";".into()),
+                prefix: Some(prefix.into()),
+                additional_prefixes: prefixes,
                 edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(
                     std::time::Duration::from_secs(3600), // ought to be enough
                 ))),
@@ -49,7 +72,12 @@ async fn main() -> Result<(), Error> {
             },
             ..Default::default()
         })
-        .setup(|ctx, _ready, _framework| Box::pin(async move { Ok(State::load(ctx)) }))
+        .setup(|ctx, _ready, _framework| {
+            Box::pin(async move {
+                state.load(ctx);
+                Ok(state)
+            })
+        })
         .build();
 
     let client = serenity::ClientBuilder::new(token, intents)

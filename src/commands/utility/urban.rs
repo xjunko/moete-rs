@@ -1,5 +1,5 @@
+use crate::builtins::paginate;
 use crate::{Context, Error};
-use poise::samples::paginate;
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -28,7 +28,7 @@ impl Urban {
             return Err("No results found".into());
         }
 
-        let entry: Vec<Urban> = resp["list"]
+        let mut entry: Vec<Urban> = resp["list"]
             .as_array()
             .unwrap()
             .into_iter()
@@ -42,6 +42,8 @@ impl Urban {
                 dislike: e["thumbs_down"].as_i64().unwrap() as i32,
             })
             .collect();
+
+        entry.sort_by(|a, b| a.like.cmp(&b.like));
 
         Ok(entry)
     }
