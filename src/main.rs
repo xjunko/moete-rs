@@ -1,41 +1,14 @@
 mod builtins;
 mod commands;
 mod core;
+mod events;
+mod routines;
 
-use std::{sync::Arc, time::Duration};
-
-use log::info;
 use poise::serenity_prelude as serenity;
-use rand::{Rng, SeedableRng, rngs::StdRng};
-use tokio::time::sleep;
+use std::sync::Arc;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, core::State, Error>;
-
-async fn on_ready(_ctx: &serenity::Context, ready: &serenity::Ready) -> Result<(), Error> {
-    info!("Logged in as {}", ready.user.name);
-    Ok(())
-}
-
-async fn on_message(
-    ctx: &serenity::Context,
-    message: &serenity::Message,
-    data: &core::State,
-) -> Result<(), Error> {
-    crate::commands::emote::listener::on_message(ctx, message, data).await?;
-    Ok(())
-}
-
-async fn status_rotate(ctx: Arc<serenity::Context>, status: Vec<String>) {
-    let mut rng = StdRng::from_seed([0; 32]);
-    loop {
-        let i: usize = rng.random_range(0..status.len());
-        ctx.set_activity(Some(serenity::gateway::ActivityData::watching(
-            status.get(i).unwrap(),
-        )));
-        sleep(Duration::from_secs(60 * 5)).await; // n minutes
-    }
-}
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
@@ -59,11 +32,11 @@ async fn main() -> Result<(), Error> {
         event_handler: |ctx, event, _framework, data| {
             Box::pin(async move {
                 if let serenity::FullEvent::Ready { data_about_bot, .. } = event {
-                    on_ready(ctx, data_about_bot).await?;
+                    events::on_ready(ctx, data_about_bot).await?;
                 }
 
                 if let serenity::FullEvent::Message { new_message } = event {
-                    on_message(ctx, &new_message, data).await?;
+                    events::on_message(ctx, &new_message, data).await?;
                 }
 
                 Ok(())
@@ -97,7 +70,7 @@ async fn main() -> Result<(), Error> {
             Box::pin(async move {
                 // background tasks
                 let ctx_arc = Arc::new(ctx.clone());
-                tokio::spawn(status_rotate(Arc::clone(&ctx_arc), status));
+                routines::start(Arc::clone(&ctx_arc), status.clone()).await;
 
                 // this loads data instantly, no need for Arc.
                 data.load(ctx).await?;
