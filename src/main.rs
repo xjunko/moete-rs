@@ -2,10 +2,12 @@ mod builtins;
 mod commands;
 mod core;
 
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use log::info;
 use poise::serenity_prelude as serenity;
+use rand::{Rng, SeedableRng, rngs::StdRng};
+use tokio::time::sleep;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, core::State, Error>;
@@ -24,12 +26,24 @@ async fn on_message(
     Ok(())
 }
 
+async fn status_rotate(ctx: Arc<serenity::Context>, status: Vec<String>) {
+    let mut rng = StdRng::from_seed([0; 32]);
+    loop {
+        let i: usize = rng.random_range(0..status.len());
+        ctx.set_activity(Some(serenity::gateway::ActivityData::watching(
+            status.get(i).unwrap(),
+        )));
+        sleep(Duration::from_secs(60 * 5)).await; // n minutes
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     env_logger::init();
 
     let mut data = core::State::create();
     let token = data.config.discord.token.clone();
+    let status = data.config.discord.status.clone();
 
     // what prefixes to use
     let (primary_prefix, additional_prefixes) = {
@@ -81,6 +95,11 @@ async fn main() -> Result<(), Error> {
         .options(framework_options)
         .setup(|ctx, _ready, _framework| {
             Box::pin(async move {
+                // background tasks
+                let ctx_arc = Arc::new(ctx.clone());
+                tokio::spawn(status_rotate(Arc::clone(&ctx_arc), status));
+
+                // this loads data instantly, no need for Arc.
                 data.load(ctx).await?;
                 Ok(data)
             })
