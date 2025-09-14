@@ -1,14 +1,15 @@
-use crate::{serenity, state::Config};
+use super::Config;
+use crate::serenity;
 
-pub struct State {
+pub struct Data {
     pub config: Config,
 }
 
-impl State {
+impl Data {
     pub fn create() -> Self {
         let config = Config::load();
         Self { config }
     }
 
-    pub fn load(&mut self, _: &serenity::Context) {}
+    pub fn load(&mut self, _ctx: &serenity::Context) {}
 }

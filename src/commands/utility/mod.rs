@@ -1,4 +1,4 @@
-use crate::{Error, state::State};
+use crate::{Error, core::Data};
 
 mod google;
 pub use google::*;
@@ -13,6 +13,6 @@ mod urban;
 pub use urban::*;
 
 /// Collect all commands into a single Vec
-pub fn commands() -> Vec<poise::Command<State, Error>> {
+pub fn commands() -> Vec<poise::Command<Data, Error>> {
     vec![help(), google(), ping(), urban()]
 }
