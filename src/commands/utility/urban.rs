@@ -1,16 +1,19 @@
-use crate::builtins::paginate;
+use crate::builtins::branding;
+use crate::builtins::discord::{embed, paginate};
+use crate::serenity::all::CreateEmbedFooter;
 use crate::{Context, Error};
+use crate::{core, serenity};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
 struct Urban {
-    author: String,
-    word: String,
+    _author: String,
+    _word: String,
     // permalink: String,
     definition: String,
     example: String,
-    like: i32,
-    dislike: i32,
+    _like: i32,
+    _dislike: i32,
 }
 
 impl Urban {
@@ -33,17 +36,17 @@ impl Urban {
             .unwrap()
             .into_iter()
             .map(|e| Self {
-                author: e["author"].as_str().unwrap().to_string(),
-                word: e["word"].as_str().unwrap().to_string(),
+                _author: e["author"].as_str().unwrap().to_string(),
+                _word: e["word"].as_str().unwrap().to_string(),
                 // permalink: e["permalink"].as_str().unwrap().to_string(),
                 definition: e["definition"].as_str().unwrap().to_string(),
                 example: e["example"].as_str().unwrap().to_string(),
-                like: e["thumbs_up"].as_i64().unwrap() as i32,
-                dislike: e["thumbs_down"].as_i64().unwrap() as i32,
+                _like: e["thumbs_up"].as_i64().unwrap() as i32,
+                _dislike: e["thumbs_down"].as_i64().unwrap() as i32,
             })
             .collect();
 
-        entry.sort_by(|a, b| a.like.cmp(&b.like));
+        entry.sort_by(|a, b| a._like.cmp(&b._like));
 
         Ok(entry)
     }
@@ -59,17 +62,41 @@ pub async fn urban(
 ) -> Result<(), Error> {
     match Urban::get(&term).await {
         Ok(urban_definitions) => {
-            let pages: Vec<String> = urban_definitions.into_iter().map(|def|format!(
-                    "**{}**\n\n**Definition:**\n{}\n\n**Example:**\n{}\n\n👍 {} | 👎 {} | Author: {}",
-                    def.word,
-                    def.definition,
-                    def.example,
-                    def.like,
-                    def.dislike,
-                    def.author
-                )).collect();
-            let response_refs: Vec<&str> = pages.iter().map(String::as_str).collect();
-            paginate(ctx, &response_refs).await?;
+            let data: &core::Data = ctx.data();
+            let total = urban_definitions.len();
+
+            let pages: Vec<serenity::CreateEmbed> = urban_definitions
+                .into_iter()
+                .map(|def| {
+                    format!(
+                        "**Definition:**\n{}\n\n**Example:**\n{}",
+                        def.definition, def.example
+                    )
+                })
+                .into_iter()
+                .enumerate()
+                .map(|(i, desc)| {
+                    embed::create_embed()
+                        .title(format!(
+                            "{} | {} [{}/{}]",
+                            data.config.discord.name,
+                            term,
+                            i + 1,
+                            total
+                        ))
+                        .description(desc)
+                        .footer(
+                            CreateEmbedFooter::new(format!(
+                                "Requested by {} | {}",
+                                ctx.author().name,
+                                branding::version()
+                            ))
+                            .icon_url(ctx.author().face()),
+                        )
+                })
+                .collect();
+
+            paginate::paginate_embed(ctx, pages).await?;
         }
         Err(reason) => {
             ctx.say(format!("failed to get urban dictionary entry: {}", reason))
