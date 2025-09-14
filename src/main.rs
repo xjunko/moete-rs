@@ -7,13 +7,20 @@ use std::sync::Arc;
 use log::info;
 use poise::serenity_prelude as serenity;
 
-use crate::builtins::prefixes;
-
 type Error = Box<dyn std::error::Error + Send + Sync>;
-type Context<'a> = poise::Context<'a, core::Data, Error>;
+type Context<'a> = poise::Context<'a, core::State, Error>;
 
 async fn on_ready(_ctx: &serenity::Context, ready: &serenity::Ready) -> Result<(), Error> {
     info!("Logged in as {}", ready.user.name);
+    Ok(())
+}
+
+async fn on_message(
+    ctx: &serenity::Context,
+    message: &serenity::Message,
+    data: &core::State,
+) -> Result<(), Error> {
+    crate::commands::emote::listener::on_message(ctx, message, data).await?;
     Ok(())
 }
 
@@ -21,24 +28,30 @@ async fn on_ready(_ctx: &serenity::Context, ready: &serenity::Ready) -> Result<(
 async fn main() -> Result<(), Error> {
     env_logger::init();
 
-    let mut data = core::Data::create();
+    let mut data = core::State::create();
     let token = data.config.discord.token.clone();
 
-    // Prefixes
+    // what prefixes to use
     let (primary_prefix, additional_prefixes) = {
         if data.config.discord.debug {
-            prefixes::debug_prefixes()
+            builtins::prefixes::debug_prefixes()
         } else {
-            prefixes::release_prefixes()
+            builtins::prefixes::release_prefixes()
         }
     };
 
+    // options
     let framework_options = poise::FrameworkOptions {
-        event_handler: |ctx, event, _framework, _data| {
+        event_handler: |ctx, event, _framework, data| {
             Box::pin(async move {
                 if let serenity::FullEvent::Ready { data_about_bot, .. } = event {
                     on_ready(ctx, data_about_bot).await?;
                 }
+
+                if let serenity::FullEvent::Message { new_message } = event {
+                    on_message(ctx, &new_message, data).await?;
+                }
+
                 Ok(())
             })
         },
@@ -68,13 +81,13 @@ async fn main() -> Result<(), Error> {
         .options(framework_options)
         .setup(|ctx, _ready, _framework| {
             Box::pin(async move {
-                data.load(ctx);
+                data.load(ctx).await?;
                 Ok(data)
             })
         })
         .build();
 
-    // Client
+    // client
     serenity::ClientBuilder::new(token, serenity::GatewayIntents::all())
         .framework(framework)
         .await?

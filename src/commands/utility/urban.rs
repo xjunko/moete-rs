@@ -62,7 +62,7 @@ pub async fn urban(
 ) -> Result<(), Error> {
     match Urban::get(&term).await {
         Ok(urban_definitions) => {
-            let data: &core::Data = ctx.data();
+            let data: &core::State = ctx.data();
             let total = urban_definitions.len();
 
             let pages: Vec<serenity::CreateEmbed> = urban_definitions
