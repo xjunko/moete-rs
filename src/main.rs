@@ -2,10 +2,12 @@ mod builtins;
 mod commands;
 mod core;
 
-use poise::serenity_prelude as serenity;
 use std::sync::Arc;
 
 use log::info;
+use poise::serenity_prelude as serenity;
+
+use crate::builtins::prefixes;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, core::Data, Error>;
@@ -20,48 +22,35 @@ async fn main() -> Result<(), Error> {
     env_logger::init();
 
     let mut data = core::Data::create();
-
     let token = data.config.discord.token.clone();
 
-    // get all the required param
-    let prefix = data
-        .config
-        .discord
-        .prefix
-        .get(0)
-        .expect("No prefix set")
-        .clone();
+    // Prefixes
 
-    // abit ugly but whatevs
-    let prefixes: Vec<poise::Prefix> = data
-        .config
-        .discord
-        .prefix
-        .iter()
-        .map(|s| {
-            // this leaks memory, but it only does so during startup, should be fine.
-            poise::Prefix::Literal(Box::leak(s.clone().into_boxed_str()))
-        })
-        .collect();
+    let (primary_prefix, additional_prefixes) = {
+        if data.config.discord.debug {
+            prefixes::debug_prefixes()
+        } else {
+            prefixes::release_prefixes()
+        }
+    };
 
+    // Framework
     let intents = serenity::GatewayIntents::all();
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
             event_handler: |ctx, event, _framework, _data| {
                 Box::pin(async move {
-                    match event {
-                        serenity::FullEvent::Ready { data_about_bot, .. } => {
-                            on_ready(ctx, data_about_bot).await
-                        }
-                        _ => Ok(()),
+                    if let serenity::FullEvent::Ready { data_about_bot, .. } = event {
+                        on_ready(ctx, data_about_bot).await?;
                     }
+                    Ok(())
                 })
             },
             prefix_options: poise::PrefixFrameworkOptions {
-                prefix: Some(prefix.into()),
-                additional_prefixes: prefixes,
+                prefix: Some(primary_prefix.into()),
+                additional_prefixes,
                 edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(
-                    std::time::Duration::from_secs(3600), // ought to be enough
+                    std::time::Duration::from_secs(3600),
                 ))),
                 ..Default::default()
             },
@@ -80,10 +69,12 @@ async fn main() -> Result<(), Error> {
         })
         .build();
 
-    let client = serenity::ClientBuilder::new(token, intents)
+    // Client
+    serenity::ClientBuilder::new(token, intents)
         .framework(framework)
-        .await;
+        .await?
+        .start()
+        .await?;
 
-    client.unwrap().start().await?;
     Ok(())
 }

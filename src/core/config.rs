@@ -19,7 +19,7 @@ pub struct Discord {
     pub name: String,
     pub token: String,
     pub status: Vec<String>,
-    pub prefix: Vec<String>,
+    pub debug: bool,
 }
 
 impl Config {
@@ -52,7 +52,7 @@ impl Config {
                 name: String::from("Moete"),
                 token: String::from("DISCORD_TOKEN"),
                 status: vec!["hello world!".into()],
-                prefix: vec![";".into()],
+                debug: false,
             },
         }
     }
