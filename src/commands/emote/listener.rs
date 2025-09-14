@@ -1,8 +1,10 @@
+use ::serenity::all::ExecuteWebhook;
 use log::error;
 use once_cell::sync::Lazy;
 use regex::Regex;
 
 use crate::Error;
+use crate::builtins;
 use crate::core;
 use crate::serenity;
 
@@ -35,11 +37,31 @@ pub async fn on_message(
     if found_emote {
         let converted: String = words.join(" ");
 
+        // Failing to delete message is not a big deal
         if let Err(err) = message.delete(&ctx.http).await {
             error!("Failed to delete message: {err:?}");
         }
 
-        if let Err(err) = message.channel_id.say(&ctx.http, converted).await {
+        // Try to send thru webhook, if failed, send thru text
+        if let Some(webhook) =
+            builtins::discord::webhook::get_or_create_webhook(ctx, message.channel_id).await
+        {
+            if let Err(err) = webhook
+                .execute(
+                    &ctx.http,
+                    true,
+                    ExecuteWebhook::new().content(converted.clone()),
+                )
+                .await
+            {
+                error!("Failed to execute webhook: {err:?}");
+            } else {
+                return Ok(());
+            }
+        }
+
+        // Webhook failed, fallback to normal message
+        if let Err(err) = message.channel_id.say(&ctx.http, converted.clone()).await {
             error!("Failed to send message: {err:?}");
         }
     }

@@ -3,3 +3,4 @@ pub mod embed;
 pub mod help;
 pub mod paginate;
 pub mod poise_builtins;
+pub mod webhook;
