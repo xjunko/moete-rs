@@ -50,7 +50,7 @@ impl Urban {
 }
 
 /// Finds a term on Urban Dictionary and returns the definition(s).
-#[poise::command(prefix_command)]
+#[poise::command(prefix_command, category = "Utility")]
 pub async fn urban(
     ctx: Context<'_>,
     #[description = "The term to search for"]

@@ -4,7 +4,7 @@ use crate::{Context, Error};
 use std::time::Instant;
 
 /// Replies with a message and get the difference in milliseconds.
-#[poise::command(prefix_command)]
+#[poise::command(prefix_command, category = "Utility")]
 pub async fn ping(ctx: Context<'_>) -> Result<(), Error> {
     let start = Instant::now();
     let msg = ctx.say("uwu").await?;

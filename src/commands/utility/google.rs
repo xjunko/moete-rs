@@ -1,7 +1,7 @@
 use crate::{Context, Error};
 
 /// Replies with a Google search link for the given query.
-#[poise::command(prefix_command)]
+#[poise::command(prefix_command, category = "Utility")]
 pub async fn google(
     ctx: Context<'_>,
     #[description = "Query to search"]
