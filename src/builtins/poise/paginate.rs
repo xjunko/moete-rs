@@ -1,6 +1,8 @@
-use ::serenity::all::Color;
 use poise::serenity_prelude as serenity;
 
+use crate::builtins::poise::embed;
+
+/// Sends a paginated message from pages passed.
 pub async fn paginate(ctx: crate::Context<'_>, pages: &[&str]) -> Result<(), serenity::Error> {
     let ctx_id = ctx.id();
     let prev_button_id = format!("{}prev", ctx_id);
@@ -13,11 +15,7 @@ pub async fn paginate(ctx: crate::Context<'_>, pages: &[&str]) -> Result<(), ser
         ]);
 
         poise::CreateReply::default()
-            .embed(
-                serenity::CreateEmbed::default()
-                    .description(pages[0])
-                    .color(Color::BLUE),
-            )
+            .embed(embed::create_embed().description(pages[0]))
             .components(vec![components])
     };
 
