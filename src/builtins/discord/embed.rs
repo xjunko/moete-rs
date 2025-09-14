@@ -1,8 +1,8 @@
-use ::serenity::all::CreateEmbedFooter;
+use crate::serenity::all::CreateEmbedFooter;
 use poise::serenity_prelude as serenity;
 
 use crate::builtins::branding;
-use crate::builtins::poise::color;
+use crate::builtins::discord::color;
 
 /// Creates a basic moete-branded embed.
 pub fn create_embed() -> serenity::CreateEmbed {

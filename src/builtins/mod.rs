@@ -1,4 +1,4 @@
-pub use self::{bot::*, poise::embed::*, poise::paginate::*};
+pub use self::{bot::*, discord::embed::*, discord::paginate::*};
 
 mod bot;
-mod poise;
+mod discord;
