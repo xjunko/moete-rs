@@ -1,6 +1,6 @@
 mod builtins;
 mod commands;
-mod state;
+mod core;
 
 use poise::serenity_prelude as serenity;
 use std::sync::Arc;
@@ -8,7 +8,7 @@ use std::sync::Arc;
 use log::info;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
-type Context<'a> = poise::Context<'a, state::State, Error>;
+type Context<'a> = poise::Context<'a, core::Data, Error>;
 
 async fn on_ready(_ctx: &serenity::Context, ready: &serenity::Ready) -> Result<(), Error> {
     info!("Logged in as {}", ready.user.name);
@@ -19,12 +19,12 @@ async fn on_ready(_ctx: &serenity::Context, ready: &serenity::Ready) -> Result<(
 async fn main() -> Result<(), Error> {
     env_logger::init();
 
-    let mut state = state::State::create();
+    let mut data = core::Data::create();
 
-    let token = state.config.discord.token.clone();
+    let token = data.config.discord.token.clone();
 
     // get all the required param
-    let prefix = state
+    let prefix = data
         .config
         .discord
         .prefix
@@ -33,7 +33,7 @@ async fn main() -> Result<(), Error> {
         .clone();
 
     // abit ugly but whatevs
-    let prefixes: Vec<poise::Prefix> = state
+    let prefixes: Vec<poise::Prefix> = data
         .config
         .discord
         .prefix
@@ -74,8 +74,8 @@ async fn main() -> Result<(), Error> {
         })
         .setup(|ctx, _ready, _framework| {
             Box::pin(async move {
-                state.load(ctx);
-                Ok(state)
+                data.load(ctx);
+                Ok(data)
             })
         })
         .build();
