@@ -1,4 +1,5 @@
-pub use self::{config::Config, data::Data};
+pub use self::{config::Config, emotes::EmoteManager, state::State};
 
 mod config;
-mod data;
+mod emotes;
+mod state;

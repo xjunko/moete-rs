@@ -186,7 +186,7 @@ async fn help_single_command(
 
         // Everything should be fine now
         // Construct embed for the help message.
-        let data: &core::Data = ctx.data();
+        let data: &core::State = ctx.data();
         let mut embed =
             embed::create_embed().title(format!("{} | {}", data.config.discord.name, command_name));
 
@@ -283,7 +283,7 @@ async fn generate_all_commands(
     ctx: Context<'_>,
     config: &HelpConfiguration<'_>,
 ) -> Result<serenity::CreateEmbed, serenity::Error> {
-    let data: &core::Data = ctx.data();
+    let data: &core::State = ctx.data();
     let mut embed =
         embed::create_embed().title(format!("{} | {}", data.config.discord.name, "Help"));
 
