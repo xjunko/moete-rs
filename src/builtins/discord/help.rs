@@ -16,8 +16,6 @@ pub struct HelpConfiguration<'a> {
     pub ephemeral: bool,
     /// Whether to list context menu commands as well
     pub show_context_menu_commands: bool,
-    /// Whether to list context menu commands as well
-    pub show_subcommands: bool,
     /// Whether to include [`poise::Command::description`] (above [`poise::Command::help_text`]).
     pub include_description: bool,
     #[doc(hidden)]
@@ -30,7 +28,6 @@ impl Default for HelpConfiguration<'_> {
             extra_text_at_bottom: "",
             ephemeral: true,
             show_context_menu_commands: false,
-            show_subcommands: false,
             include_description: true,
             __non_exhaustive: (),
         }
@@ -49,16 +46,6 @@ impl TwoColumnList {
     /// Add a line that needs the padding between the columns
     fn push_two_colums(&mut self, command: String, description: String) {
         self.0.push((command, Some(description)));
-    }
-
-    /// Add a line that doesn't influence the first columns's width
-    fn push_heading(&mut self, category: &str) {
-        if !self.0.is_empty() {
-            self.0.push(("".to_string(), None));
-        }
-        let mut category = category.to_string();
-        category += ":";
-        self.0.push((category, None));
     }
 
     /// Convert the list into a string with aligned descriptions
@@ -252,11 +239,12 @@ async fn help_single_command(
 
         let reply = CreateReply::default()
             .embed(embed)
-            .ephemeral(config.ephemeral);
+            .ephemeral(config.ephemeral)
+            .reply(true);
 
         ctx.send(reply).await?;
     } else {
-        ctx.say(format!("Could not find command named `{}`", command_name))
+        ctx.reply(format!("Could not find command named `{}`", command_name))
             .await?;
     }
 
@@ -285,34 +273,6 @@ fn preformat_subcommands<U, E>(
         // We could recurse here, but things can get cluttered quickly.
         // Instead, we show (using this function) subsubcommands when
         // the user asks for help on the subcommand.
-    }
-}
-
-/// Preformat lines (except for padding,) like `("  /ping", "Emits a ping message")`
-fn preformat_command<U, E>(
-    commands: &mut TwoColumnList,
-    config: &HelpConfiguration<'_>,
-    command: &poise::Command<U, E>,
-    indent: &str,
-    options_prefix: Option<&str>,
-) {
-    let prefix = if command.slash_action.is_some() {
-        String::from("/")
-    } else if command.prefix_action.is_some() {
-        options_prefix.map(String::from).unwrap_or_default()
-    } else {
-        // This is not a prefix or slash command, i.e. probably a context menu only command
-        // This should have been filtered out in `generate_all_commands`
-        unreachable!();
-    };
-
-    let prefix = format!("{}{}{}", indent, prefix, command.name);
-    commands.push_two_colums(
-        prefix.clone(),
-        command.description.as_deref().unwrap_or("").to_string(),
-    );
-    if config.show_subcommands {
-        preformat_subcommands(commands, command, &prefix)
     }
 }
 
@@ -392,7 +352,8 @@ async fn help_all_commands(
     let menu = generate_all_commands(ctx, &config).await?;
     let reply = CreateReply::default()
         .embed(menu)
-        .ephemeral(config.ephemeral);
+        .ephemeral(config.ephemeral)
+        .reply(true);
 
     ctx.send(reply).await?;
     Ok(())

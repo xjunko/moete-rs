@@ -8,7 +8,7 @@ pub async fn google(
     #[rest]
     query: String,
 ) -> Result<(), Error> {
-    ctx.say(format!(
+    ctx.reply(format!(
         "https://www.google.com/search?q={}",
         query.replace(" ", "+")
     ))

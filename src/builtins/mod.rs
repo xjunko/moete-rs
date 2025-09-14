@@ -1,4 +1,4 @@
-pub use self::{bot::*, discord::embed::*, discord::paginate::*};
+pub use self::bot::*;
 
 pub mod bot;
 pub mod discord;
