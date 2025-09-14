@@ -1,7 +1,9 @@
 [package]
 name = "moete"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2024"
+authors = ["xjunko <phony@kafu.ovh>"]
+repository = "https://github.com/xjunko/moete-rs"
 
 [dependencies]
 toml = "0.9.5"

@@ -25,7 +25,6 @@ async fn main() -> Result<(), Error> {
     let token = data.config.discord.token.clone();
 
     // Prefixes
-
     let (primary_prefix, additional_prefixes) = {
         if data.config.discord.debug {
             prefixes::debug_prefixes()
@@ -34,33 +33,39 @@ async fn main() -> Result<(), Error> {
         }
     };
 
-    // Framework
-    let intents = serenity::GatewayIntents::all();
-    let framework = poise::Framework::builder()
-        .options(poise::FrameworkOptions {
-            event_handler: |ctx, event, _framework, _data| {
-                Box::pin(async move {
-                    if let serenity::FullEvent::Ready { data_about_bot, .. } = event {
-                        on_ready(ctx, data_about_bot).await?;
-                    }
-                    Ok(())
-                })
-            },
-            prefix_options: poise::PrefixFrameworkOptions {
-                prefix: Some(primary_prefix.into()),
-                additional_prefixes,
-                edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(
-                    std::time::Duration::from_secs(3600),
-                ))),
-                ..Default::default()
-            },
-            commands: {
-                let mut cmds = Vec::new();
-                cmds.extend(commands::utility::commands());
-                cmds
-            },
+    let framework_options = poise::FrameworkOptions {
+        event_handler: |ctx, event, _framework, _data| {
+            Box::pin(async move {
+                if let serenity::FullEvent::Ready { data_about_bot, .. } = event {
+                    on_ready(ctx, data_about_bot).await?;
+                }
+                Ok(())
+            })
+        },
+        on_error: |err| {
+            Box::pin(async move {
+                let _ = poise::builtins::on_error(err).await;
+            })
+        },
+        prefix_options: poise::PrefixFrameworkOptions {
+            prefix: Some(primary_prefix.into()),
+            additional_prefixes,
+            edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(
+                std::time::Duration::from_secs(3600),
+            ))),
             ..Default::default()
-        })
+        },
+        commands: {
+            let mut cmds = Vec::new();
+            cmds.extend(commands::commands());
+            cmds
+        },
+        initialize_owners: true,
+        ..Default::default()
+    };
+
+    let framework = poise::Framework::builder()
+        .options(framework_options)
         .setup(|ctx, _ready, _framework| {
             Box::pin(async move {
                 data.load(ctx);
@@ -70,7 +75,7 @@ async fn main() -> Result<(), Error> {
         .build();
 
     // Client
-    serenity::ClientBuilder::new(token, intents)
+    serenity::ClientBuilder::new(token, serenity::GatewayIntents::all())
         .framework(framework)
         .await?
         .start()
