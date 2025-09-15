@@ -1,4 +1,5 @@
 use serenity::all::CreateWebhook;
+use serenity::all::WebhookType;
 
 use crate::serenity;
 
@@ -7,16 +8,19 @@ pub async fn get_or_create_webhook(
     channel_id: serenity::ChannelId,
 ) -> Option<serenity::Webhook> {
     match channel_id.webhooks(&ctx.http).await {
-        Ok(mut hooks) => {
-            if let Some(existing) = hooks.pop() {
+        Ok(hooks) => {
+            // Look for an existing webhook named "Moete" and of type Incoming
+            if let Some(existing) = hooks.into_iter().find(|hook| {
+                hook.kind == WebhookType::Incoming && hook.name.as_deref() == Some("Moete")
+            }) {
                 Some(existing)
             } else {
-                // no webhook found, try to create one
+                // no matching webhook found, try to create one
                 channel_id
                     .create_webhook(
                         &ctx.http,
                         CreateWebhook::new("Moete").audit_log_reason(
-                            "Moete requires a webhook to send a message with custom emotes.",
+                            "Moete requires an incoming webhook named 'Moete' to send messages with custom emotes.",
                         ),
                     )
                     .await
@@ -29,7 +33,7 @@ pub async fn get_or_create_webhook(
                 .create_webhook(
                     &ctx.http,
                     CreateWebhook::new("Moete").audit_log_reason(
-                        "Moete requires a webhook to send a message with custom emotes.",
+                        "Moete requires an incoming webhook named 'Moete' to send messages with custom emotes.",
                     ),
                 )
                 .await
