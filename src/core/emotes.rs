@@ -2,9 +2,12 @@ use crate::Error;
 use crate::serenity;
 use log::info;
 
+/// EmoteManager handles all emoji related operation.
 pub struct EmoteManager {
-    internal: Vec<serenity::Emoji>, // Came straight from the bot's application
-    external: Vec<serenity::Emoji>, // Whitelisted servers
+    /// Came straight from the bot's application
+    internal: Vec<serenity::Emoji>,
+    /// Whitelisted servers
+    external: Vec<serenity::Emoji>,
 }
 
 impl EmoteManager {
@@ -27,20 +30,28 @@ impl EmoteManager {
         self.internal.iter().chain(self.external.iter())
     }
 
-    // Load all the emojis we can use into EmoteManager.
+    /// Load all the emojis we can use into EmoteManager.
     pub async fn load(&mut self, ctx: &serenity::Context) {
         self.internal = Self::fetch_bot_emojis(ctx).await.unwrap_or_default();
         info!("Loaded {} bot emojis", self.internal.len());
     }
 
-    // Returns emoji if the word matches an emoji name.
+    /// Returns emoji if the word matches an emoji name.
     pub fn get(&self, name: &str) -> Option<&serenity::Emoji> {
         self.global()
             .filter(|e| e.available)
             .find(|e| e.name.eq_ignore_ascii_case(name))
     }
 
-    // Builds a text and transform it with emojis we can use.
+    /// Returns emojis matching the names.
+    pub fn get_many(&self, query: &str) -> Vec<&serenity::Emoji> {
+        self.global()
+            .filter(|e| e.available)
+            .filter(|e| e.name.contains(query))
+            .collect()
+    }
+
+    /// Builds a text and transform it with emojis we can use.
     pub fn text(&self, text: &str) -> String {
         let content: Vec<String> = text
             .split(" ")
