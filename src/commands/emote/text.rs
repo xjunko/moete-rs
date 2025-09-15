@@ -1,15 +1,56 @@
+use crate::builtins;
 use crate::core;
 use crate::{Context, Error};
+use log::error;
+use serenity::all::ExecuteWebhook;
 
 /// Send a message through Moete's emote system.
-#[poise::command(prefix_command, category = "Text")]
+#[poise::command(prefix_command, category = "Emote")]
 pub async fn text(
     ctx: Context<'_>,
     #[description = "Text to send"]
     #[rest]
     msg: String,
 ) -> Result<(), Error> {
+    if let poise::Context::Prefix(prefix_ctx) = ctx {
+        if let Err(e) = prefix_ctx
+            .msg
+            .delete(&ctx.serenity_context().http.clone())
+            .await
+        {
+            error!("Failed to delete message: {:?}", e);
+        }
+    }
+
     let data: &core::State = ctx.data();
-    ctx.reply(data.emotes.text(&msg)).await?;
+    let msg = data.emotes.text(&msg);
+
+    if let Some(webhook) =
+        builtins::discord::webhook::get_or_create_webhook(ctx.serenity_context(), ctx.channel_id())
+            .await
+    {
+        let user = builtins::discord::user::get_member_or_user(&ctx).await?;
+
+        if let Err(e) = webhook
+            .execute(
+                ctx.serenity_context().http.clone(),
+                true,
+                ExecuteWebhook::new()
+                    .content(msg.clone())
+                    .avatar_url(user.avatar_url().unwrap_or(user.default_avatar_url()))
+                    .username(user.display_name()),
+            )
+            .await
+        {
+            error!("Failed to execute webhook: {:?}", e);
+        } else {
+            return Ok(());
+        }
+    }
+
+    // Fallback to normal message if webhook fails
+    ctx.say(format!("{} - {}", msg.clone(), ctx.author().display_name()))
+        .await?;
+
     Ok(())
 }
