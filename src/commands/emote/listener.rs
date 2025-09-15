@@ -35,6 +35,7 @@ pub async fn on_message(
     }
 
     if found_emote {
+        let user = message.author.clone();
         let converted: String = words.join(" ");
 
         // Failing to delete message is not a big deal
@@ -50,7 +51,10 @@ pub async fn on_message(
                 .execute(
                     &ctx.http,
                     true,
-                    ExecuteWebhook::new().content(converted.clone()),
+                    ExecuteWebhook::new()
+                        .content(converted.clone())
+                        .username(user.display_name())
+                        .avatar_url(user.avatar_url().unwrap_or(user.default_avatar_url())),
                 )
                 .await
             {
@@ -61,7 +65,14 @@ pub async fn on_message(
         }
 
         // Webhook failed, fallback to normal message
-        if let Err(err) = message.channel_id.say(&ctx.http, converted.clone()).await {
+        if let Err(err) = message
+            .channel_id
+            .say(
+                &ctx.http,
+                format!("{} - {}", converted.clone(), user.display_name()),
+            )
+            .await
+        {
             error!("Failed to send message: {err:?}");
         }
     }
