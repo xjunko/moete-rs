@@ -20,7 +20,7 @@ pub async fn search(
         .map(|(i, chunk)| {
             let page = chunk
                 .iter()
-                .map(|e| format!("{} {}", e.to_string(), e.name))
+                .map(|e| format!("{} {}", e, e.name))
                 .collect::<Vec<_>>()
                 .join("\n");
 

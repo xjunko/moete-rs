@@ -8,26 +8,19 @@ use poise::{CreateReply, serenity_prelude as serenity};
 use std::fmt::Write as _;
 
 /// Optional configuration for how the help message from [`help()`] looks
-pub struct HelpConfiguration<'a> {
-    /// Extra text displayed at the bottom of your message. Can be used for help and tips specific
-    /// to your bot
-    pub extra_text_at_bottom: &'a str,
+pub struct HelpConfiguration {
     /// Whether to make the response ephemeral if possible. Can be nice to reduce clutter
     pub ephemeral: bool,
-    /// Whether to list context menu commands as well
-    pub show_context_menu_commands: bool,
     /// Whether to include [`poise::Command::description`] (above [`poise::Command::help_text`]).
     pub include_description: bool,
     #[doc(hidden)]
     pub __non_exhaustive: (),
 }
 
-impl Default for HelpConfiguration<'_> {
+impl Default for HelpConfiguration {
     fn default() -> Self {
         Self {
-            extra_text_at_bottom: "",
             ephemeral: true,
-            show_context_menu_commands: false,
             include_description: true,
             __non_exhaustive: (),
         }
@@ -114,23 +107,23 @@ fn format_context_menu_name<U, E>(command: &poise::Command<U, E>) -> Option<Stri
 async fn help_single_command(
     ctx: Context<'_>,
     command_name: &str,
-    config: HelpConfiguration<'_>,
+    config: HelpConfiguration,
 ) -> Result<(), serenity::Error> {
     let commands = &ctx.framework().options().commands;
     // Try interpret the command name as a context menu command first
     let mut command = commands.iter().find(|command| {
-        if let Some(context_menu_name) = &command.context_menu_name {
-            if context_menu_name.eq_ignore_ascii_case(command_name) {
-                return true;
-            }
+        if let Some(context_menu_name) = &command.context_menu_name
+            && context_menu_name.eq_ignore_ascii_case(command_name)
+        {
+            return true;
         }
         false
     });
     // Then interpret command name as a normal command (possibly nested subcommand)
-    if command.is_none() {
-        if let Some((c, _, _)) = poise::find_command(commands, command_name, true, &mut vec![]) {
-            command = Some(c);
-        }
+    if command.is_none()
+        && let Some((c, _, _)) = poise::find_command(commands, command_name, true, &mut vec![])
+    {
+        command = Some(c);
     }
 
     if let Some(command) = command {
@@ -281,7 +274,7 @@ fn preformat_subcommands<U, E>(
 /// This is a separate function so we can have tests for it
 async fn generate_all_commands(
     ctx: Context<'_>,
-    _config: &HelpConfiguration<'_>,
+    _config: &HelpConfiguration,
 ) -> Result<serenity::CreateEmbed, serenity::Error> {
     let data: &core::State = ctx.data();
     let mut embed =
@@ -347,7 +340,7 @@ async fn generate_all_commands(
 /// Code for printing an overview of all commands (e.g. `~help`)
 async fn help_all_commands(
     ctx: Context<'_>,
-    config: HelpConfiguration<'_>,
+    config: HelpConfiguration,
 ) -> Result<(), serenity::Error> {
     let menu = generate_all_commands(ctx, &config).await?;
     let reply = CreateReply::default()
@@ -364,7 +357,7 @@ async fn help_all_commands(
 pub async fn help(
     ctx: Context<'_>,
     command: Option<&str>,
-    config: HelpConfiguration<'_>,
+    config: HelpConfiguration,
 ) -> Result<(), serenity::Error> {
     match command {
         Some(command) => help_single_command(ctx, command, config).await,

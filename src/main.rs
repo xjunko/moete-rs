@@ -36,7 +36,7 @@ async fn main() -> Result<(), Error> {
                 }
 
                 if let serenity::FullEvent::Message { new_message } = event {
-                    events::on_message(ctx, &new_message, data).await?;
+                    events::on_message(ctx, new_message, data).await?;
                 }
 
                 Ok(())
@@ -48,7 +48,7 @@ async fn main() -> Result<(), Error> {
             })
         },
         prefix_options: poise::PrefixFrameworkOptions {
-            prefix: Some(primary_prefix.into()),
+            prefix: Some(primary_prefix),
             additional_prefixes,
             edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(
                 std::time::Duration::from_secs(3600),

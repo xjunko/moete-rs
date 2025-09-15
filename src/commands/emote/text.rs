@@ -12,14 +12,13 @@ pub async fn text(
     #[rest]
     msg: String,
 ) -> Result<(), Error> {
-    if let poise::Context::Prefix(prefix_ctx) = ctx {
-        if let Err(e) = prefix_ctx
+    if let poise::Context::Prefix(prefix_ctx) = ctx
+        && let Err(e) = prefix_ctx
             .msg
             .delete(&ctx.serenity_context().http.clone())
             .await
-        {
-            error!("Failed to delete message: {:?}", e);
-        }
+    {
+        error!("Failed to delete message: {:?}", e);
     }
 
     let data: &core::State = ctx.data();

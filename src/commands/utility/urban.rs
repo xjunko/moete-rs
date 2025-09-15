@@ -34,7 +34,7 @@ impl Urban {
         let mut entry: Vec<Urban> = resp["list"]
             .as_array()
             .unwrap()
-            .into_iter()
+            .iter()
             .map(|e| Self {
                 _author: e["author"].as_str().unwrap().to_string(),
                 _word: e["word"].as_str().unwrap().to_string(),
@@ -66,14 +66,13 @@ pub async fn urban(
             let total = urban_definitions.len();
 
             let pages: Vec<serenity::CreateEmbed> = urban_definitions
-                .into_iter()
+                .iter()
                 .map(|def| {
                     format!(
                         "**Definition:**\n{}\n\n**Example:**\n{}",
                         def.definition, def.example
                     )
                 })
-                .into_iter()
                 .enumerate()
                 .map(|(i, desc)| {
                     embed::create_embed()
