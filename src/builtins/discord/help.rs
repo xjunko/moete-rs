@@ -281,7 +281,7 @@ fn preformat_subcommands<U, E>(
 /// This is a separate function so we can have tests for it
 async fn generate_all_commands(
     ctx: Context<'_>,
-    config: &HelpConfiguration<'_>,
+    _config: &HelpConfiguration<'_>,
 ) -> Result<serenity::CreateEmbed, serenity::Error> {
     let data: &core::State = ctx.data();
     let mut embed =
@@ -295,8 +295,6 @@ async fn generate_all_commands(
             .push(cmd);
     }
 
-    let mut menu = String::from("```\n");
-
     for (category_name, commands) in categories {
         let commands = commands
             .into_iter()
@@ -304,6 +302,7 @@ async fn generate_all_commands(
                 !cmd.hide_in_help && (cmd.prefix_action.is_some() || cmd.slash_action.is_some())
             })
             .collect::<Vec<_>>();
+
         if commands.is_empty() {
             continue;
         }
@@ -325,21 +324,22 @@ async fn generate_all_commands(
         );
     }
 
-    if config.show_context_menu_commands {
-        menu += "\nContext menu commands:\n";
+    // let mut menu = String::from("```\n");
+    // if config.show_context_menu_commands {
+    //     menu += "\nContext menu commands:\n";
 
-        for command in &ctx.framework().options().commands {
-            let name = format_context_menu_name(command);
-            if name.is_none() {
-                continue;
-            };
-            let _ = writeln!(menu, "  {}", name.unwrap());
-        }
-    }
+    //     for command in &ctx.framework().options().commands {
+    //         let name = format_context_menu_name(command);
+    //         if name.is_none() {
+    //             continue;
+    //         };
+    //         let _ = writeln!(menu, "  {}", name.unwrap());
+    //     }
+    // }
 
-    menu += "\n";
-    menu += config.extra_text_at_bottom;
-    menu += "\n```";
+    // menu += "\n";
+    // menu += config.extra_text_at_bottom;
+    // menu += "\n```";
 
     Ok(embed)
 }
