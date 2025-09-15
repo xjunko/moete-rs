@@ -3,7 +3,7 @@ use poise::serenity_prelude as serenity;
 use crate::builtins::discord::embed;
 
 /// Sends a paginated message from pages passed.
-pub async fn paginate(ctx: crate::Context<'_>, pages: &[&str]) -> Result<(), serenity::Error> {
+pub async fn paginate(ctx: crate::Context<'_>, pages: Vec<String>) -> Result<(), serenity::Error> {
     let ctx_id = ctx.id();
     let prev_button_id = format!("{}prev", ctx_id);
     let next_button_id = format!("{}next", ctx_id);
@@ -15,7 +15,7 @@ pub async fn paginate(ctx: crate::Context<'_>, pages: &[&str]) -> Result<(), ser
         ]);
 
         poise::CreateReply::default()
-            .embed(embed::create_embed().description(pages[0]))
+            .embed(embed::create_embed().description(&pages[0]))
             .components(vec![components])
     };
 
@@ -50,7 +50,7 @@ pub async fn paginate(ctx: crate::Context<'_>, pages: &[&str]) -> Result<(), ser
                 ctx.serenity_context(),
                 serenity::CreateInteractionResponse::UpdateMessage(
                     serenity::CreateInteractionResponseMessage::new()
-                        .embed(embed::create_embed().description(pages[current_page])),
+                        .embed(embed::create_embed().description(&pages[current_page])),
                 ),
             )
             .await?;
