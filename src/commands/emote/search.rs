@@ -3,7 +3,7 @@ use crate::core;
 use crate::{Context, Error};
 
 /// Search for emotes matching a query.
-#[poise::command(prefix_command, category = "Emote", aliases("list"))]
+#[poise::command(prefix_command, category = "Emote", aliases("list", "ls"))]
 pub async fn search(
     ctx: Context<'_>,
     #[description = "Query for the emote"]

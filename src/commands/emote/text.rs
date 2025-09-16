@@ -5,7 +5,7 @@ use log::error;
 use serenity::all::ExecuteWebhook;
 
 /// Send a message through Moete's emote system.
-#[poise::command(prefix_command, category = "Emote")]
+#[poise::command(prefix_command, category = "Emote", aliases("txt", "t"))]
 pub async fn text(
     ctx: Context<'_>,
     #[description = "Text to send"]

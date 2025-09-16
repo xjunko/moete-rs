@@ -9,7 +9,12 @@ use super::search::search;
 use super::text::text;
 
 /// Help command for the emote system.
-#[poise::command(prefix_command, category = "Emote", subcommands("search", "text"))]
+#[poise::command(
+    prefix_command,
+    category = "Emote",
+    aliases("emotes", "e"),
+    subcommands("search", "text")
+)]
 pub async fn emote(ctx: Context<'_>) -> Result<(), Error> {
     let cmds = vec![
         ["search", "Search emote"],
