@@ -1,6 +1,7 @@
 //! Contains the built-in help command and surrounding infrastructure
 
 use crate::Context;
+use crate::builtins;
 use crate::builtins::discord::embed;
 use crate::builtins::discord::poise_builtins;
 use crate::core;
@@ -269,16 +270,70 @@ fn preformat_subcommands<U, E>(
     }
 }
 
+const INFO_GENERAL: &str = "\
+- To find out more about a command like what arguments you can give or which shorter aliases it has, use __**{}help [command]**__, e.g. `{}help emotes list`\n \
+- If you want to specify an argument, e.g. a username, that contains space, you **must** surround it with **\"** i.e `\"Kagamine Rin\"`.";
+
+const INFO_EMOTES: &str = "\
+To trigger the auto-emote function of Moete's you **must** either use **:** _or_ **;**, i.e __:trollhd:__, you can get the list of available emotes with, __**{}emotes list**__.
+";
+
+// Trait for prefix
+trait PrefixDisplay {
+    fn display(&self) -> String;
+}
+
+impl PrefixDisplay for poise::Prefix {
+    fn display(&self) -> String {
+        match self {
+            poise::Prefix::Literal(s) => s.to_string(),
+            poise::Prefix::Regex(r) => format!("/{}/", r.as_str()),
+            poise::Prefix::__NonExhaustive => String::new(),
+        }
+    }
+}
+
 /// Create help text for `help_all_commands`
 ///
 /// This is a separate function so we can have tests for it
 async fn generate_all_commands(
     ctx: Context<'_>,
     _config: &HelpConfiguration,
-) -> Result<serenity::CreateEmbed, serenity::Error> {
+) -> Result<Vec<serenity::CreateEmbed>, serenity::Error> {
     let data: &core::State = ctx.data();
-    let mut embed =
-        embed::create_embed().title(format!("{} | {}", data.config.discord.name, "Help"));
+    let (main_prefix, additional_prefixes) =
+        builtins::bot::prefixes::get_prefixes(data.config.discord.debug);
+    let mut embeds: Vec<serenity::CreateEmbed> = Vec::new();
+
+    // First page
+    embeds.push(
+        embed::create_embed()
+            .title(format!("{} | {}", data.config.discord.name, "Help [Main]"))
+            .description(format!(
+                "Prefix: `{}` {}",
+                main_prefix,
+                additional_prefixes
+                    .iter()
+                    .map(|p| format!("`{}`", p.display()))
+                    .collect::<Vec<_>>()
+                    .join(" "),
+            ))
+            .field(
+                "",
+                format!(
+                    "__**General**__\n{}\n\n__**Emotes**__\n{}",
+                    INFO_GENERAL.replace("{}", &main_prefix),
+                    INFO_EMOTES.replace("{}", &main_prefix),
+                ),
+                false,
+            ),
+    );
+
+    // Any other pages
+    let mut embed = embed::create_embed().title(format!(
+        "{} | {}",
+        data.config.discord.name, "Help [Commands]"
+    ));
 
     let mut categories =
         poise_builtins::util::OrderedMap::<Option<&str>, Vec<&poise::Command<_, _>>>::new();
@@ -317,24 +372,8 @@ async fn generate_all_commands(
         );
     }
 
-    // let mut menu = String::from("```\n");
-    // if config.show_context_menu_commands {
-    //     menu += "\nContext menu commands:\n";
-
-    //     for command in &ctx.framework().options().commands {
-    //         let name = format_context_menu_name(command);
-    //         if name.is_none() {
-    //             continue;
-    //         };
-    //         let _ = writeln!(menu, "  {}", name.unwrap());
-    //     }
-    // }
-
-    // menu += "\n";
-    // menu += config.extra_text_at_bottom;
-    // menu += "\n```";
-
-    Ok(embed)
+    embeds.push(embed);
+    Ok(embeds)
 }
 
 /// Code for printing an overview of all commands (e.g. `~help`)
@@ -343,12 +382,7 @@ async fn help_all_commands(
     config: HelpConfiguration,
 ) -> Result<(), serenity::Error> {
     let menu = generate_all_commands(ctx, &config).await?;
-    let reply = CreateReply::default()
-        .embed(menu)
-        .ephemeral(config.ephemeral)
-        .reply(true);
-
-    ctx.send(reply).await?;
+    builtins::discord::paginate::paginate_embed(ctx, menu).await?;
     Ok(())
 }
 

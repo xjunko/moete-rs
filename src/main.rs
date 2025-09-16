@@ -19,13 +19,8 @@ async fn main() -> Result<(), Error> {
     let status = data.config.discord.status.clone();
 
     // what prefixes to use
-    let (primary_prefix, additional_prefixes) = {
-        if data.config.discord.debug {
-            builtins::prefixes::debug_prefixes()
-        } else {
-            builtins::prefixes::release_prefixes()
-        }
-    };
+    let (primary_prefix, additional_prefixes) =
+        builtins::bot::prefixes::get_prefixes(data.config.discord.debug);
 
     // options
     let framework_options = poise::FrameworkOptions {

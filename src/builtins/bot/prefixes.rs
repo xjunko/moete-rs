@@ -14,3 +14,11 @@ pub fn release_prefixes() -> (String, Vec<Prefix>) {
         ],
     )
 }
+
+pub fn get_prefixes(debug: bool) -> (String, Vec<Prefix>) {
+    if debug {
+        debug_prefixes()
+    } else {
+        release_prefixes()
+    }
+}
