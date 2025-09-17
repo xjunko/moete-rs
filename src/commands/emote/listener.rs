@@ -1,7 +1,7 @@
-use ::serenity::all::ExecuteWebhook;
 use log::error;
 use once_cell::sync::Lazy;
 use regex::Regex;
+use serenity::all::ExecuteWebhook;
 
 use crate::Error;
 use crate::builtins;
