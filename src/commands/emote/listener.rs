@@ -1,12 +1,15 @@
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serenity::all::ExecuteWebhook;
+use tracing::debug;
 use tracing::error;
 
 use crate::Error;
 use crate::builtins;
 use crate::core;
 use crate::serenity;
+
+const JUNKO: u64 = 736223131240497183;
 
 static RE_EMOTE_TYPED: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"(\B(:|;|\.)[a-zA-Z0-9_-]+(:|;|\.)\B)").unwrap());
@@ -17,6 +20,11 @@ pub async fn on_message(
     message: &serenity::Message,
     data: &core::State,
 ) -> Result<(), Error> {
+    if data.config.flag.debug && message.author.id != JUNKO {
+        debug!("Message received: {:?}", message);
+        return Ok(());
+    }
+
     let mut found_emote = false;
     let mut words: Vec<String> = message
         .content
