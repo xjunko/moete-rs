@@ -1,5 +1,7 @@
 // =======================================================
+use ::serenity::prelude::TypeMapKey;
 use poise::serenity_prelude as serenity;
+use sqlx::postgres;
 use std::{env, sync::Arc};
 use tracing::info;
 use tracing_subscriber::{EnvFilter, fmt, prelude::*};
@@ -13,6 +15,14 @@ mod routines;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, core::State, Error>;
+
+// =======================================================
+struct ConnectionPool;
+
+impl TypeMapKey for ConnectionPool {
+    type Value = Option<postgres::PgPool>;
+}
+// =======================================================
 
 #[tokio::main]
 async fn main() {
@@ -78,14 +88,22 @@ async fn main() {
 
                 // this loads data instantly, no need for Arc.
                 state.load(ctx).await?;
+
+                // serenity somethings
+                let mut data = ctx.data.write().await;
+                data.insert::<ConnectionPool>((*state.pool).clone());
+
                 Ok(state)
             })
         })
         .build();
 
     // client
-    let intents =
-        serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
+    let intents = serenity::GatewayIntents::non_privileged()
+        | serenity::GatewayIntents::GUILD_MEMBERS
+        | serenity::GatewayIntents::GUILD_PRESENCES
+        | serenity::GatewayIntents::MESSAGE_CONTENT;
+
     let client = serenity::ClientBuilder::new(token, intents)
         .framework(framework)
         .await;
@@ -97,6 +115,7 @@ async fn main() {
 
 async fn logging_init() {
     let filter = EnvFilter::from_env("MOETE_FILTER");
+
     tracing_subscriber::registry()
         .with(fmt::layer())
         .with(filter)

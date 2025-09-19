@@ -22,6 +22,11 @@ tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
 dotenv = "0.15.0"
 mimalloc = "0.1.48"
 libc = "0.2.175"
+sqlx = { version = "0.8.6", features = [
+    "runtime-tokio",
+    "tls-native-tls",
+    "postgres",
+] }
 
 [profile.release]
 opt-level = 3

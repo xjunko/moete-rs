@@ -1,49 +1,47 @@
+use super::ALLOWED;
+use crate::core::markov;
 use poise::CreateReply;
 use rand::Rng;
 use serenity::all::{ExecuteWebhook, UserId};
+use sqlx::postgres;
+use std::sync::Arc;
+use tracing::info;
 
-use crate::builtins;
 use crate::{Context, Error};
+use crate::{builtins, core};
 
-const ALLOWED: &[u64] = &[
-    224785877086240768, // Me
-    255365914898333707, // Asperl
-    393201541630394368, // Nity
-    261815692150571009, // Neko
-    383468859211907083, // Mattsu
-    546976983012212746, // Arissa
-    658976239100362753, // aXccel
-    223367426526412800, // Bright
-    655023950689992706, // Nia
-    406463187052134411, // Mooth
-    315116686850129922, // Mystia
-    443022415451127808, // Salty
-    360256398933753856, // Zavents
-    286438559341215746, // Kagi
-    210065177574375424, // Eima
-    369858698941693953, // Amano
-    824537345541799976, // Piqi
-    304512418976104450, // WilsonYogi
-    922423503909687317, // Zed
-    736223131240497183, // rmhakurei
-];
+async fn load_data(id: u64, pool: Arc<Option<postgres::PgPool>>) -> Option<String> {
+    info!("Loading data for user {}", id);
 
-fn load_data(id: u64) -> Option<String> {
-    std::fs::read_to_string(format!("data/{}.txt", id)).ok()
+    if let Some(pool) = pool.as_ref()
+        && let Ok(user_data) = markov::get_user(pool, id.try_into().ok()?).await
+        && let Some(data) = user_data
+    {
+        info!("Loaded {} messages for user {}", data.messages.len(), id);
+        return Some(
+            data.messages
+                .iter()
+                .map(|m| m.content.as_str())
+                .collect::<Vec<_>>()
+                .join("\n"),
+        );
+    }
+
+    None
 }
 
-fn generate(picked: i32) -> Option<(String, u64)> {
+async fn generate(picked: i32, pool: Arc<Option<postgres::PgPool>>) -> Option<(String, u64)> {
     if picked <= 0 || picked > ALLOWED.len() as i32 {
         return None;
     }
 
     let user_id = ALLOWED[picked as usize - 1];
     let result = {
-        let data = load_data(user_id)?;
+        let data = load_data(user_id, pool).await?;
         let text = marukov::Text::new(data);
         let mut rng = rand::rng();
         let res = text.generate(marukov::TextOptions {
-            tries: 9999,
+            tries: 100,
             min_words: rng.random_range(0..10),
             max_words: rng.random_range(50..100),
         });
@@ -68,8 +66,10 @@ pub async fn markov(
     ctx: Context<'_>,
     #[description = "User to generate text for"] picked: Option<i32>,
 ) -> Result<(), Error> {
+    let state: &core::State = ctx.data();
+
     if let Some(picked) = picked
-        && let Some((content, user_id)) = generate(picked)
+        && let Some((content, user_id)) = generate(picked, state.pool.clone()).await
     {
         if let Ok(user) = UserId::new(user_id).to_user(ctx.http()).await
             && let Some(webhook) = builtins::discord::webhook::get_or_create_webhook(
@@ -92,11 +92,12 @@ pub async fn markov(
     } else {
         // Show everyone's stats on error.
         let mut available_users = Vec::new();
+        let cache = Arc::clone(&ctx.serenity_context().cache);
         for (n, id) in ALLOWED.iter().enumerate() {
-            if let Ok(user) = UserId::new(*id).to_user(ctx.http()).await {
+            if let Some(user) = cache.user(*id) {
                 available_users.push(format!("{}. {} | {} messages", n + 1, user.name, -1));
             } else {
-                available_users.push(format!("{}. Unknown User | {} messages", n + 1, -1));
+                available_users.push(format!("{}. {} | {} messages", n + 1, id, -1));
             }
         }
 
