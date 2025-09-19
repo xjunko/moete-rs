@@ -32,9 +32,10 @@ fn load_data(id: u64) -> Option<String> {
 }
 
 fn generate(picked: i32) -> Option<(String, u64)> {
-    if picked < 0 || picked > ALLOWED.len() as i32 {
+    if picked <= 0 || picked > ALLOWED.len() as i32 {
         return None;
     }
+
     let user_id = ALLOWED[picked as usize - 1];
     let data = load_data(user_id)?;
     let text = marukov::Text::new(data);

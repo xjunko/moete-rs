@@ -1,8 +1,18 @@
+use std::sync::Arc;
+
+use super::State;
 use crate::Error;
+use crate::core::Config;
 use crate::serenity;
-use tracing::info;
+use serenity::prelude::TypeMapKey;
+use tracing::{error, info};
+
+impl TypeMapKey for State {
+    type Value = State;
+}
 
 /// EmoteManager handles all emoji related operation.
+#[derive(Debug)]
 pub struct EmoteManager {
     /// Came straight from the bot's application
     internal: Vec<serenity::Emoji>,
@@ -25,15 +35,87 @@ impl EmoteManager {
         Ok(emojis)
     }
 
+    /// Fetches emojis from a guild by its ID.
+    async fn fetch_guild_emojis_by_id(
+        ctx: &serenity::Context,
+        id: u64,
+    ) -> Result<Vec<serenity::Emoji>, Error> {
+        let http: &serenity::Http = &ctx.http;
+        let emojis: Vec<serenity::Emoji> = http.get_emojis(serenity::GuildId::new(id)).await?;
+        Ok(emojis)
+    }
+
+    /// Fetches emojis from a guild by its name.
+    async fn fetch_guild_emojis_by_name(
+        ctx: &serenity::Context,
+        query: &str,
+    ) -> Result<Vec<serenity::Emoji>, Error> {
+        let http: &serenity::Http = &ctx.http;
+        let cache: &serenity::Cache = &ctx.cache;
+        let mut emojis: Vec<serenity::Emoji> = Vec::new();
+
+        for guild_id in cache.guilds() {
+            if let Some(name) = guild_id.name(cache) {
+                if name.contains(query) {
+                    let found: Vec<serenity::Emoji> = http
+                        .get_emojis(serenity::GuildId::new(guild_id.get()))
+                        .await?;
+                    emojis.extend(found);
+                }
+            } else {
+                error!("Guild name not found in cache: {:?}", guild_id);
+            }
+        }
+        Ok(emojis)
+    }
+
+    /// Fetches all the emojis that the bot can access.
+    async fn fetch_guild_emojis(
+        ctx: &serenity::Context,
+        config: Arc<Config>,
+    ) -> Result<Vec<serenity::Emoji>, Error> {
+        let mut emojis: Vec<serenity::Emoji> = Vec::new();
+
+        for query in config
+            .moete
+            .whitelisted
+            .iter()
+            .chain(config.moete.owned.iter())
+        {
+            if let Ok(id) = query.parse::<u64>() {
+                let found = Self::fetch_guild_emojis_by_id(ctx, id).await?;
+                info!("Found {} emojis in guild ID={}", found.len(), id);
+                emojis.extend(found);
+            } else {
+                let found = Self::fetch_guild_emojis_by_name(ctx, query).await?;
+                info!("Found {} emojis in guild Query={}", found.len(), query);
+                emojis.extend(found);
+            }
+        }
+
+        Ok(emojis)
+    }
+
     /// Returns an iterator over all emojis the bot can access.
     pub fn global(&self) -> impl Iterator<Item = &serenity::Emoji> {
+        // NOTE: tbh i would add a sort here but
+        //       it needs allocation so...
         self.internal.iter().chain(self.external.iter())
     }
 
     /// Load all the emojis we can use into EmoteManager.
-    pub async fn load(&mut self, ctx: &serenity::Context) {
+    pub async fn load(&mut self, ctx: &serenity::Context, config: Arc<Config>) {
         self.internal = Self::fetch_bot_emojis(ctx).await.unwrap_or_default();
+        self.external = Self::fetch_guild_emojis(ctx, config)
+            .await
+            .unwrap_or_default();
+
+        self.internal.sort_by(|a, b| a.name.cmp(&b.name));
+        self.external.sort_by(|a, b| a.name.cmp(&b.name));
+
         info!("Loaded {} bot emojis", self.internal.len());
+        info!("Loaded {} external emojis", self.external.len());
+        info!("Total {} emojis available", self.global().count());
     }
 
     /// Returns emoji if the word matches an emoji name.

@@ -3,6 +3,7 @@ use std::sync::Arc;
 use super::{Config, EmoteManager};
 use crate::{Error, serenity};
 
+#[derive(Debug)]
 pub struct State {
     pub config: Arc<Config>,
     pub emotes: EmoteManager,
@@ -17,7 +18,7 @@ impl State {
     }
 
     pub async fn load(&mut self, ctx: &serenity::Context) -> Result<(), Error> {
-        self.emotes.load(ctx).await;
+        self.emotes.load(ctx, Arc::clone(&self.config)).await;
         Ok(())
     }
 }

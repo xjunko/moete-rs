@@ -1,6 +1,7 @@
 use std::env;
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub struct Discord {
     pub name: String,
     pub token: String,
@@ -23,6 +24,8 @@ impl Default for Discord {
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
+
 pub struct Flag {
     pub debug: bool,
     pub minimal: bool,
@@ -44,6 +47,8 @@ impl Default for Flag {
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
+
 pub struct Moete {
     pub owners: &'static [u64],
     pub blacklisted: &'static [u64],
@@ -100,7 +105,7 @@ impl Default for Moete {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Config {
     pub discord: Discord,
     pub flag: Flag,
