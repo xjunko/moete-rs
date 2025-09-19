@@ -20,6 +20,8 @@ marukov = "0.0.1"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
 dotenv = "0.15.0"
+mimalloc = "0.1.48"
+libc = "0.2.175"
 
 [profile.release]
 opt-level = 3

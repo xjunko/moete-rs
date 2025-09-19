@@ -25,6 +25,7 @@ const ALLOWED: &[u64] = &[
     824537345541799976, // Piqi
     304512418976104450, // WilsonYogi
     922423503909687317, // Zed
+    736223131240497183, // rmhakurei
 ];
 
 fn load_data(id: u64) -> Option<String> {
@@ -37,20 +38,28 @@ fn generate(picked: i32) -> Option<(String, u64)> {
     }
 
     let user_id = ALLOWED[picked as usize - 1];
-    let data = load_data(user_id)?;
-    let text = marukov::Text::new(data);
-    let mut rng = rand::rng();
-    for _ in 0..10 {
-        println!("{}", text.generate(marukov::TextOptions::default()));
-    }
-    Some((
-        text.generate(marukov::TextOptions {
+    let result = {
+        let data = load_data(user_id)?;
+        let text = marukov::Text::new(data);
+        let mut rng = rand::rng();
+        let res = text.generate(marukov::TextOptions {
             tries: 9999,
             min_words: rng.random_range(0..10),
             max_words: rng.random_range(50..100),
-        }),
-        user_id,
-    ))
+        });
+
+        std::mem::drop(text);
+        std::mem::drop(rng);
+
+        res
+    };
+
+    // text generation uses a lot of memory, trim the memory here.
+    unsafe {
+        libc::malloc_trim(0);
+    }
+
+    Some((result.clone(), user_id))
 }
 
 /// Generates a random text based on the user's messages.
