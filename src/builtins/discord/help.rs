@@ -301,8 +301,7 @@ async fn generate_all_commands(
     _config: &HelpConfiguration,
 ) -> Result<Vec<serenity::CreateEmbed>, serenity::Error> {
     let data: &core::State = ctx.data();
-    let (main_prefix, additional_prefixes) =
-        builtins::bot::prefixes::get_prefixes(data.config.discord.debug);
+    let (main_prefix, additional_prefixes) = data.config.get_prefixes();
     let mut embeds: Vec<serenity::CreateEmbed> = Vec::new();
 
     // First page

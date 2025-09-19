@@ -40,7 +40,12 @@ pub async fn search(
         })
         .collect::<Vec<_>>();
 
-    discord::paginate::paginate(ctx, emotes).await?;
+    if emotes.is_empty() {
+        ctx.reply(format!("No emotes found for query: `{}`", query_or_all))
+            .await?;
+    } else {
+        discord::paginate::paginate(ctx, emotes).await?;
+    }
 
     Ok(())
 }

@@ -1,15 +1,17 @@
+use std::sync::Arc;
+
 use super::{Config, EmoteManager};
 use crate::{Error, serenity};
 
 pub struct State {
-    pub config: Config,
+    pub config: Arc<Config>,
     pub emotes: EmoteManager,
 }
 
 impl State {
     pub fn create() -> Self {
         Self {
-            config: Config::load(),
+            config: Arc::new(Config::default()),
             emotes: EmoteManager::new(),
         }
     }

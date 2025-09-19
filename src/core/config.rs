@@ -1,59 +1,134 @@
-use std::path::Path;
+use std::env;
 
-use crate::Error;
-use log::info;
-use serde::Deserialize;
-use serde::Serialize;
-
-use log::error;
-
-static CONFIG_PATH: &str = "config.toml";
-
-#[derive(Serialize, Deserialize)]
-pub struct Config {
-    pub discord: Discord,
-}
-
-#[derive(Serialize, Deserialize)]
+#[allow(dead_code)]
 pub struct Discord {
     pub name: String,
     pub token: String,
-    pub status: Vec<String>,
+    pub prefixes: Vec<String>,
+}
+
+impl Default for Discord {
+    fn default() -> Self {
+        Self {
+            name: env::var("INSTANCE_NAME").unwrap_or("Moete".to_string()),
+            token: env::var("INSTANCE_TOKEN_DISCORD")
+                .expect("Error: INSTANCE_TOKEN_DISCORD not set"),
+            prefixes: env::var("INSTANCE_PREFIXES")
+                .unwrap_or(";".to_string())
+                .split(" ")
+                .map(|s| s.to_string())
+                .collect(),
+        }
+    }
+}
+
+#[allow(dead_code)]
+pub struct Flag {
     pub debug: bool,
+    pub minimal: bool,
+}
+
+impl Default for Flag {
+    fn default() -> Self {
+        Self {
+            debug: env::var("IS_DEBUG")
+                .unwrap_or("False".to_string())
+                .to_lowercase()
+                .eq("true"),
+            minimal: env::var("IS_MINIMAL")
+                .unwrap_or("False".to_string())
+                .to_lowercase()
+                .eq("true"),
+        }
+    }
+}
+
+#[allow(dead_code)]
+pub struct Moete {
+    pub owners: &'static [u64],
+    pub blacklisted: &'static [u64],
+    pub whitelisted: &'static [&'static str],
+    pub owned: &'static [&'static str],
+    pub status: &'static [&'static str],
+}
+
+impl Default for Moete {
+    fn default() -> Self {
+        Self {
+            owners: &[
+                224785877086240768, // xjunko
+                255365914898333707,
+                393201541630394368,
+                261815692150571009,
+                302755468802260993,
+                872808388562661446,
+                223367426526412800,
+                360256398933753856,
+                406463187052134411,
+                315116686850129922,
+                546976983012212746,
+                443022415451127808,
+                736223131240497183, // rmhakurei
+            ],
+            blacklisted: &[
+                924728250666733578, // aya server, she asked for this
+            ],
+            whitelisted: &[
+                "CustomEmote",
+                "PAKB",
+                "EmoteBot",
+                "HololiveEmote",
+                "709407328406994975",
+                "696405704134885466",
+                "747623770876805193", // Zavents Emote Server
+            ],
+            owned: &["EmoteServer"],
+            status: &[
+                "W|the moon",
+                "W|the stars",
+                "W|you",
+                "W|the world",
+                "W|for any new messages",
+                "L|FLAVOR FOLEY - weathergirl",
+                "P|with your feelings",
+                "P|Minecraft",
+                "P|osu!",
+                "L|the rain",
+                "L|the voices in my head",
+            ],
+        }
+    }
+}
+
+#[derive(Default)]
+pub struct Config {
+    pub discord: Discord,
+    pub flag: Flag,
+    pub moete: Moete,
 }
 
 impl Config {
-    pub fn save(&self) -> Result<(), Error> {
-        let conf_path = Path::new(CONFIG_PATH);
-        std::fs::write(conf_path, toml::to_string(self).unwrap())?;
-        Ok(())
+    pub fn get_prefixes(&self) -> (String, Vec<poise::Prefix>) {
+        if self.flag.debug {
+            return (";;".to_string(), vec![poise::Prefix::Literal("moete@")]);
+        }
+        // FIXME: make this use self.discord.prefixes
+        (
+            ";".to_string(),
+            vec![
+                poise::Prefix::Literal(":"),
+                poise::Prefix::Literal("#"),
+                poise::Prefix::Literal("e!"),
+                poise::Prefix::Literal("e#"),
+            ],
+        )
     }
 
-    pub fn load() -> Self {
-        let conf_path = Path::new(CONFIG_PATH);
-
-        if !conf_path.exists() {
-            let default_config = Config::create_default();
-            if let Err(reason) = default_config.save() {
-                error!("Failed to save file: {reason:?}");
-            }
-            info!("Fill out the config with the correct values");
-            std::process::exit(0);
+    pub fn get_status(&self) -> &'static [&'static str] {
+        if self.flag.debug {
+            return &["W|Debug Mode"];
         }
 
-        let conf_content = std::fs::read_to_string(conf_path).expect("Failed to read config.toml");
-        let config: Config = toml::from_str(&conf_content).unwrap();
-        config
-    }
-
-    fn create_default() -> Self {
-        Self {
-            discord: Discord {
-                name: String::from("Moete"),
-                token: String::from("DISCORD_TOKEN"),
-                status: vec!["hello world!".into()],
-                debug: false,
-            },
-        }
+        self.moete.status
     }
 }

@@ -1,7 +1,7 @@
 use super::Error;
 use super::serenity;
 use crate::core;
-use log::info;
+use tracing::info;
 
 pub async fn on_ready(_ctx: &serenity::Context, ready: &serenity::Ready) -> Result<(), Error> {
     info!("Logged in as {}", ready.user.name);

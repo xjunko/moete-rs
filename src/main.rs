@@ -1,26 +1,33 @@
+use poise::serenity_prelude as serenity;
+use std::{env, sync::Arc};
+use tracing::info;
+use tracing_subscriber::{EnvFilter, fmt, prelude::*};
+
+// =======================================================
 mod builtins;
 mod commands;
 mod core;
 mod events;
 mod routines;
 
-use poise::serenity_prelude as serenity;
-use std::sync::Arc;
-
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, core::State, Error>;
 
 #[tokio::main]
-async fn main() -> Result<(), Error> {
-    env_logger::init();
+async fn main() {
+    match dotenv::dotenv() {
+        Ok(env) => env,
+        Err(err) => panic!("Failed to load enviroment: {}", err),
+    };
 
-    let mut data = core::State::create();
-    let token = data.config.discord.token.clone();
-    let status = data.config.discord.status.clone();
+    logging_init().await;
+
+    // this will be used throughout the bot
+    let mut state = core::State::create();
+    let token = state.config.discord.token.clone();
 
     // what prefixes to use
-    let (primary_prefix, additional_prefixes) =
-        builtins::bot::prefixes::get_prefixes(data.config.discord.debug);
+    let (primary_prefix, additional_prefixes) = state.config.get_prefixes();
 
     // options
     let framework_options = poise::FrameworkOptions {
@@ -65,21 +72,37 @@ async fn main() -> Result<(), Error> {
             Box::pin(async move {
                 // background tasks
                 let ctx_arc = Arc::new(ctx.clone());
-                routines::start(Arc::clone(&ctx_arc), status.clone()).await;
+                let config_clone = Arc::clone(&state.config);
+                routines::start(Arc::clone(&ctx_arc), config_clone).await;
 
                 // this loads data instantly, no need for Arc.
-                data.load(ctx).await?;
-                Ok(data)
+                state.load(ctx).await?;
+                Ok(state)
             })
         })
         .build();
 
     // client
-    serenity::ClientBuilder::new(token, serenity::GatewayIntents::all())
+    let intents =
+        serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
+    let client = serenity::ClientBuilder::new(token, intents)
         .framework(framework)
-        .await?
-        .start()
-        .await?;
+        .await;
 
-    Ok(())
+    info!("Starting Moete..");
+
+    client.unwrap().start().await.unwrap();
+}
+
+async fn logging_init() {
+    let filter = EnvFilter::from_env("MOETE_FILTER");
+    tracing_subscriber::registry()
+        .with(fmt::layer())
+        .with(filter)
+        .init();
+
+    info!(
+        "Logger ready - Filter {:?}",
+        env::var("MOETE_FILTER").unwrap()
+    );
 }

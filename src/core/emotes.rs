@@ -1,6 +1,6 @@
 use crate::Error;
 use crate::serenity;
-use log::info;
+use tracing::info;
 
 /// EmoteManager handles all emoji related operation.
 pub struct EmoteManager {
