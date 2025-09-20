@@ -1314,9 +1314,9 @@ checksum = "34080505efa8e45a4b816c349525ebe327ceaa8559756f0356cba97ef3bf7432"
 
 [[package]]
 name = "marukov"
-version = "0.0.1"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "046b35b3aefd3c2aa3a5b1e98b318fa5216e7958e231a51ec43be7724409730d"
+checksum = "333ce5bcedeea758b75070276612b2199422c7dcf72cb2c5a744816b2a06c610"
 dependencies = [
  "rand 0.9.2",
  "regex",

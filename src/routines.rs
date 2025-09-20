@@ -22,6 +22,16 @@ pub async fn status_rotate(ctx: Arc<serenity::Context>, config: Arc<core::Config
     }
 }
 
+pub async fn memory_trim() {
+    loop {
+        unsafe {
+            libc::malloc_trim(0);
+        }
+        sleep(Duration::from_secs(30)).await;
+    }
+}
+
 pub async fn start(ctx: Arc<serenity::Context>, config: Arc<core::Config>) {
     tokio::spawn(status_rotate(Arc::clone(&ctx), Arc::clone(&config)));
+    tokio::spawn(memory_trim());
 }
