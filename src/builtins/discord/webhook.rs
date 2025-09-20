@@ -1,13 +1,27 @@
+use once_cell::sync::Lazy;
 use serenity::all::CreateWebhook;
 use serenity::all::WebhookType;
+use std::collections::HashMap;
+use tokio::sync::Mutex;
 
 use crate::serenity;
+
+// cache
+// as much as i like to avoid global state, this is the easiest way to cache webhooks
+static CACHE: Lazy<Mutex<HashMap<serenity::ChannelId, serenity::Webhook>>> =
+    Lazy::new(|| Mutex::new(HashMap::new()));
 
 pub async fn get_or_create_webhook(
     ctx: &serenity::Context,
     channel_id: serenity::ChannelId,
 ) -> Option<serenity::Webhook> {
-    match channel_id.webhooks(&ctx.http).await {
+    // check cache first
+    let mut cache = CACHE.lock().await;
+    if let Some(cached) = cache.get(&channel_id) {
+        return Some(cached.clone());
+    }
+
+    let webhook = match channel_id.webhooks(&ctx.http).await {
         Ok(hooks) => {
             // Look for an existing webhook named "Moete" and of type Incoming
             if let Some(existing) = hooks.into_iter().find(|hook| {
@@ -43,5 +57,12 @@ pub async fn get_or_create_webhook(
                 .await
                 .ok()
         }
+    };
+
+    // cache
+    if let Some(ref hook) = webhook {
+        cache.insert(channel_id, hook.clone());
     }
+
+    webhook
 }
