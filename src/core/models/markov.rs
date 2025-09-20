@@ -19,6 +19,7 @@ pub struct Message {
 #[allow(dead_code)]
 pub struct MarkovUser {
     pub id: i64,
+    pub count: i64,
     pub messages: Vec<Message>,
 }
 
@@ -40,8 +41,21 @@ pub async fn get_user(
 
     Ok(Some(MarkovUser {
         id: user.id,
+        count: user.count,
         messages,
     }))
+}
+
+pub async fn get_user_count(
+    pool: &postgres::PgPool,
+    user_id: i64,
+) -> Result<Option<i64>, sqlx::Error> {
+    let user: User = sqlx::query_as("SELECT id, count FROM users WHERE id = $1")
+        .bind(user_id)
+        .fetch_one(pool)
+        .await?;
+
+    Ok(Some(user.count))
 }
 
 pub async fn add_message(

@@ -1,5 +1,3 @@
-use super::ALLOWED;
-use crate::core::markov;
 use poise::CreateReply;
 use rand::Rng;
 use serenity::all::{ExecuteWebhook, UserId};
@@ -7,8 +5,8 @@ use sqlx::postgres;
 use std::sync::Arc;
 use tracing::info;
 
-use crate::{Context, Error};
-use crate::{builtins, core};
+use super::ALLOWED;
+use crate::{Context, Error, builtins, core, core::markov};
 
 async fn load_data(id: u64, pool: Arc<Option<postgres::PgPool>>) -> Option<String> {
     info!("Loading data for user {}", id);
@@ -35,22 +33,38 @@ async fn generate(picked: i32, pool: Arc<Option<postgres::PgPool>>) -> Option<(S
         return None;
     }
 
+    let outer = std::time::Instant::now();
     let user_id = ALLOWED[picked as usize - 1];
-    let result = {
+    let result: String = {
+        // load data
+        let start = std::time::Instant::now();
         let data = load_data(user_id, pool).await?;
+        if data.is_empty() {
+            return Some(("Not enough data!".to_string(), user_id));
+        }
+        info!("Loaded data in {:?}", start.elapsed());
+
+        // build model
+        let start = std::time::Instant::now();
         let text = marukov::Text::new(data);
+        info!("Built model in {:?}", start.elapsed());
+
+        // generate text
+        let start = std::time::Instant::now();
         let mut rng = rand::rng();
         let res = text.generate(marukov::TextOptions {
-            tries: 100,
+            tries: 999,
             min_words: rng.random_range(0..10),
             max_words: rng.random_range(50..100),
         });
+        info!("Generated text in {:?}", start.elapsed());
 
         std::mem::drop(text);
         std::mem::drop(rng);
 
         res
     };
+    info!("Total time: {:?}", outer.elapsed());
 
     // text generation uses a lot of memory, trim the memory here.
     unsafe {
@@ -94,10 +108,21 @@ pub async fn markov(
         let mut available_users = Vec::new();
         let cache = Arc::clone(&ctx.serenity_context().cache);
         for (n, id) in ALLOWED.iter().enumerate() {
-            if let Some(user) = cache.user(*id) {
-                available_users.push(format!("{}. {} | {} messages", n + 1, user.name, -1));
+            // Get user count
+            let count = if let Some(pool) = state.pool.as_ref() {
+                match markov::get_user_count(pool, *id as i64).await {
+                    Ok(Some(c)) => c,
+                    _ => 0,
+                }
             } else {
-                available_users.push(format!("{}. {} | {} messages", n + 1, id, -1));
+                0
+            };
+
+            // Gets user from discord cache
+            if let Some(user) = cache.user(*id) {
+                available_users.push(format!("{}. {} | {} messages", n + 1, user.name, count));
+            } else {
+                available_users.push(format!("{}. {} | {} messages", n + 1, id, count));
             }
         }
 
