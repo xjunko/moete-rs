@@ -21,7 +21,7 @@ before running, make sure to create a `.env` file and fill it based on the conte
 INSTANCE_NAME = "Moete"
 INSTANCE_TOKEN_DISCORD = "..."
 INSTANCE_TOKEN_CDN = "..."
-INSTANCE_PREFIXES = ";; !!'
+INSTANCE_PREFIXES = ";; !!"
 
 # [Flags]
 IS_DEBUG = true
