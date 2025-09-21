@@ -1,3 +1,4 @@
+pub mod cdn;
 pub mod color;
 pub mod embed;
 pub mod help;

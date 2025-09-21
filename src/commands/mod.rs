@@ -1,5 +1,6 @@
 pub mod emote;
 pub mod markov;
+pub mod pakb;
 pub mod role;
 pub mod utility;
 
@@ -9,5 +10,6 @@ pub fn commands() -> Vec<poise::Command<crate::core::State, crate::Error>> {
     cmds.extend(emote::commands());
     cmds.extend(role::commands());
     cmds.extend(markov::commands());
+    cmds.extend(pakb::commands());
     cmds
 }

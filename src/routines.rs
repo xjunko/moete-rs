@@ -1,4 +1,5 @@
 use super::serenity;
+use crate::commands;
 use crate::core;
 use rand::{Rng, SeedableRng, rngs::StdRng};
 use std::{sync::Arc, time::Duration};
@@ -34,4 +35,8 @@ pub async fn memory_trim() {
 pub async fn start(ctx: Arc<serenity::Context>, config: Arc<core::Config>) {
     tokio::spawn(status_rotate(Arc::clone(&ctx), Arc::clone(&config)));
     tokio::spawn(memory_trim());
+    tokio::spawn(commands::pakb::banner_rotate(
+        Arc::clone(&ctx),
+        Arc::clone(&config),
+    ));
 }

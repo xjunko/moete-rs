@@ -27,6 +27,8 @@ sqlx = { version = "0.8.6", features = [
     "tls-native-tls",
     "postgres",
 ] }
+chrono = "0.4.42"
+base64 = "0.22.1"
 
 [profile.release]
 opt-level = 3
