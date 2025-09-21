@@ -10,13 +10,25 @@ a (hopefully) better and improved version of Moete, written in the Rust Programm
 
 ## requirements
 - rust
+- postgresql server (optional)
 - a discord bot
 
-## note
-this rewrite is probably gonna take a while as i have to learn the language and it's quirks at the same time.
-
 ## running
-during the first launch of the program it will create a `config.toml` file, do make sure to fill it out.
+before running, make sure to create a `.env` file and fill it based on the contents of [[core/config]](src/core/config.rs), like so:
+```env
+# The configuration file of the discord bot, Moete.
+# [Discord]
+INSTANCE_NAME = "Moete"
+INSTANCE_TOKEN_DISCORD = "..."
+INSTANCE_TOKEN_CDN = "..."
+INSTANCE_PREFIXES = ";; !!'
+
+# [Flags]
+IS_DEBUG = true
+IS_MINIMAL = false
 ```
-cargo run
+
+then you can run with
+```
+MOETE_FILTER=info cargo run
 ```
