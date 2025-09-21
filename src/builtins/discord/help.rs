@@ -1,12 +1,12 @@
 //! Contains the built-in help command and surrounding infrastructure
+use poise::{CreateReply, serenity_prelude as serenity};
+use std::fmt::Write as _;
 
 use crate::Context;
 use crate::builtins;
 use crate::builtins::discord::embed;
 use crate::builtins::discord::poise_builtins;
 use crate::core;
-use poise::{CreateReply, serenity_prelude as serenity};
-use std::fmt::Write as _;
 
 /// Optional configuration for how the help message from [`help()`] looks
 pub struct HelpConfiguration {

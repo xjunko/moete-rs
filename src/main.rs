@@ -1,6 +1,6 @@
 // =======================================================
-use ::serenity::prelude::TypeMapKey;
 use poise::serenity_prelude as serenity;
+use serenity::prelude::TypeMapKey;
 use sqlx::postgres;
 use std::{env, sync::Arc};
 use tracing::info;

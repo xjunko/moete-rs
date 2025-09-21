@@ -1,4 +1,4 @@
-use crate::builtins::discord::help;
+use crate::builtins;
 use crate::{Context, Error};
 
 /// Replies with a list of available commands and their descriptions.
@@ -7,6 +7,11 @@ pub async fn help(
     ctx: Context<'_>,
     #[description = "Specific command"] command: Option<String>,
 ) -> Result<(), Error> {
-    help::help(ctx, command.as_deref(), help::HelpConfiguration::default()).await?;
+    builtins::discord::help::help(
+        ctx,
+        command.as_deref(),
+        builtins::discord::help::HelpConfiguration::default(),
+    )
+    .await?;
     Ok(())
 }

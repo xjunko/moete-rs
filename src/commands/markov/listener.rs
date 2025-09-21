@@ -1,6 +1,5 @@
 use super::ALLOWED;
 use crate::core;
-use crate::core::markov;
 use crate::{ConnectionPool, Error, serenity};
 
 const COMMON_BOT_PREFIXES: &[&str] = &[
@@ -42,7 +41,7 @@ pub async fn on_message(
             return Ok(());
         }
 
-        markov::add_message(&pool, message.author.id.into(), &message.content).await?;
+        core::markov::add_message(&pool, message.author.id.into(), &message.content).await?;
     }
 
     Ok(())

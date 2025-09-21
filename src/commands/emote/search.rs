@@ -1,4 +1,4 @@
-use crate::builtins::discord;
+use crate::builtins;
 use crate::core;
 use crate::{Context, Error};
 
@@ -44,7 +44,7 @@ pub async fn search(
         ctx.reply(format!("No emotes found for query: `{}`", query_or_all))
             .await?;
     } else {
-        discord::paginate::paginate(ctx, emotes).await?;
+        builtins::discord::paginate::paginate(ctx, emotes).await?;
     }
 
     Ok(())

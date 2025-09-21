@@ -1,11 +1,11 @@
 use crate::Error;
-use crate::core::State;
+use crate::core;
 
 pub mod listener;
 
 mod text;
 
-pub fn commands() -> Vec<poise::Command<State, Error>> {
+pub fn commands() -> Vec<poise::Command<core::State, Error>> {
     vec![text::markov()]
 }
 

@@ -1,7 +1,7 @@
 use poise::CreateReply;
 use serenity::all::CreateEmbedFooter;
 
-use crate::builtins::discord;
+use crate::builtins;
 use crate::{Context, Error};
 
 /// Subcommands
@@ -34,7 +34,7 @@ pub async fn emote(ctx: Context<'_>) -> Result<(), Error> {
     .collect::<Vec<_>>()
     .join("\n");
 
-    let embed = discord::embed::create_embed()
+    let embed = builtins::discord::embed::create_embed()
         .title(format!("{} | {}", "Emotes", "Main"))
         .field("Commands", cmds, false)
         .footer(CreateEmbedFooter::new(

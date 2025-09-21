@@ -1,9 +1,10 @@
-use crate::builtins::branding;
-use crate::builtins::discord::{embed, paginate};
-use crate::serenity::all::CreateEmbedFooter;
-use crate::{Context, Error};
-use crate::{core, serenity};
 use serde::Deserialize;
+use serenity::all::CreateEmbedFooter;
+
+use crate::builtins;
+use crate::core;
+use crate::serenity;
+use crate::{Context, Error};
 
 #[derive(Deserialize)]
 struct Urban {
@@ -75,7 +76,7 @@ pub async fn urban(
                 })
                 .enumerate()
                 .map(|(i, desc)| {
-                    embed::create_embed()
+                    builtins::discord::embed::create_embed()
                         .title(format!(
                             "{} | {} [{}/{}]",
                             data.config.discord.name,
@@ -88,14 +89,14 @@ pub async fn urban(
                             CreateEmbedFooter::new(format!(
                                 "Requested by {} | {}",
                                 ctx.author().name,
-                                branding::version()
+                                builtins::branding::version()
                             ))
                             .icon_url(ctx.author().face()),
                         )
                 })
                 .collect();
 
-            paginate::paginate_embed(ctx, pages).await?;
+            builtins::discord::paginate::paginate_embed(ctx, pages).await?;
         }
         Err(reason) => {
             ctx.say(format!("failed to get urban dictionary entry: {}", reason))

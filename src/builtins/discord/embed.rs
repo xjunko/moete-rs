@@ -1,5 +1,5 @@
-use crate::serenity::all::CreateEmbedFooter;
 use poise::serenity_prelude as serenity;
+use serenity::all::CreateEmbedFooter;
 
 use crate::builtins::branding;
 use crate::builtins::discord::color;

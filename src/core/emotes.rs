@@ -1,15 +1,9 @@
 use std::sync::Arc;
+use tracing::{error, info};
 
-use super::State;
 use crate::Error;
 use crate::core::Config;
 use crate::serenity;
-use serenity::prelude::TypeMapKey;
-use tracing::{error, info};
-
-impl TypeMapKey for State {
-    type Value = State;
-}
 
 /// EmoteManager handles all emoji related operation.
 #[derive(Debug)]

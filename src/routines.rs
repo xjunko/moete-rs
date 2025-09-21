@@ -1,9 +1,10 @@
-use super::serenity;
-use crate::commands;
-use crate::core;
 use rand::{Rng, SeedableRng, rngs::StdRng};
 use std::{sync::Arc, time::Duration};
 use tokio::time::sleep;
+
+use crate::commands;
+use crate::core;
+use crate::serenity;
 
 pub async fn status_rotate(ctx: Arc<serenity::Context>, config: Arc<core::Config>) {
     let mut rng = StdRng::from_seed([0; 32]);

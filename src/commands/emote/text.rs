@@ -1,8 +1,9 @@
+use serenity::all::ExecuteWebhook;
+use tracing::error;
+
 use crate::builtins;
 use crate::core;
 use crate::{Context, Error};
-use serenity::all::ExecuteWebhook;
-use tracing::error;
 
 /// Send a message through Moete's emote system.
 #[poise::command(prefix_command, category = "Emote", aliases("txt", "t"))]

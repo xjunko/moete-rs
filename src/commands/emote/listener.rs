@@ -1,8 +1,7 @@
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serenity::all::ExecuteWebhook;
-use tracing::debug;
-use tracing::error;
+use tracing::{debug, error};
 
 use crate::Error;
 use crate::builtins;

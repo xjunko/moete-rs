@@ -1,6 +1,6 @@
 use poise::serenity_prelude as serenity;
 
-use crate::builtins::discord::embed;
+use super::embed;
 
 /// Sends a paginated message from pages passed.
 pub async fn paginate(ctx: crate::Context<'_>, pages: Vec<String>) -> Result<(), serenity::Error> {

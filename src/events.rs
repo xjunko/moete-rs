@@ -1,7 +1,9 @@
-use super::Error;
-use super::serenity;
-use crate::core;
 use tracing::info;
+
+use crate::Error;
+use crate::commands;
+use crate::core;
+use crate::serenity;
 
 pub async fn on_ready(_ctx: &serenity::Context, ready: &serenity::Ready) -> Result<(), Error> {
     info!("Logged in as {}", ready.user.name);
@@ -14,7 +16,7 @@ pub async fn on_message(
     message: &serenity::Message,
     data: &core::State,
 ) -> Result<(), Error> {
-    crate::commands::emote::listener::on_message(ctx, message, data).await?;
-    crate::commands::markov::listener::on_message(ctx, message, data).await?;
+    commands::emote::listener::on_message(ctx, message, data).await?;
+    commands::markov::listener::on_message(ctx, message, data).await?;
     Ok(())
 }

@@ -1,5 +1,6 @@
-use crate::serenity;
 use rand::Rng;
+
+use crate::serenity;
 
 /// Returns random color
 pub fn get_random_color() -> serenity::Color {

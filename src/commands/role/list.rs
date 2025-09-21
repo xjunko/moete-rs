@@ -1,8 +1,8 @@
 use poise::CreateReply;
 use serenity::all::Role;
 
+use super::color::color_to_hex;
 use crate::builtins;
-use crate::commands::role::color::color_to_hex;
 use crate::core;
 use crate::{Context, Error};
 
