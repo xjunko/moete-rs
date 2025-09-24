@@ -1,0 +1,18 @@
+[package]
+name = "moete-discord"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+moete-core = { path = "../moete-core" }
+moete-framework = { path = "../moete-framework" }
+base64 = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+rand = { workspace = true }
+serenity = { workspace = true }
+poise = { workspace = true }
+reqwest = { workspace = true }
+tokio = { workspace = true }
+once_cell = { workspace = true }

@@ -1,11 +1,14 @@
-[package]
-name = "moete"
+[workspace]
+members = ["moete", "moete-core", "moete-discord", "moete-framework"]
+resolver = "3"
+
+[workspace.package]
 version = "0.0.1"
 edition = "2024"
 authors = ["xjunko <phony@kafu.ovh>"]
 repository = "https://github.com/xjunko/moete-rs"
 
-[dependencies]
+[workspace.dependencies]
 toml = "0.9.5"
 serenity = "0.12"
 poise = { version = "0.6.1", features = ["cache"] }
