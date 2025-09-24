@@ -6,7 +6,7 @@ use crate::builtins;
 use crate::core;
 use crate::{Context, Error, serenity};
 
-const LIMIT: usize = 10;
+const LIMIT: usize = 20;
 
 /// Returns lists of words being counted.
 #[poise::command(prefix_command, category = "Utility", aliases("wordcount", "wc"))]
