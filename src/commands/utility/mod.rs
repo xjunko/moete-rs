@@ -3,6 +3,7 @@ use crate::core;
 
 mod google;
 mod help;
+mod math;
 mod nhentai;
 mod ping;
 mod urban;
@@ -15,5 +16,6 @@ pub fn commands() -> Vec<poise::Command<core::State, Error>> {
         nhentai::nhentai(),
         ping::ping(),
         urban::urban(),
+        math::math(),
     ]
 }
