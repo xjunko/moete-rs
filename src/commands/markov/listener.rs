@@ -20,7 +20,7 @@ pub async fn on_message(
         let data_read = ctx.data.read().await;
         data_read.get::<ConnectionPool>().unwrap().clone()
     } {
-        let (main_prefix, _) = data.config.get_prefixes();
+        let (main_prefix, additional_prefixes) = data.config.get_prefixes();
         // Checks to make sure the content of the message met certain criteria
 
         // If starts with prefixes, ignore.
@@ -36,6 +36,10 @@ pub async fn on_message(
         // More checks
         if COMMON_BOT_PREFIXES
             .iter()
+            .chain(additional_prefixes.iter().map(|s| match s {
+                poise::Prefix::Literal(s) => s,
+                _ => panic!("Expecting Literal prefixes, received Regex"),
+            }))
             .any(|prefix| message.content.starts_with(prefix))
         {
             return Ok(());
