@@ -89,6 +89,11 @@ async fn main() {
                 // this loads data instantly, no need for Arc.
                 state.load(ctx).await?;
 
+                // build sql
+                if let Some(pool) = state.pool.as_ref() {
+                    core::build_sql(pool).await?;
+                }
+
                 // serenity somethings
                 let mut data = ctx.data.write().await;
                 data.insert::<ConnectionPool>((*state.pool).clone());

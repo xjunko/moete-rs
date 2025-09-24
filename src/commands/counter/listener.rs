@@ -54,7 +54,7 @@ pub async fn on_message(
         // increment in database
         if let Some(pool) = data.pool.as_ref() {
             for word in to_increment {
-                core::counter::increment_word_for_user_id(&pool, message.author.id.into(), &word)
+                core::counter::increment_word_for_user_id(pool, message.author.id.into(), &word)
                     .await?;
             }
         }

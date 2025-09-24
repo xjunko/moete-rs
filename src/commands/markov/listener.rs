@@ -1,6 +1,6 @@
 use super::ALLOWED;
 use crate::core;
-use crate::{ConnectionPool, Error, serenity};
+use crate::{Error, serenity};
 
 const COMMON_BOT_PREFIXES: &[&str] = &[
     ";", "t!", "pls ", "please ", "p ", "->", "!", "`", "``", ";;", "~>", ">", "<", "$", "k!",
@@ -8,7 +8,7 @@ const COMMON_BOT_PREFIXES: &[&str] = &[
 ];
 
 pub async fn on_message(
-    ctx: &serenity::Context,
+    _ctx: &serenity::Context,
     message: &serenity::Message,
     data: &core::State,
 ) -> Result<(), Error> {
@@ -16,10 +16,7 @@ pub async fn on_message(
         return Ok(());
     }
 
-    if let Some(pool) = {
-        let data_read = ctx.data.read().await;
-        data_read.get::<ConnectionPool>().unwrap().clone()
-    } {
+    if let Some(pool) = data.pool.as_ref() {
         let (main_prefix, additional_prefixes) = data.config.get_prefixes();
         // Checks to make sure the content of the message met certain criteria
 
@@ -45,7 +42,7 @@ pub async fn on_message(
             return Ok(());
         }
 
-        core::markov::add_message(&pool, message.author.id.into(), &message.content).await?;
+        core::markov::add_message(pool, message.author.id.into(), &message.content).await?;
     }
 
     Ok(())
