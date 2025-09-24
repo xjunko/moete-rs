@@ -4,6 +4,7 @@ use crate::core;
 pub mod counter;
 pub mod emote;
 pub mod markov;
+pub mod math;
 pub mod pakb;
 pub mod role;
 pub mod utility;
@@ -16,5 +17,6 @@ pub fn commands() -> Vec<poise::Command<core::State, Error>> {
     cmds.extend(markov::commands());
     cmds.extend(pakb::commands());
     cmds.extend(counter::commands());
+    cmds.extend(math::commands());
     cmds
 }

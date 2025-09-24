@@ -1,12 +1,8 @@
 use crate::{Context, Error};
 
 /// Replies with a result of the math calculation.
-#[poise::command(
-    prefix_command,
-    category = "Utility",
-    aliases("calc", "calculate", "eval")
-)]
-pub async fn math(
+#[poise::command(prefix_command, category = "Math", aliases("calculate", "eval"))]
+pub async fn calc(
     ctx: Context<'_>,
     #[description = "Math expression to evaluate"]
     #[rest]
