@@ -1,7 +1,7 @@
 use moete_core::{MoeteContext, MoeteError};
 
 /// Replies with a list of available commands and their descriptions.
-#[poise::command(prefix_command, category = "Utility")]
+#[poise::command(prefix_command, slash_command, category = "Utility")]
 pub async fn help(
     ctx: MoeteContext<'_>,
     #[description = "Specific command"] command: Option<String>,

@@ -1,7 +1,12 @@
 use moete_core::{MoeteContext, MoeteError};
 
 /// Search for emotes matching a query.
-#[poise::command(prefix_command, category = "Emote", aliases("list", "ls"))]
+#[poise::command(
+    prefix_command,
+    slash_command,
+    category = "Emote",
+    aliases("list", "ls")
+)]
 pub async fn search(
     ctx: MoeteContext<'_>,
     #[description = "Query for the emote"]

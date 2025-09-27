@@ -4,7 +4,7 @@ use moete_core::{MoeteContext, MoeteError};
 use moete_discord as discord;
 
 /// Send host machine information.
-#[poise::command(slash_command, prefix_command, category = "Utility")]
+#[poise::command(prefix_command, slash_command, category = "Utility")]
 pub async fn machine(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let memory = sys_info::mem_info()?;
 

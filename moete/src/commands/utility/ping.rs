@@ -3,7 +3,7 @@ use std::time::Instant;
 use moete_core::{MoeteContext, MoeteError};
 
 /// Replies with a message and get the difference in milliseconds.
-#[poise::command(prefix_command, category = "Utility")]
+#[poise::command(prefix_command, slash_command, category = "Utility")]
 pub async fn ping(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let start = Instant::now();
     let msg = ctx.say("uwu").await?;

@@ -7,7 +7,7 @@ use crate::serenity;
 use moete_core::{MoeteContext, MoeteError};
 
 /// Lists all the custom color roles in this server.
-#[poise::command(prefix_command, category = "Role")]
+#[poise::command(prefix_command, slash_command, category = "Role")]
 pub async fn list(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let roles: Vec<Role> = {
         let Some(guild) = ctx.guild() else {

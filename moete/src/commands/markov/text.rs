@@ -76,7 +76,7 @@ async fn generate(picked: i32, pool: Arc<Option<postgres::PgPool>>) -> Option<(S
 }
 
 /// Generates a random text based on the user's messages.
-#[poise::command(prefix_command, category = "Markov", aliases("deep"))]
+#[poise::command(prefix_command, slash_command, category = "Markov", aliases("deep"))]
 pub async fn markov(
     ctx: MoeteContext<'_>,
     #[description = "User to generate text for"] picked: Option<i32>,

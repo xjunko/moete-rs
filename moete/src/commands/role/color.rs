@@ -69,7 +69,7 @@ pub async fn get_colour_role_from_server_if_exists_else_make_one(
 }
 
 /// Sets a custom colour role for the user.
-#[poise::command(prefix_command, category = "Role", subcommands("list"))]
+#[poise::command(prefix_command, slash_command, category = "Role", subcommands("list"))]
 pub async fn color(
     ctx: MoeteContext<'_>,
     #[description = "Color to use for user's role"]

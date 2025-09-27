@@ -1,7 +1,12 @@
 use moete_core::{MoeteContext, MoeteError};
 
 /// Replies with a result of the math calculation.
-#[poise::command(prefix_command, category = "Math", aliases("calculate", "eval"))]
+#[poise::command(
+    prefix_command,
+    slash_command,
+    category = "Math",
+    aliases("calculate", "eval")
+)]
 pub async fn calc(
     ctx: MoeteContext<'_>,
     #[description = "Math expression to evaluate"]

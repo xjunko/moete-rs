@@ -5,7 +5,12 @@ use moete_core::{MoeteContext, MoeteError};
 use moete_discord as discord;
 
 /// Replies with the server's information.
-#[poise::command(prefix_command, category = "Utility", subcommands("emote", "role"))]
+#[poise::command(
+    prefix_command,
+    slash_command,
+    category = "Utility",
+    subcommands("emote", "role")
+)]
 pub async fn server(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let embed = {
         let guild = ctx

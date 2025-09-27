@@ -4,7 +4,7 @@ use tracing::error;
 use moete_core::{MoeteContext, MoeteError};
 
 /// Send a message through Moete's emote system.
-#[poise::command(prefix_command, category = "Emote", aliases("txt", "t"))]
+#[poise::command(prefix_command, slash_command, category = "Emote", aliases("txt", "t"))]
 pub async fn text(
     ctx: MoeteContext<'_>,
     #[description = "Text to send"]

@@ -65,7 +65,7 @@ async fn main() {
 
     let framework = poise::Framework::builder()
         .options(framework_options)
-        .setup(|ctx, _ready, _framework| {
+        .setup(|ctx, _ready, framework| {
             Box::pin(async move {
                 // background tasks
                 let ctx_arc = Arc::new(ctx.clone());
@@ -79,6 +79,9 @@ async fn main() {
                 if let Some(pool) = state.pool.as_ref() {
                     moete_core::build_sql(pool).await?;
                 }
+
+                // poise thingamajig
+                poise::builtins::register_globally(ctx, &framework.options().commands).await?;
 
                 Ok(state)
             })

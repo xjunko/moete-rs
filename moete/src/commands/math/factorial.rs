@@ -3,7 +3,12 @@ use poise::CreateReply;
 use moete_core::{MoeteContext, MoeteError};
 
 /// Calculate the factorial of a number.
-#[poise::command(prefix_command, category = "Math", aliases("factorials"))]
+#[poise::command(
+    prefix_command,
+    slash_command,
+    category = "Math",
+    aliases("factorials")
+)]
 pub async fn factorial(
     ctx: MoeteContext<'_>,
     #[description = "Number to calculate the factorial of"]

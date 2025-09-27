@@ -10,6 +10,7 @@ use super::text::text;
 /// Help command for the emote system.
 #[poise::command(
     prefix_command,
+    slash_command,
     category = "Emote",
     aliases("emotes", "e"),
     subcommands("search", "text")
