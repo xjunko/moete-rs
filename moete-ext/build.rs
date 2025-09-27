@@ -33,8 +33,12 @@ fn main() {
     }
 
     let json_path = std::path::Path::new("files/commands.json");
-    let json = std::fs::read_to_string(json_path)
-        .expect(&format!("Failed to read moete's commands: {:?}", json_path).to_string());
+    let json = std::fs::read_to_string(json_path).unwrap_or_else(|_| {
+        panic!(
+            "{}",
+            format!("Failed to read moete's commands: {:?}", json_path).to_string()
+        )
+    });
     let data: HashMap<String, MacroDef> =
         serde_json::from_str(&json).expect("Failed to parse moete's commands JSON");
 

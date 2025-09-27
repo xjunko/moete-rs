@@ -4,17 +4,22 @@ version.workspace = true
 authors.workspace = true
 edition.workspace = true
 
+[features]
+default = []
+macros = ["moete-ext/macros"]
+
 [dependencies]
 moete-framework = { path = "../moete-framework" }
 moete-core = { path = "../moete-core" }
 moete-discord = { path = "../moete-discord" }
+moete-ext = { path = "../moete-ext", optional = true }
 toml = { workspace = true }
 serenity = { workspace = true }
 poise = { workspace = true }
 tokio = { workspace = true }
-serde = { workspace = true }
+serde.workspace = true
 reqwest = { workspace = true }
-serde_json = { workspace = true }
+serde_json.workspace = true
 rand = { workspace = true }
 regex = { workspace = true }
 once_cell = { workspace = true }

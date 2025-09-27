@@ -1,6 +1,10 @@
 # rust
 /target
 
+# internals
+moete-ext/files/*
+moete/src/commands/macros/*
+
 # dev
 .env
 data/*

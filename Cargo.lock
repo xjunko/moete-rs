@@ -1422,6 +1422,7 @@ dependencies = [
  "mimalloc",
  "moete-core",
  "moete-discord",
+ "moete-ext",
  "moete-framework",
  "once_cell",
  "poise",
@@ -1465,6 +1466,14 @@ dependencies = [
  "serde_json",
  "serenity",
  "tokio",
+]
+
+[[package]]
+name = "moete-ext"
+version = "0.0.2"
+dependencies = [
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

@@ -8,6 +8,9 @@ pub mod pakb;
 pub mod role;
 pub mod utility;
 
+#[cfg(feature = "macros")]
+pub mod macros;
+
 pub fn commands() -> Vec<poise::Command<moete_core::State, Error>> {
     let mut cmds = Vec::new();
     cmds.extend(emote::commands());
@@ -17,6 +20,9 @@ pub fn commands() -> Vec<poise::Command<moete_core::State, Error>> {
     cmds.extend(utility::commands());
     cmds.extend(markov::commands());
     cmds.extend(role::commands());
+
+    #[cfg(feature = "macros")]
+    cmds.extend(macros::commands());
 
     cmds
 }
