@@ -355,22 +355,45 @@ async fn generate_all_commands(
         }
 
         let mut text = String::new();
-        for command in commands {
-            text += format!(
-                "**{}** - {}\n",
-                command.name,
-                command.description.as_deref().unwrap_or("None")
-            )
-            .as_str();
 
-            for subcommand in &command.subcommands {
+        // FIXME: hardcoded, but its very likely this will be the only case
+        // Format:
+        // `command` `command2` `command3` etc...
+        // (no descriptions, no subcommands)
+        if category_name.unwrap_or("Commands").contains("Fun") {
+            for command in commands {
+                text += format!("`{}` ", command.name).as_str();
+
+                for subcommand in &command.subcommands {
+                    text += format!("`{}` ", subcommand.name).as_str();
+                }
+            }
+        } else {
+            // Normal generation
+            // Format:
+            // **command** - description
+            //   **command subcommand** - description
+            //   **command subcommand2** - description
+            // **command2** - description
+            //   **command2 subcommand** - description
+            // etc...
+            for command in commands {
                 text += format!(
-                    "  **{} {}** - {}\n",
+                    "**{}** - {}\n",
                     command.name,
-                    subcommand.name,
-                    subcommand.description.as_deref().unwrap_or("None")
+                    command.description.as_deref().unwrap_or("None")
                 )
                 .as_str();
+
+                for subcommand in &command.subcommands {
+                    text += format!(
+                        "  **{} {}** - {}\n",
+                        command.name,
+                        subcommand.name,
+                        subcommand.description.as_deref().unwrap_or("None")
+                    )
+                    .as_str();
+                }
             }
         }
 
