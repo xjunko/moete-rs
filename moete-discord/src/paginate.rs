@@ -1,4 +1,4 @@
-use poise::serenity_prelude as serenity;
+use poise::{CreateReply, serenity_prelude as serenity};
 
 use super::embed;
 use moete_core::MoeteContext;
@@ -20,7 +20,7 @@ pub async fn paginate(ctx: MoeteContext<'_>, pages: Vec<String>) -> Result<(), s
             .components(vec![components])
     };
 
-    ctx.send(reply).await?;
+    let msg = ctx.send(reply).await?;
 
     // Loop through incoming interactions with the navigation buttons
     let mut current_page = 0;
@@ -57,6 +57,15 @@ pub async fn paginate(ctx: MoeteContext<'_>, pages: Vec<String>) -> Result<(), s
             .await?;
     }
 
+    // remove interaction buttons after timeout
+    msg.edit(
+        ctx,
+        CreateReply::default()
+            .embed(embed::create_embed().description(&pages[current_page]))
+            .components(vec![]),
+    )
+    .await?;
+
     Ok(())
 }
 
@@ -80,7 +89,7 @@ pub async fn paginate_embed(
             .components(vec![components])
     };
 
-    ctx.send(reply).await?;
+    let msg = ctx.send(reply).await?;
 
     // Loop through incoming interactions with the navigation buttons
     let mut current_page = 0;
@@ -116,6 +125,15 @@ pub async fn paginate_embed(
             )
             .await?;
     }
+
+    // remove interaction after timeout
+    msg.edit(
+        ctx,
+        CreateReply::default()
+            .embed(pages[current_page].clone())
+            .components(vec![]),
+    )
+    .await?;
 
     Ok(())
 }
