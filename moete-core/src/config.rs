@@ -2,31 +2,6 @@ use std::env;
 
 #[allow(dead_code)]
 #[derive(Debug)]
-pub struct Discord {
-    pub name: String,
-    pub token: String,
-    pub token_cdn: String,
-    pub prefixes: Vec<String>,
-}
-
-impl Default for Discord {
-    fn default() -> Self {
-        Self {
-            name: env::var("INSTANCE_NAME").unwrap_or("Moete".to_string()),
-            token: env::var("INSTANCE_TOKEN_DISCORD")
-                .expect("Error: INSTANCE_TOKEN_DISCORD not set"),
-            token_cdn: env::var("INSTANCE_TOKEN_CDN").expect("Error: INSTANCE_TOKEN_CDN not set"),
-            prefixes: env::var("INSTANCE_PREFIXES")
-                .unwrap_or(";".to_string())
-                .split(" ")
-                .map(|s| s.to_string())
-                .collect(),
-        }
-    }
-}
-
-#[allow(dead_code)]
-#[derive(Debug)]
 
 pub struct Flag {
     pub debug: bool,
@@ -107,11 +82,51 @@ impl Default for Moete {
     }
 }
 
+#[allow(dead_code)]
+#[derive(Debug)]
+pub struct Discord {
+    pub name: String,
+    pub token: String,
+    pub token_cdn: String,
+    pub prefixes: Vec<String>,
+}
+
+impl Default for Discord {
+    fn default() -> Self {
+        Self {
+            name: env::var("INSTANCE_NAME").unwrap_or("Moete".to_string()),
+            token: env::var("INSTANCE_TOKEN_DISCORD")
+                .expect("Error: INSTANCE_TOKEN_DISCORD not set"),
+            token_cdn: env::var("INSTANCE_TOKEN_CDN").expect("Error: INSTANCE_TOKEN_CDN not set"),
+            prefixes: env::var("INSTANCE_PREFIXES")
+                .unwrap_or(";".to_string())
+                .split(" ")
+                .map(|s| s.to_string())
+                .collect(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct Services {
+    pub database: String,
+}
+
+impl Default for Services {
+    fn default() -> Self {
+        Self {
+            database: env::var("INSTANCE_DB_URL")
+                .expect("INSTANCE_DB_URL must be set in the environment"),
+        }
+    }
+}
+
 #[derive(Default, Debug)]
 pub struct Config {
-    pub discord: Discord,
     pub flag: Flag,
     pub moete: Moete,
+    pub discord: Discord,
+    pub services: Services,
 }
 
 impl Config {

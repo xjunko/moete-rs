@@ -24,7 +24,7 @@ impl State {
         self.pool = Arc::new(Some(
             postgres::PgPoolOptions::new()
                 .max_connections(5)
-                .connect("postgresql://moete:1442@localhost/moete")
+                .connect(&self.config.services.database)
                 .await?,
         ));
 
