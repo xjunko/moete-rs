@@ -11,6 +11,7 @@ mod routines;
 
 #[tokio::main]
 async fn main() {
+    #[cfg(debug_assertions)]
     match dotenv::dotenv() {
         Ok(env) => env,
         Err(err) => panic!("Failed to load enviroment: {}", err),
