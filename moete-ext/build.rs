@@ -70,7 +70,7 @@ fn main() {
             maybe_aliases
         ));
         out.push_str(&format!(
-            "pub async fn {}(ctx: Context<'_>) -> Result<(), Error> {{\n",
+            "pub async fn {}(ctx: Context<'_>) -> Result<(), MoeteError> {{\n",
             name
         ));
         out.push_str("    let replies = vec![\n");
@@ -89,7 +89,9 @@ fn main() {
         commands.push(name.clone());
     }
 
-    out.push_str("pub fn macro_commands() -> Vec<poise::Command<moete_core::State, Error>> {\n");
+    out.push_str(
+        "pub fn macro_commands() -> Vec<poise::Command<moete_core::State, MoeteError>> {\n",
+    );
     out.push_str("    vec![\n");
     for command in commands {
         out.push_str(&format!("    {}(),\n", command));

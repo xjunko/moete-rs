@@ -6,7 +6,6 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-moete-framework = { path = "../moete-framework" }
 poise = { workspace = true }
 serenity = { workspace = true }
 sqlx = { workspace = true }

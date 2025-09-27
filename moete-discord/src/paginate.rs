@@ -1,9 +1,10 @@
 use poise::serenity_prelude as serenity;
 
 use super::embed;
+use moete_core::MoeteContext;
 
 /// Sends a paginated message from pages passed.
-pub async fn paginate(ctx: crate::Context<'_>, pages: Vec<String>) -> Result<(), serenity::Error> {
+pub async fn paginate(ctx: MoeteContext<'_>, pages: Vec<String>) -> Result<(), serenity::Error> {
     let ctx_id = ctx.id();
     let prev_button_id = format!("{}prev", ctx_id);
     let next_button_id = format!("{}next", ctx_id);
@@ -61,7 +62,7 @@ pub async fn paginate(ctx: crate::Context<'_>, pages: Vec<String>) -> Result<(),
 
 /// Sends a paginated message from pages passed.
 pub async fn paginate_embed(
-    ctx: crate::Context<'_>,
+    ctx: MoeteContext<'_>,
     pages: Vec<serenity::CreateEmbed>,
 ) -> Result<(), serenity::Error> {
     let ctx_id = ctx.id();

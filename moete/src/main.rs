@@ -9,9 +9,6 @@ mod commands;
 mod events;
 mod routines;
 
-type Error = moete_framework::MoeteError;
-type Context<'a> = moete_framework::MoeteContext<'a, moete_core::State, Error>;
-
 #[tokio::main]
 async fn main() {
     match dotenv::dotenv() {

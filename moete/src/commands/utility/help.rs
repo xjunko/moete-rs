@@ -1,11 +1,11 @@
-use crate::{Context, Error};
+use moete_core::{MoeteContext, MoeteError};
 
 /// Replies with a list of available commands and their descriptions.
 #[poise::command(prefix_command, category = "Utility")]
 pub async fn help(
-    ctx: Context<'_>,
+    ctx: MoeteContext<'_>,
     #[description = "Specific command"] command: Option<String>,
-) -> Result<(), Error> {
+) -> Result<(), MoeteError> {
     moete_discord::help::help(
         ctx,
         command.as_deref(),

@@ -1,15 +1,15 @@
 use poise::CreateReply;
 
-use crate::{Context, Error};
+use moete_core::{MoeteContext, MoeteError};
 
 /// Calculate the factorial of a number.
 #[poise::command(prefix_command, category = "Math", aliases("factorials"))]
 pub async fn factorial(
-    ctx: Context<'_>,
+    ctx: MoeteContext<'_>,
     #[description = "Number to calculate the factorial of"]
     #[rest]
     number: f64,
-) -> Result<(), Error> {
+) -> Result<(), MoeteError> {
     let embed = moete_discord::embed::create_embed()
         .title(format!("Factorials of {}", number))
         .description({

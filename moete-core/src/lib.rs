@@ -3,6 +3,7 @@ use sqlx::postgres;
 
 pub use self::branding::*;
 pub use self::models::*;
+pub use self::types::*;
 pub use self::{config::Config, emotes::EmoteManager, state::State};
 
 mod branding;
@@ -10,8 +11,7 @@ mod config;
 mod emotes;
 mod models;
 mod state;
-
-type Error = moete_framework::MoeteError;
+mod types;
 
 pub async fn build_sql(pool: &postgres::PgPool) -> Result<(), sqlx::Error> {
     models::markov::build(pool).await?;

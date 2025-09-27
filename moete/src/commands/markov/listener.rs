@@ -1,6 +1,7 @@
 use super::ALLOWED;
 
-use crate::{Error, serenity};
+use crate::serenity;
+use moete_core::MoeteError;
 
 const COMMON_BOT_PREFIXES: &[&str] = &[
     ";", "t!", "pls ", "please ", "p ", "->", "!", "`", "``", ";;", "~>", ">", "<", "$", "k!",
@@ -11,7 +12,7 @@ pub async fn on_message(
     _ctx: &serenity::Context,
     message: &serenity::Message,
     data: &moete_core::State,
-) -> Result<(), Error> {
+) -> Result<(), MoeteError> {
     if !ALLOWED.contains(&message.author.id.into()) {
         return Ok(());
     }

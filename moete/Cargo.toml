@@ -9,7 +9,6 @@ default = []
 macros = ["moete-ext/macros"]
 
 [dependencies]
-moete-framework = { path = "../moete-framework" }
 moete-core = { path = "../moete-core" }
 moete-discord = { path = "../moete-discord" }
 moete-ext = { path = "../moete-ext", optional = true }

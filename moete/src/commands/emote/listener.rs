@@ -3,9 +3,8 @@ use regex::Regex;
 use serenity::all::ExecuteWebhook;
 use tracing::{debug, error};
 
-use crate::Error;
-
 use crate::serenity;
+use moete_core::MoeteError;
 
 const JUNKO: u64 = 736223131240497183;
 
@@ -17,7 +16,7 @@ pub async fn on_message(
     ctx: &serenity::Context,
     message: &serenity::Message,
     data: &moete_core::State,
-) -> Result<(), Error> {
+) -> Result<(), MoeteError> {
     if data.config.flag.debug && message.author.id != JUNKO {
         debug!("Message received: {:?}", message);
         return Ok(());

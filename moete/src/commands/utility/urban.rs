@@ -2,7 +2,7 @@ use serde::Deserialize;
 use serenity::all::CreateEmbedFooter;
 
 use crate::serenity;
-use crate::{Context, Error};
+use moete_core::{MoeteContext, MoeteError};
 
 #[derive(Deserialize)]
 struct Urban {
@@ -16,7 +16,7 @@ struct Urban {
 }
 
 impl Urban {
-    pub async fn get(term: &str) -> Result<Vec<Urban>, Error> {
+    pub async fn get(term: &str) -> Result<Vec<Urban>, MoeteError> {
         let url = format!(
             "https://api.urbandictionary.com/v0/define?term={}",
             term.replace(" ", "%20")
@@ -54,11 +54,11 @@ impl Urban {
 /// Finds a term on Urban Dictionary and returns the definition(s).
 #[poise::command(prefix_command, category = "Utility")]
 pub async fn urban(
-    ctx: Context<'_>,
+    ctx: MoeteContext<'_>,
     #[description = "The term to search for"]
     #[rest]
     term: String,
-) -> Result<(), Error> {
+) -> Result<(), MoeteError> {
     match Urban::get(&term).await {
         Ok(urban_definitions) => {
             let data: &moete_core::State = ctx.data();

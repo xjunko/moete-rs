@@ -2,13 +2,14 @@ use serenity::all::UserId;
 
 use super::listener::WORDS;
 
-use crate::{Context, Error, serenity};
+use crate::serenity;
+use moete_core::{MoeteContext, MoeteError};
 
 const LIMIT: usize = 20;
 
 /// Returns lists of words being counted.
 #[poise::command(prefix_command, category = "Utility", aliases("wordcount", "wc"))]
-pub async fn count(ctx: Context<'_>) -> Result<(), Error> {
+pub async fn count(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let data: &moete_core::State = ctx.data();
     let mut embeds: Vec<serenity::CreateEmbed> = Vec::new();
 

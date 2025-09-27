@@ -1,16 +1,16 @@
 use serenity::all::ExecuteWebhook;
 use tracing::error;
 
-use crate::{Context, Error};
+use moete_core::{MoeteContext, MoeteError};
 
 /// Send a message through Moete's emote system.
 #[poise::command(prefix_command, category = "Emote", aliases("txt", "t"))]
 pub async fn text(
-    ctx: Context<'_>,
+    ctx: MoeteContext<'_>,
     #[description = "Text to send"]
     #[rest]
     msg: String,
-) -> Result<(), Error> {
+) -> Result<(), MoeteError> {
     if let poise::Context::Prefix(prefix_ctx) = ctx
         && let Err(e) = prefix_ctx
             .msg

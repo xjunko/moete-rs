@@ -1,7 +1,7 @@
 use poise::CreateReply;
 use serenity::all::CreateEmbedFooter;
 
-use crate::{Context, Error};
+use moete_core::{MoeteContext, MoeteError};
 
 /// Subcommands
 use super::search::search;
@@ -14,7 +14,7 @@ use super::text::text;
     aliases("emotes", "e"),
     subcommands("search", "text")
 )]
-pub async fn emote(ctx: Context<'_>) -> Result<(), Error> {
+pub async fn emote(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let cmds = vec![
         ["search", "Search emote"],
         ["list", "List all emotes"],

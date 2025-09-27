@@ -2,9 +2,9 @@
 use poise::{CreateReply, serenity_prelude as serenity};
 use std::fmt::Write as _;
 
-use crate::Context;
 use crate::embed;
 use crate::poise_builtins;
+use moete_core::MoeteContext;
 
 /// Optional configuration for how the help message from [`help()`] looks
 pub struct HelpConfiguration {
@@ -104,7 +104,7 @@ fn format_context_menu_name<U, E>(command: &poise::Command<U, E>) -> Option<Stri
 
 /// Code for printing help of a specific command (e.g. `~help my_command`)
 async fn help_single_command(
-    ctx: Context<'_>,
+    ctx: MoeteContext<'_>,
     command_name: &str,
     config: HelpConfiguration,
 ) -> Result<(), serenity::Error> {
@@ -295,7 +295,7 @@ impl PrefixDisplay for poise::Prefix {
 ///
 /// This is a separate function so we can have tests for it
 async fn generate_all_commands(
-    ctx: Context<'_>,
+    ctx: MoeteContext<'_>,
     _config: &HelpConfiguration,
 ) -> Result<Vec<serenity::CreateEmbed>, serenity::Error> {
     let data: &moete_core::State = ctx.data();
@@ -411,7 +411,7 @@ async fn generate_all_commands(
 
 /// Code for printing an overview of all commands (e.g. `~help`)
 async fn help_all_commands(
-    ctx: Context<'_>,
+    ctx: MoeteContext<'_>,
     config: HelpConfiguration,
 ) -> Result<(), serenity::Error> {
     let menu = generate_all_commands(ctx, &config).await?;
@@ -422,7 +422,7 @@ async fn help_all_commands(
 /// A help command that outputs text in a code block, groups commands by categories, and annotates
 /// commands with a slash if they exist as slash commands.
 pub async fn help(
-    ctx: Context<'_>,
+    ctx: MoeteContext<'_>,
     command: Option<&str>,
     config: HelpConfiguration,
 ) -> Result<(), serenity::Error> {

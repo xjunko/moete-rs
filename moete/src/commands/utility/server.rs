@@ -1,12 +1,12 @@
-use crate::{Context, Error};
-
-use moete_discord as discord;
 use poise::CreateReply;
 use serenity::all::{ChannelType, Mentionable};
 
+use moete_core::{MoeteContext, MoeteError};
+use moete_discord as discord;
+
 /// Replies with the server's information.
 #[poise::command(prefix_command, category = "Utility", subcommands("emote", "role"))]
-pub async fn server(ctx: Context<'_>) -> Result<(), Error> {
+pub async fn server(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let embed = {
         let guild = ctx
             .cache()
@@ -98,7 +98,7 @@ pub async fn server(ctx: Context<'_>) -> Result<(), Error> {
 
 /// Replies with a list of all emotes in the server.
 #[poise::command(prefix_command, category = "Utility", aliases("emotes"))]
-pub async fn emote(ctx: Context<'_>) -> Result<(), Error> {
+pub async fn emote(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let embed = {
         let guild = ctx
             .cache()
@@ -128,7 +128,7 @@ pub async fn emote(ctx: Context<'_>) -> Result<(), Error> {
 
 /// Replies with a list of all roles in the server.
 #[poise::command(prefix_command, category = "Utility", aliases("roles"))]
-pub async fn role(ctx: Context<'_>) -> Result<(), Error> {
+pub async fn role(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let embed = {
         let guild = ctx
             .cache()

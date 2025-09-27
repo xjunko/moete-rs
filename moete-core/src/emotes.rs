@@ -2,7 +2,7 @@ use std::sync::Arc;
 use tracing::{error, info};
 
 use super::Config;
-use super::Error;
+use super::MoeteError;
 use super::serenity;
 
 /// EmoteManager handles all emoji related operation.
@@ -20,7 +20,7 @@ impl EmoteManager {
     }
 
     /// Fetches the bot emojis from Discord.
-    async fn fetch_bot_emojis(ctx: &serenity::Context) -> Result<Vec<serenity::Emoji>, Error> {
+    async fn fetch_bot_emojis(ctx: &serenity::Context) -> Result<Vec<serenity::Emoji>, MoeteError> {
         let http: &serenity::Http = &ctx.http;
         let emojis: Vec<serenity::Emoji> = http.get_application_emojis().await?;
         Ok(emojis)
@@ -30,7 +30,7 @@ impl EmoteManager {
     async fn fetch_guild_emojis_by_id(
         ctx: &serenity::Context,
         id: u64,
-    ) -> Result<Vec<serenity::Emoji>, Error> {
+    ) -> Result<Vec<serenity::Emoji>, MoeteError> {
         let http: &serenity::Http = &ctx.http;
         let emojis: Vec<serenity::Emoji> = http.get_emojis(serenity::GuildId::new(id)).await?;
         Ok(emojis)
@@ -40,7 +40,7 @@ impl EmoteManager {
     async fn fetch_guild_emojis_by_name(
         ctx: &serenity::Context,
         query: &str,
-    ) -> Result<Vec<serenity::Emoji>, Error> {
+    ) -> Result<Vec<serenity::Emoji>, MoeteError> {
         let http: &serenity::Http = &ctx.http;
         let cache: &serenity::Cache = &ctx.cache;
         let mut emojis: Vec<serenity::Emoji> = Vec::new();
@@ -64,7 +64,7 @@ impl EmoteManager {
     async fn fetch_guild_emojis(
         ctx: &serenity::Context,
         config: Arc<Config>,
-    ) -> Result<Vec<serenity::Emoji>, Error> {
+    ) -> Result<Vec<serenity::Emoji>, MoeteError> {
         let mut emojis: Vec<serenity::Emoji> = Vec::new();
 
         for query in config

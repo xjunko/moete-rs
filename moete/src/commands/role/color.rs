@@ -2,7 +2,8 @@ use poise::CreateReply;
 use serenity::all::EditRole;
 use serenity::all::Role;
 
-use crate::{Context, Error, serenity};
+use crate::serenity;
+use moete_core::{MoeteContext, MoeteError};
 
 use super::list::list;
 
@@ -12,7 +13,7 @@ pub fn color_to_hex(col: serenity::Color) -> String {
     format!("#{:06X}", col.0)
 }
 
-pub async fn is_moete_supported(ctx: Context<'_>) -> Option<Role> {
+pub async fn is_moete_supported(ctx: MoeteContext<'_>) -> Option<Role> {
     let roles = {
         let guild = ctx.guild()?;
         guild.roles.clone()
@@ -28,7 +29,7 @@ pub async fn is_moete_supported(ctx: Context<'_>) -> Option<Role> {
 }
 
 pub async fn get_colour_role_from_server_if_exists_else_make_one(
-    ctx: Context<'_>,
+    ctx: MoeteContext<'_>,
     color: serenity::Color,
 ) -> Option<Role> {
     let (roles, guild_id) = {
@@ -70,11 +71,11 @@ pub async fn get_colour_role_from_server_if_exists_else_make_one(
 /// Sets a custom colour role for the user.
 #[poise::command(prefix_command, category = "Role", subcommands("list"))]
 pub async fn color(
-    ctx: Context<'_>,
+    ctx: MoeteContext<'_>,
     #[description = "Color to use for user's role"]
     #[rest]
     optional_color_hex: Option<String>,
-) -> Result<(), Error> {
+) -> Result<(), MoeteError> {
     // If valid colors, we set them
     if let Some(color_str) = optional_color_hex
         && let Some(color) = moete_discord::color::from_string(&color_str)

@@ -2,7 +2,8 @@ use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::env;
 
-use crate::{Error, serenity};
+use crate::serenity;
+use moete_core::MoeteError;
 
 pub static WORDS: Lazy<HashMap<String, Vec<String>>> = Lazy::new(|| {
     let mut map = HashMap::new();
@@ -33,7 +34,7 @@ pub async fn on_message(
     _ctx: &serenity::Context,
     message: &serenity::Message,
     data: &moete_core::State,
-) -> Result<(), Error> {
+) -> Result<(), MoeteError> {
     if FLATTEN_WORDS
         .iter()
         .any(|w| message.content.to_lowercase().contains(w))

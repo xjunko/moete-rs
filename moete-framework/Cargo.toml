@@ -1,8 +1,0 @@
-[package]
-name = "moete-framework"
-version.workspace = true
-authors.workspace = true
-edition.workspace = true
-
-[dependencies]
-poise = { workspace = true }

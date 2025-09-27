@@ -1423,7 +1423,6 @@ dependencies = [
  "moete-core",
  "moete-discord",
  "moete-ext",
- "moete-framework",
  "once_cell",
  "poise",
  "rand 0.9.2",
@@ -1444,7 +1443,6 @@ dependencies = [
 name = "moete-core"
 version = "0.0.2"
 dependencies = [
- "moete-framework",
  "poise",
  "serenity",
  "sqlx",
@@ -1457,7 +1455,6 @@ version = "0.0.2"
 dependencies = [
  "base64 0.22.1",
  "moete-core",
- "moete-framework",
  "once_cell",
  "poise",
  "rand 0.9.2",
@@ -1474,13 +1471,6 @@ version = "0.0.2"
 dependencies = [
  "serde",
  "serde_json",
-]
-
-[[package]]
-name = "moete-framework"
-version = "0.0.2"
-dependencies = [
- "poise",
 ]
 
 [[package]]

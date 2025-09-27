@@ -1,10 +1,11 @@
-use crate::{Context, Error};
-use moete_discord as discord;
 use poise::CreateReply;
+
+use moete_core::{MoeteContext, MoeteError};
+use moete_discord as discord;
 
 /// Send host machine information.
 #[poise::command(slash_command, prefix_command, category = "Utility")]
-pub async fn machine(ctx: Context<'_>) -> Result<(), Error> {
+pub async fn machine(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let memory = sys_info::mem_info()?;
 
     let embed = discord::embed::create_embed()

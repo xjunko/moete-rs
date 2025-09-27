@@ -1,11 +1,11 @@
-use crate::{Context, Error};
-
-use moete_discord as discord;
 use poise::CreateReply;
+
+use moete_core::{MoeteContext, MoeteError};
+use moete_discord as discord;
 
 /// Sends an invite link to the bot.
 #[poise::command(prefix_command, category = "Utility")]
-pub async fn invite(ctx: Context<'_>) -> Result<(), Error> {
+pub async fn invite(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let bot_user = ctx.serenity_context().http.get_current_user().await?;
     let embed = discord::embed::create_embed()
         .title(format!("{} | Invite Link", ctx.data().config.discord.name))

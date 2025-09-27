@@ -1,13 +1,13 @@
-use crate::{Context, Error};
+use moete_core::{MoeteContext, MoeteError};
 
 /// Replies with a Google search link for the given query.
 #[poise::command(prefix_command, category = "Utility")]
 pub async fn google(
-    ctx: Context<'_>,
+    ctx: MoeteContext<'_>,
     #[description = "Query to search"]
     #[rest]
     query: String,
-) -> Result<(), Error> {
+) -> Result<(), MoeteError> {
     ctx.reply(format!(
         "https://www.google.com/search?q={}",
         query.replace(" ", "+")

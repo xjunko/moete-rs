@@ -3,11 +3,12 @@ use serenity::all::Role;
 
 use super::color::color_to_hex;
 
-use crate::{Context, Error};
+use crate::serenity;
+use moete_core::{MoeteContext, MoeteError};
 
 /// Lists all the custom color roles in this server.
 #[poise::command(prefix_command, category = "Role")]
-pub async fn list(ctx: Context<'_>) -> Result<(), Error> {
+pub async fn list(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let roles: Vec<Role> = {
         let Some(guild) = ctx.guild() else {
             ctx.say("This command can only be used in a server.")

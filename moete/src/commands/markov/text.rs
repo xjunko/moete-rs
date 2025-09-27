@@ -7,7 +7,7 @@ use tracing::info;
 
 use super::ALLOWED;
 
-use crate::{Context, Error};
+use moete_core::{MoeteContext, MoeteError};
 
 async fn load_data(id: u64, pool: Arc<Option<postgres::PgPool>>) -> Option<String> {
     info!("Loading data for user {}", id);
@@ -78,9 +78,9 @@ async fn generate(picked: i32, pool: Arc<Option<postgres::PgPool>>) -> Option<(S
 /// Generates a random text based on the user's messages.
 #[poise::command(prefix_command, category = "Markov", aliases("deep"))]
 pub async fn markov(
-    ctx: Context<'_>,
+    ctx: MoeteContext<'_>,
     #[description = "User to generate text for"] picked: Option<i32>,
-) -> Result<(), Error> {
+) -> Result<(), MoeteError> {
     let state: &moete_core::State = ctx.data();
 
     if let Some(picked) = picked

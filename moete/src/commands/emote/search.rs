@@ -1,13 +1,13 @@
-use crate::{Context, Error};
+use moete_core::{MoeteContext, MoeteError};
 
 /// Search for emotes matching a query.
 #[poise::command(prefix_command, category = "Emote", aliases("list", "ls"))]
 pub async fn search(
-    ctx: Context<'_>,
+    ctx: MoeteContext<'_>,
     #[description = "Query for the emote"]
     #[rest]
     query: Option<String>,
-) -> Result<(), Error> {
+) -> Result<(), MoeteError> {
     let query_or_all = query.unwrap_or_default();
     let data: &moete_core::State = ctx.data();
     let emotes = data

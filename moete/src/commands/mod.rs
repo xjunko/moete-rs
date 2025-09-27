@@ -1,5 +1,3 @@
-use crate::Error;
-
 pub mod counter;
 pub mod emote;
 pub mod markov;
@@ -11,7 +9,7 @@ pub mod utility;
 #[cfg(feature = "macros")]
 pub mod macros;
 
-pub fn commands() -> Vec<poise::Command<moete_core::State, Error>> {
+pub fn commands() -> Vec<poise::Command<moete_core::State, moete_core::MoeteError>> {
     let mut cmds = Vec::new();
     cmds.extend(emote::commands());
     cmds.extend(math::commands());
