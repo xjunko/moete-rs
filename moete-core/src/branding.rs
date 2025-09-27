@@ -1,6 +1,6 @@
 pub const NAME: &str = "Moete";
 pub const BRANCH: &str = "rust";
-pub const VERSION: &str = "0.0.1";
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub fn name() -> String {
     NAME.to_string()
