@@ -323,10 +323,12 @@ async fn generate_all_commands(
                     INFO_EMOTES.replace("{}", &main_prefix),
                 ),
                 false,
-            ),
+            )
+            .thumbnail(ctx.serenity_context().cache.current_user().face()),
     );
 
     // Any other pages
+    let mut page_len = 0;
     let mut embed = embed::create_embed().title(format!(
         "{} | {}",
         data.config.discord.name, "Help [Commands]"
@@ -360,16 +362,50 @@ async fn generate_all_commands(
                 command.description.as_deref().unwrap_or("None")
             )
             .as_str();
+
+            for subcommand in &command.subcommands {
+                text += format!(
+                    "  **{} {}** - {}\n",
+                    command.name,
+                    subcommand.name,
+                    subcommand.description.as_deref().unwrap_or("None")
+                )
+                .as_str();
+            }
         }
 
-        embed = embed.field(
-            "",
-            format!("__**{}**__\n{}", category_name.unwrap_or("Commands"), text),
-            false,
-        );
+        if page_len >= 256 {
+            embeds.push(embed);
+            page_len = 0;
+            embed = embed::create_embed().title(format!(
+                "{} | {}",
+                data.config.discord.name, "Help [Commands]"
+            ));
+        }
+
+        page_len += text.len();
+
+        embed = embed
+            .field(
+                "",
+                format!("__**{}**__\n{}", category_name.unwrap_or("Commands"), text),
+                false,
+            )
+            .thumbnail(ctx.serenity_context().cache.current_user().face());
     }
 
     embeds.push(embed);
+
+    let total_pages = embeds.len();
+    for (i, embed) in embeds.iter_mut().enumerate() {
+        *embed = embed.clone().title(format!(
+            "{} | Help [Commands] - Page {}/{}",
+            data.config.discord.name,
+            i + 1,
+            total_pages
+        ));
+    }
+
     Ok(embeds)
 }
 
