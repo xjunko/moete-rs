@@ -10,12 +10,13 @@ pub mod utility;
 
 pub fn commands() -> Vec<poise::Command<moete_core::State, Error>> {
     let mut cmds = Vec::new();
-    cmds.extend(utility::commands());
     cmds.extend(emote::commands());
-    cmds.extend(role::commands());
-    cmds.extend(markov::commands());
-    cmds.extend(pakb::commands());
-    cmds.extend(counter::commands());
     cmds.extend(math::commands());
+    cmds.extend(counter::commands());
+    cmds.extend(pakb::commands());
+    cmds.extend(utility::commands());
+    cmds.extend(markov::commands());
+    cmds.extend(role::commands());
+
     cmds
 }
