@@ -2,6 +2,7 @@ use crate::Error;
 
 mod google;
 mod help;
+mod machine;
 mod nhentai;
 mod ping;
 mod urban;
@@ -14,5 +15,6 @@ pub fn commands() -> Vec<poise::Command<moete_core::State, Error>> {
         nhentai::nhentai(),
         ping::ping(),
         urban::urban(),
+        machine::machine(),
     ]
 }

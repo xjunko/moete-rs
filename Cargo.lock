@@ -1411,7 +1411,7 @@ dependencies = [
 
 [[package]]
 name = "moete"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "base64 0.22.1",
  "chrono",
@@ -1432,6 +1432,7 @@ dependencies = [
  "serde_json",
  "serenity",
  "sqlx",
+ "sys-info",
  "tokio",
  "toml",
  "tracing",
@@ -1440,7 +1441,7 @@ dependencies = [
 
 [[package]]
 name = "moete-core"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "moete-framework",
  "poise",
@@ -1451,7 +1452,7 @@ dependencies = [
 
 [[package]]
 name = "moete-discord"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "base64 0.22.1",
  "moete-core",
@@ -1468,7 +1469,7 @@ dependencies = [
 
 [[package]]
 name = "moete-framework"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "poise",
 ]
@@ -2688,6 +2689,16 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.106",
+]
+
+[[package]]
+name = "sys-info"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0b3a0d0aba8bf96a0e1ddfdc352fc53b3df7f39318c71854910c3c4b024ae52c"
+dependencies = [
+ "cc",
+ "libc",
 ]
 
 [[package]]
