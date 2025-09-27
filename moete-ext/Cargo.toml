@@ -1,0 +1,18 @@
+[package]
+name = "moete-ext"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[features]
+default = []
+macros = []
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+
+[build-dependencies]
+serde.workspace = true
+serde_json.workspace = true
