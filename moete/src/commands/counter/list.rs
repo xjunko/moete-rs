@@ -18,11 +18,7 @@ pub async fn count(ctx: Context<'_>) -> Result<(), Error> {
                 "{} | {}-word counter",
                 data.config.discord.name, word
             ))
-            .thumbnail(
-                ctx.author()
-                    .avatar_url()
-                    .unwrap_or(ctx.author().default_avatar_url()),
-            );
+            .thumbnail(ctx.author().face());
 
         if let Some(pool) = data.pool.as_ref() {
             let counters = moete_core::counter::get_counters(pool, word).await?;

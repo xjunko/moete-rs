@@ -2,9 +2,11 @@ use crate::Error;
 
 mod google;
 mod help;
+mod invite;
 mod machine;
 mod nhentai;
 mod ping;
+mod server;
 mod urban;
 
 /// Collect all commands into a single Vec
@@ -15,6 +17,8 @@ pub fn commands() -> Vec<poise::Command<moete_core::State, Error>> {
         nhentai::nhentai(),
         ping::ping(),
         urban::urban(),
+        invite::invite(),
         machine::machine(),
+        server::server(),
     ]
 }

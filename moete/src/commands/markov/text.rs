@@ -99,7 +99,7 @@ pub async fn markov(
                     true,
                     ExecuteWebhook::new()
                         .username(user.display_name())
-                        .avatar_url(user.avatar_url().unwrap_or(user.default_avatar_url()))
+                        .avatar_url(user.face())
                         .content(content),
                 )
                 .await;

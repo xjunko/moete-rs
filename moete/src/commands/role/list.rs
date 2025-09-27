@@ -33,11 +33,7 @@ pub async fn list(ctx: Context<'_>) -> Result<(), Error> {
     let mut embed = moete_discord::embed::create_embed()
         .title(format!("{} | Color Roles", data.config.discord.name))
         .description("List of all self-assignable color roles in this server.")
-        .thumbnail(
-            ctx.author()
-                .avatar_url()
-                .unwrap_or(ctx.author().default_avatar_url()),
-        );
+        .thumbnail(ctx.author().face());
 
     let roles_len = roles.len();
     for role in roles {

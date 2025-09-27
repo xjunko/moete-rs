@@ -35,7 +35,7 @@ pub async fn text(
                 true,
                 ExecuteWebhook::new()
                     .content(msg.clone())
-                    .avatar_url(user.avatar_url().unwrap_or(user.default_avatar_url()))
+                    .avatar_url(user.face())
                     .username(user.display_name()),
             )
             .await

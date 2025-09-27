@@ -84,11 +84,7 @@ pub async fn color(
         let mut embed = moete_discord::embed::create_embed()
             .title(format!("{} | Self Color Role", data.config.discord.name))
             .color(color)
-            .thumbnail(
-                ctx.author()
-                    .avatar_url()
-                    .unwrap_or(ctx.author().default_avatar_url()),
-            )
+            .thumbnail(ctx.author().face())
             .field("Info", format!("Hex: {}", color_to_hex(color)), false);
 
         // Check
