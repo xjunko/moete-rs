@@ -6,7 +6,9 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
+moete-ext = { path = "../moete-ext" }
 poise = { workspace = true }
 serenity = { workspace = true }
 sqlx = { workspace = true }
+tokio.workspace = true
 tracing = { workspace = true }

@@ -10,8 +10,10 @@ default = []
 macros = []
 
 [dependencies]
+reqwest.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+tracing.workspace = true
 
 [build-dependencies]
 serde.workspace = true

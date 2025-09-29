@@ -1,3 +1,4 @@
+mod currency;
 mod google;
 mod help;
 mod invite;
@@ -18,5 +19,6 @@ pub fn commands() -> Vec<poise::Command<moete_core::State, moete_core::MoeteErro
         invite::invite(),
         machine::machine(),
         server::server(),
+        currency::convert(),
     ]
 }
