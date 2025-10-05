@@ -12,7 +12,6 @@ macros = ["moete-ext/macros"]
 moete-core = { path = "../moete-core" }
 moete-discord = { path = "../moete-discord" }
 moete-ext = { path = "../moete-ext" }
-toml = { workspace = true }
 serenity = { workspace = true }
 poise = { workspace = true }
 tokio = { workspace = true }
@@ -26,7 +25,6 @@ marukov = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 dotenv = { workspace = true }
-mimalloc = { workspace = true }
 libc = { workspace = true }
 sqlx = { workspace = true }
 chrono = { workspace = true }
