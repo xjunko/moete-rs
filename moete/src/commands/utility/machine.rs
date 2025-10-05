@@ -15,11 +15,13 @@ pub async fn machine(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
             format!(
                 "**Operating System**: `{}` [Release: `{}`]\n\
                 **Host name**: `{}`\n\
-                **Machine**: `{}`\n",
+                **Machine**: `{}`\n\
+                **Uptime**: `{}`",
                 sys_info::os_type().unwrap_or_default(),
                 sys_info::os_release().unwrap_or_default(),
                 sys_info::hostname().unwrap_or_default(),
                 std::env::consts::ARCH,
+                humantime::format_duration(ctx.data().uptime())
             ),
             false,
         )

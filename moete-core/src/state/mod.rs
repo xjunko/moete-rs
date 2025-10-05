@@ -9,6 +9,8 @@ use crate::{MoeteError, serenity};
 
 #[derive(Debug)]
 pub struct State {
+    started_at: std::time::Instant,
+
     pub config: Arc<Config>,
     pub emotes: EmoteManager,
     pub pool: Arc<Option<postgres::PgPool>>,
@@ -18,6 +20,8 @@ pub struct State {
 impl State {
     pub fn create() -> Self {
         Self {
+            started_at: std::time::Instant::now(),
+
             config: Arc::new(Config::default()),
             emotes: EmoteManager::new(),
             pool: Arc::new(None),
@@ -38,5 +42,9 @@ impl State {
         currency.load().await?;
 
         Ok(())
+    }
+
+    pub fn uptime(&self) -> std::time::Duration {
+        self.started_at.elapsed()
     }
 }
