@@ -49,6 +49,11 @@ impl Currencies {
 
         self.official_name = supported_currencies;
 
+        // preload common currencies used in our servers.
+        for currency in ["myr", "idr", "sgd", "jpy", "eur"] {
+            let _ = self.fetch(currency).await;
+        }
+
         Ok(())
     }
 
@@ -62,13 +67,6 @@ impl Currencies {
 
     /// Fetches the exchange rates for a specific currency if not already loaded.
     pub async fn fetch(&mut self, currency: &str) -> Result<Option<CurrencyRate>, reqwest::Error> {
-        // FIXME: this is the dumbest way to do caching,
-        //        basically, we do a 10/90 chance to clear the cache,
-        //        with this much, it probably will trigger at least once a day, unless we are extremely unlucky.
-        if rand::random_range(0..100) < 10 {
-            self.clear_cache();
-        }
-
         if !self.rates.contains_key(currency) {
             debug!(
                 "Fetching currency rate for {}: {}",
@@ -97,5 +95,15 @@ impl Currencies {
     /// Clears the cached exchange rates.
     pub fn clear_cache(&mut self) {
         self.rates.clear();
+    }
+
+    /// Refreshes the exchange rates for all cached currencies.
+    pub async fn refresh(&mut self) {
+        let currencies: Vec<String> = self.rates.keys().cloned().collect();
+        self.rates.clear();
+
+        for currency in currencies {
+            let _ = self.fetch(&currency).await;
+        }
     }
 }
