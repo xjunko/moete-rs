@@ -33,6 +33,7 @@ impl Currencies {
         Self::default()
     }
 
+    /// Loads the supported currencies from the API.
     pub async fn load(&mut self) -> Result<(), reqwest::Error> {
         info!(
             "Fetching currencies: {}",
@@ -51,6 +52,15 @@ impl Currencies {
         Ok(())
     }
 
+    /// Get the official name of a currency, or return the currency code if not found.
+    pub fn get_official_name(&self, currency: &str) -> String {
+        self.official_name
+            .get(currency)
+            .cloned()
+            .unwrap_or_else(|| currency.to_string())
+    }
+
+    /// Fetches the exchange rates for a specific currency if not already loaded.
     pub async fn fetch(&mut self, currency: &str) -> Result<Option<CurrencyRate>, reqwest::Error> {
         if !self.rates.contains_key(currency) {
             info!(
@@ -77,10 +87,8 @@ impl Currencies {
         Ok(Some(self.rates.get(currency).cloned().unwrap()))
     }
 
-    pub fn get_official_name(&self, currency: &str) -> String {
-        self.official_name
-            .get(currency)
-            .cloned()
-            .unwrap_or_else(|| currency.to_string())
+    /// Clears the cached exchange rates.
+    pub fn clear_cache(&mut self) {
+        self.rates.clear();
     }
 }
