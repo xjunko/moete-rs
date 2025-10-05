@@ -10,6 +10,7 @@ default = []
 macros = []
 
 [dependencies]
+rand.workspace = true
 reqwest.workspace = true
 serde.workspace = true
 serde_json.workspace = true

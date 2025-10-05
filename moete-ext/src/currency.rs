@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use tracing::info;
+use tracing::debug;
 
 use serde::Deserialize;
 use serde_json::json;
@@ -35,7 +35,7 @@ impl Currencies {
 
     /// Loads the supported currencies from the API.
     pub async fn load(&mut self) -> Result<(), reqwest::Error> {
-        info!(
+        debug!(
             "Fetching currencies: {}",
             format!("{API_URL}/currencies.json")
         );
@@ -62,8 +62,15 @@ impl Currencies {
 
     /// Fetches the exchange rates for a specific currency if not already loaded.
     pub async fn fetch(&mut self, currency: &str) -> Result<Option<CurrencyRate>, reqwest::Error> {
+        // FIXME: this is the dumbest way to do caching,
+        //        basically, we do a 10/90 chance to clear the cache,
+        //        with this much, it probably will trigger at least once a day, unless we are extremely unlucky.
+        if rand::random_range(0..100) < 10 {
+            self.clear_cache();
+        }
+
         if !self.rates.contains_key(currency) {
-            info!(
+            debug!(
                 "Fetching currency rate for {}: {}",
                 currency,
                 format!("{API_URL}/currencies/{currency}.json")
