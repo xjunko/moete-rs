@@ -3,14 +3,35 @@ use poise::CreateReply;
 use moete_core::{MoeteContext, MoeteError};
 use moete_discord as discord;
 
-/// Converts a currency from one to another.
+/// Refreshes the currencies information.
 #[poise::command(prefix_command, slash_command, category = "Utility")]
+pub async fn refresh(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
+    let mut currency = ctx.data().currency.lock().await;
+    currency.refresh().await;
+    ctx.say("Currency rates refreshed").await?;
+    Ok(())
+}
+
+/// Converts a currency from one to another.
+#[poise::command(
+    prefix_command,
+    slash_command,
+    category = "Utility",
+    subcommands("refresh")
+)]
 pub async fn convert(
     ctx: MoeteContext<'_>,
     #[description = "Base currency"] base_currency: Option<String>,
     #[description = "Target currency"] target_currency: Option<String>,
     #[description = "Amount to convert"] amount: Option<f64>,
 ) -> Result<(), MoeteError> {
+    // fuck it, we balling
+    // randomly clear the cache here so that the data stays up to date.
+    if rand::random_range(0..100) < 10 {
+        let mut currency = ctx.data().currency.lock().await;
+        currency.refresh().await;
+    }
+
     // if all argument is valid
     if let Some(base) = base_currency
         && let Some(target) = target_currency
@@ -62,9 +83,41 @@ pub async fn convert(
             .description("Convert a currency from one to another.")
             .field(
                 "Usage",
-                "**<FROM>**: - What currency as a base\n \
-            **<TO>**: - What currency to convert it to\n \
-            **<AMOUNT>**: - The amount to convert",
+                "```<FROM>: - What currency as a base\n\
+            <TO>: - What currency to convert it to\n\
+            <AMOUNT>: - The amount to convert```",
+                false,
+            )
+            .field(
+                "1 USD to other currencies",
+                {
+                    let mut currency = ctx.data().currency.lock().await;
+                    let base_currency = currency.fetch("usd").await?;
+
+                    if let Some(base_currency) = base_currency {
+                        format!(
+                            "```{}```",
+                            currency
+                                .rates
+                                .iter()
+                                .filter(|(code, _)| *code != "usd")
+                                .map(|(code, rate)| {
+                                    format!(
+                                        "{} | {} | {:.2}",
+                                        rate.date,
+                                        code.to_uppercase(),
+                                        readable::num::Float::from(
+                                            base_currency.get_rate_to(code).unwrap_or(0.0)
+                                        )
+                                    )
+                                })
+                                .collect::<Vec<String>>()
+                                .join("\n")
+                        )
+                    } else {
+                        "No currency loaded yet".to_string()
+                    }
+                },
                 false,
             )
             .field(
@@ -75,31 +128,6 @@ pub async fn convert(
                     ctx.prefix(),
                     ctx.prefix()
                 ),
-                false,
-            )
-            .field(
-                "1 dollar to other currencies",
-                {
-                    let mut currency = ctx.data().currency.lock().await;
-                    let base_currency = currency.fetch("usd").await?;
-
-                    if let Some(base_currency) = base_currency {
-                        currency
-                            .rates
-                            .keys()
-                            .map(|code| {
-                                format!(
-                                    "**{}**: `{:.2}`",
-                                    code.to_uppercase(),
-                                    base_currency.get_rate_to(code).unwrap_or(0.0)
-                                )
-                            })
-                            .collect::<Vec<String>>()
-                            .join("\n")
-                    } else {
-                        "No currency loaded yet".to_string()
-                    }
-                },
                 false,
             );
         ctx.send(CreateReply::default().embed(embed)).await?;
