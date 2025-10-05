@@ -76,8 +76,32 @@ pub async fn convert(
                     ctx.prefix()
                 ),
                 false,
-            );
+            )
+            .field(
+                "1 dollar to other currencies",
+                {
+                    let mut currency = ctx.data().currency.lock().await;
+                    let base_currency = currency.fetch("usd").await?;
 
+                    if let Some(base_currency) = base_currency {
+                        currency
+                            .rates
+                            .keys()
+                            .map(|code| {
+                                format!(
+                                    "**{}**: `{:.2}`",
+                                    code.to_uppercase(),
+                                    base_currency.get_rate_to(code).unwrap_or(0.0)
+                                )
+                            })
+                            .collect::<Vec<String>>()
+                            .join("\n")
+                    } else {
+                        "No currency loaded yet".to_string()
+                    }
+                },
+                false,
+            );
         ctx.send(CreateReply::default().embed(embed)).await?;
     }
 
