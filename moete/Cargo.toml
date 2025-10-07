@@ -32,5 +32,5 @@ base64 = { workspace = true }
 evalexpr = { workspace = true }
 sys-info = "0.9.1"
 lazy_static = "1.5.0"
-readable = "0.16.0"
 humantime = "2.3.0"
+human_format = "1.1.0"
