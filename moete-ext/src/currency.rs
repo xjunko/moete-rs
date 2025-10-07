@@ -74,11 +74,11 @@ impl Currencies {
                 format!("{API_URL}/currencies/{currency}.json")
             );
 
-            let data: serde_json::Value =
-                reqwest::get(format!("{API_URL}/currencies/{currency}.json"))
-                    .await?
-                    .json()
-                    .await?;
+            let resp = reqwest::get(format!("{API_URL}/currencies/{currency}.json")).await?;
+            if !resp.status().is_success() {
+                return Ok(None);
+            }
+            let data: serde_json::Value = resp.json().await?;
 
             let rate = CurrencyRate {
                 name: currency.to_string(),
