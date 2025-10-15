@@ -22,6 +22,11 @@ pub async fn on_message(
         return Ok(());
     }
 
+    // Ignore bot message
+    if message.author.bot {
+        return Ok(());
+    }
+
     let mut found_emote = false;
     let mut words: Vec<String> = message
         .content

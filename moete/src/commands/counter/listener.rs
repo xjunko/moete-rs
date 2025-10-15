@@ -35,6 +35,10 @@ pub async fn on_message(
     message: &serenity::Message,
     data: &moete_core::State,
 ) -> Result<(), MoeteError> {
+    if message.author.bot {
+        return Ok(());
+    }
+
     if FLATTEN_WORDS
         .iter()
         .any(|w| message.content.to_lowercase().contains(w))
