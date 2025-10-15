@@ -21,7 +21,7 @@ pub async fn text(
     }
 
     let data: &moete_core::State = ctx.data();
-    let msg = data.emotes.text(&msg);
+    let msg = data.emotes.lock().await.text(&msg);
 
     if let Some(webhook) =
         moete_discord::webhook::get_or_create_webhook(ctx.serenity_context(), ctx.channel_id())

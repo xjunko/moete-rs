@@ -32,11 +32,12 @@ pub async fn memory_trim() {
     }
 }
 
-pub async fn start(ctx: Arc<serenity::Context>, config: Arc<moete_core::Config>) {
-    tokio::spawn(status_rotate(Arc::clone(&ctx), Arc::clone(&config)));
+pub async fn start(ctx: Arc<serenity::Context>, state: moete_core::State) {
+    tokio::spawn(status_rotate(ctx.clone(), state.config.clone()));
     tokio::spawn(memory_trim());
+    tokio::spawn(commands::emote::refresh(ctx.clone(), state.clone()));
     tokio::spawn(commands::pakb::banner_rotate(
-        Arc::clone(&ctx),
-        Arc::clone(&config),
+        ctx.clone(),
+        state.config.clone(),
     ));
 }

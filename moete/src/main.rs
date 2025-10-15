@@ -28,10 +28,16 @@ async fn main() {
 
     // options
     let framework_options = poise::FrameworkOptions {
-        event_handler: |ctx, event, _framework, data| {
+        event_handler: |ctx, event, _framework, data: &moete_core::State| {
             Box::pin(async move {
                 if let serenity::FullEvent::Ready { data_about_bot, .. } = event {
                     events::on_ready(ctx, data_about_bot).await?;
+                    {
+                        // this is slightly hacked in, but it works.
+                        // starts up the background tasks
+                        let ctx_arc = Arc::new(ctx.clone());
+                        routines::start(ctx_arc.clone(), data.clone()).await;
+                    }
                 }
 
                 if let serenity::FullEvent::Message { new_message } = event {
@@ -67,11 +73,6 @@ async fn main() {
         .options(framework_options)
         .setup(|ctx, _ready, framework| {
             Box::pin(async move {
-                // background tasks
-                let ctx_arc = Arc::new(ctx.clone());
-                let config_clone = Arc::clone(&state.config);
-                routines::start(Arc::clone(&ctx_arc), config_clone).await;
-
                 // this loads data instantly, no need for Arc.
                 state.load(ctx).await?;
 

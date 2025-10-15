@@ -1,6 +1,9 @@
 pub mod listener;
 
+pub use refresh::refresh;
+
 mod main;
+mod refresh;
 mod search;
 mod text;
 

@@ -17,6 +17,8 @@ pub async fn search(
     let data: &moete_core::State = ctx.data();
     let emotes = data
         .emotes
+        .lock()
+        .await
         .get_many(&query_or_all)
         .chunks(20)
         .enumerate()

@@ -37,7 +37,7 @@ pub async fn on_message(
     for word in &mut words {
         if RE_EMOTE_TYPED.is_match(word) {
             let clean = RE_EMOTE_CLEAN.replace_all(word, "").into_owned();
-            if let Some(emote) = data.emotes.get(&clean) {
+            if let Some(emote) = data.emotes.lock().await.get(&clean) {
                 *word = emote.to_string();
                 found_emote = true;
             }
