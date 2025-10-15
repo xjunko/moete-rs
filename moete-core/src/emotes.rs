@@ -109,6 +109,12 @@ impl EmoteManager {
         info!("Total {} emojis available", self.global().count());
     }
 
+    /// Refresh the emojis we can use.
+    /// This will re-fetch all emojis from Discord.
+    pub async fn refresh(&mut self, ctx: &serenity::Context, config: Arc<Config>) {
+        self.load(ctx, config).await;
+    }
+
     /// Returns emoji if the word matches an emoji name.
     pub fn get(&self, name: &str) -> Option<&serenity::Emoji> {
         self.global()
