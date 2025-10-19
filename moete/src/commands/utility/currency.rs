@@ -1,21 +1,34 @@
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use poise::CreateReply;
 
 use moete_core::{MoeteContext, MoeteError};
 use moete_discord as discord;
+use serenity::all::{Color, CreateEmbedFooter};
+use tokio::sync::Mutex;
 
-lazy_static! {
-    static ref FMT_NUMBER: human_format::Formatter = {
-        let mut formatter = human_format::Formatter::new();
-        formatter.with_decimals(2);
-        formatter.with_separator("");
-        formatter
-    };
-}
+static FMT_NUMBER: Lazy<human_format::Formatter> = Lazy::new(|| {
+    let mut formatter = human_format::Formatter::new();
+    formatter.with_decimals(2);
+    formatter.with_separator("");
+    formatter
+});
+
+static FMT_NUMBER_SMALL: Lazy<human_format::Formatter> = Lazy::new(|| {
+    let mut formatter = human_format::Formatter::new();
+    formatter.with_decimals(16);
+    formatter.with_separator("");
+    formatter
+});
+
+static LAST_REFRESH: Lazy<Mutex<Option<std::time::Instant>>> = Lazy::new(|| Mutex::new(None));
+const REFRESH_INTERVAL: std::time::Duration = std::time::Duration::from_secs(60 * 60 * 6); // 6 hours
 
 /// Returns a number in a human readable format.
 fn readable_number(num: f64) -> String {
-    FMT_NUMBER.format(num)
+    match num {
+        n if n >= 0.01 => FMT_NUMBER.format(num),
+        _ => FMT_NUMBER_SMALL.format(num),
+    }
 }
 
 /// Parses a shorthand number (e.g., 1k, 2.5M) into a f64.
@@ -65,11 +78,18 @@ pub async fn convert(
     #[description = "Target currency"] target_currency: Option<String>,
     #[description = "Amount to convert"] amount: Option<String>,
 ) -> Result<(), MoeteError> {
-    // fuck it, we balling
-    // randomly clear the cache here so that the data stays up to date.
-    if rand::random_range(0..100) < 10 {
-        let mut currency = ctx.data().currency.lock().await;
-        currency.refresh().await;
+    // refresh if needed
+    {
+        let mut last_refresh = LAST_REFRESH.lock().await;
+        match *last_refresh {
+            Some(t) if t.elapsed() < REFRESH_INTERVAL => {}
+            _ => {
+                let mut currency = ctx.data().currency.lock().await;
+                currency.refresh().await;
+
+                *last_refresh = Some(std::time::Instant::now());
+            }
+        }
     }
 
     // if all argument is valid
@@ -82,21 +102,28 @@ pub async fn convert(
         let base_currency = currency.fetch(&base.to_lowercase()).await?;
         let target_currency = currency.fetch(&target.to_lowercase()).await?;
 
+        // default is green
+        let mut embed = discord::embed::create_embed().color(Color::from_rgb(0, 255, 0));
+
         if base_currency.is_none() {
-            ctx.say(format!(
-                "Couldn't find a currency info with the name: {}",
-                base
-            ))
-            .await?;
+            embed = embed
+                .description(format!(
+                    "Base: Couldn't find a currency info with the name: {}",
+                    base
+                ))
+                .color(Color::from_rgb(255, 0, 0));
+            ctx.send(CreateReply::default().embed(embed)).await?;
             return Ok(());
         }
 
         if target_currency.is_none() {
-            ctx.say(format!(
-                "Couldn't find a currency info with the name: {}",
-                target
-            ))
-            .await?;
+            embed = embed
+                .description(format!(
+                    "Target: Couldn't find a currency info with the name: {}",
+                    target
+                ))
+                .color(Color::from_rgb(255, 0, 0));
+            ctx.send(CreateReply::default().embed(embed)).await?;
             return Ok(());
         }
 
@@ -105,24 +132,28 @@ pub async fn convert(
         let rate = base_currency.get_rate_to(&target_currency.name);
 
         if rate.is_none() {
-            ctx.say(format!(
-                "No exchange rate found from {} to {}",
-                base_currency.name, target_currency.name
-            ))
-            .await?;
+            embed = embed
+                .description(format!(
+                    "No exchange rate found from {} to {}",
+                    base_currency.name, target_currency.name
+                ))
+                .color(Color::from_rgb(255, 0, 0));
+            ctx.send(CreateReply::default().embed(embed)).await?;
             return Ok(());
         }
 
         let rate = rate.unwrap();
         let converted_amount = readable_number(amount * rate);
-        ctx.say(format!(
-            "{} {} = {} {}",
-            readable_number(amount),
-            base_currency.name.to_uppercase(),
-            converted_amount,
-            target_currency.name.to_uppercase()
-        ))
-        .await?;
+        embed = embed
+            .description(format!(
+                "**{} {} = {} {}**",
+                readable_number(amount),
+                base_currency.name.to_uppercase(),
+                converted_amount,
+                target_currency.name.to_uppercase()
+            ))
+            .footer(CreateEmbedFooter::new(""));
+        ctx.send(CreateReply::default().embed(embed)).await?;
     } else {
         let embed = discord::embed::create_embed()
             .title(format!(
@@ -178,6 +209,20 @@ pub async fn convert(
                     readable_number(100.0_f64),
                     ctx.prefix(),
                     readable_number(10000.0_f64)
+                ),
+                false,
+            )
+            .field(
+                "Last updated",
+                format!(
+                    "```{} ago```",
+                    humantime::format_duration(
+                        LAST_REFRESH
+                            .lock()
+                            .await
+                            .unwrap_or(std::time::Instant::now())
+                            .elapsed()
+                    )
                 ),
                 false,
             );
