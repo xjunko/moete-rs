@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use tracing::{error, info};
+use tracing::{debug, error};
 
 use super::Config;
 use super::MoeteError;
@@ -75,11 +75,11 @@ impl EmoteManager {
         {
             if let Ok(id) = query.parse::<u64>() {
                 let found = Self::fetch_guild_emojis_by_id(ctx, id).await?;
-                info!("Found {} emojis in guild ID={}", found.len(), id);
+                debug!("Found {} emojis in guild ID={}", found.len(), id);
                 emojis.extend(found);
             } else {
                 let found = Self::fetch_guild_emojis_by_name(ctx, query).await?;
-                info!("Found {} emojis in guild Query={}", found.len(), query);
+                debug!("Found {} emojis in guild Query={}", found.len(), query);
                 emojis.extend(found);
             }
         }
@@ -94,8 +94,8 @@ impl EmoteManager {
         self.internal.iter().chain(self.external.iter())
     }
 
-    /// Load all the emojis we can use into EmoteManager.
-    pub async fn load(&mut self, ctx: &serenity::Context, config: Arc<Config>) {
+    /// The inner load function.
+    async fn load_inner(&mut self, ctx: &serenity::Context, config: Arc<Config>) {
         self.internal = Self::fetch_bot_emojis(ctx).await.unwrap_or_default();
         self.external = Self::fetch_guild_emojis(ctx, config)
             .await
@@ -104,15 +104,20 @@ impl EmoteManager {
         self.internal.sort_by(|a, b| a.name.cmp(&b.name));
         self.external.sort_by(|a, b| a.name.cmp(&b.name));
 
-        info!("Loaded {} bot emojis", self.internal.len());
-        info!("Loaded {} external emojis", self.external.len());
-        info!("Total {} emojis available", self.global().count());
+        debug!("Loaded {} bot emojis", self.internal.len());
+        debug!("Loaded {} external emojis", self.external.len());
+        debug!("Total {} emojis available", self.global().count());
+    }
+
+    /// Load the emojis we can use.
+    pub async fn load(&mut self, ctx: &serenity::Context, config: Arc<Config>) {
+        self.load_inner(ctx, config).await;
     }
 
     /// Refresh the emojis we can use.
     /// This will re-fetch all emojis from Discord.
     pub async fn refresh(&mut self, ctx: &serenity::Context, config: Arc<Config>) {
-        self.load(ctx, config).await;
+        self.load_inner(ctx, config).await;
     }
 
     /// Returns emoji if the word matches an emoji name.
