@@ -6,6 +6,7 @@ mod regexes;
 
 mod add;
 mod clone;
+mod info;
 mod main;
 mod refresh;
 mod remove;
