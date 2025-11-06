@@ -18,14 +18,8 @@ pub async fn add(
     let mut emotes = data.emotes.lock().await;
 
     // check if the emoji already exists
-    let matched_emotes = emotes.get_many(&emoji_name);
-    if !matched_emotes.is_empty()
-        && matched_emotes
-            .iter()
-            .any(|e| e.name.to_lowercase() == emoji_name.to_lowercase())
-    {
-        ctx.reply(format!("Emote with name `{}` already exists.", emoji_name))
-            .await?;
+    if emotes.get(&emoji_name).is_some() {
+        ctx.reply("An emote with that name already exists.").await?;
         return Ok(());
     }
 
