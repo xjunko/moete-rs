@@ -8,6 +8,7 @@ use super::search::search;
 use super::text::text;
 
 /// Help command for the emote system.
+#[allow(clippy::useless_vec)]
 #[poise::command(
     prefix_command,
     slash_command,

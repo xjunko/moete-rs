@@ -22,7 +22,7 @@ pub async fn factorial(
             let limit = (number.sqrt() + 1.0) as u64;
 
             for i in 1..limit {
-                if (number as u64) % i == 0 && result.len() < 1024 {
+                if (number as u64).is_multiple_of(i) && result.len() < 1024 {
                     result.push_str(&format!(
                         "`{} x {} = {}` \n",
                         i,
