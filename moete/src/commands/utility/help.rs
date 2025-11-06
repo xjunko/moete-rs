@@ -4,7 +4,9 @@ use moete_core::{MoeteContext, MoeteError};
 #[poise::command(prefix_command, slash_command, category = "Utility")]
 pub async fn help(
     ctx: MoeteContext<'_>,
-    #[description = "Specific command"] command: Option<String>,
+    #[description = "Specific command"]
+    #[rest]
+    command: Option<String>,
 ) -> Result<(), MoeteError> {
     moete_discord::help::help(
         ctx,
