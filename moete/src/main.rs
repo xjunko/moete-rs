@@ -49,7 +49,41 @@ async fn main() {
         },
         on_error: |err| {
             Box::pin(async move {
-                let _ = poise::builtins::on_error(err).await;
+                match err {
+                    poise::FrameworkError::ArgumentParse {
+                        ctx, input, error, ..
+                    } => {
+                        let usage = match &ctx.command().help_text {
+                            Some(help_text) => &**help_text,
+                            None => "Please check the help menu for usage information",
+                        };
+
+                        let response = if let Some(input) = input {
+                            format!(
+                                "**Cannot parse `{}` as argument: {}**\n{}",
+                                input, error, usage
+                            )
+                        } else {
+                            format!("**{}**\n{}", error, usage)
+                        };
+
+                        if response.contains("Too many arguments were passed") {
+                            // custom handler for this scenario
+                            let _ = moete_discord::help::help(
+                                ctx,
+                                Some(&ctx.command().name),
+                                moete_discord::help::HelpConfiguration::default(),
+                            )
+                            .await;
+                        } else {
+                            let _ = ctx.say(response).await;
+                        }
+                    }
+
+                    _ => {
+                        let _ = poise::builtins::on_error(err).await;
+                    }
+                }
             })
         },
         prefix_options: poise::PrefixFrameworkOptions {
