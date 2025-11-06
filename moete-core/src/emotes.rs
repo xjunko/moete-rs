@@ -19,6 +19,31 @@ impl EmoteManager {
         Self::default()
     }
 
+    /// Adds an emoji to the manager.
+    pub fn add_emoji(&mut self, emoji: serenity::Emoji) {
+        if emoji.managed {
+            self.external.push(emoji);
+        } else {
+            self.internal.push(emoji);
+        }
+    }
+
+    /// Removes an emoji by its ID.
+    pub fn remove_emoji_by_id(&mut self, id: u64) -> Option<serenity::Emoji> {
+        if let Some(pos) = self.internal.iter().position(|e| e.id.get() == id) {
+            Some(self.internal.remove(pos))
+        } else if let Some(pos) = self.external.iter().position(|e| e.id.get() == id) {
+            Some(self.external.remove(pos))
+        } else {
+            None
+        }
+    }
+
+    /// Checks if the emoji is managed by ours.
+    pub fn is_our_emoji(&self, id: u64) -> bool {
+        self.internal.iter().any(|e| e.id.get() == id)
+    }
+
     /// Fetches the bot emojis from Discord.
     async fn fetch_bot_emojis(ctx: &serenity::Context) -> Result<Vec<serenity::Emoji>, MoeteError> {
         let http: &serenity::Http = &ctx.http;
@@ -133,6 +158,11 @@ impl EmoteManager {
             .filter(|e| e.available)
             .filter(|e| e.name.contains(query))
             .collect()
+    }
+
+    /// Returns emoji matching the ID.
+    pub fn get_by_id(&self, id: u64) -> Option<&serenity::Emoji> {
+        self.global().find(|e| e.id.get() == id)
     }
 
     /// Builds a text and transform it with emojis we can use.

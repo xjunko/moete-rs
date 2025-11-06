@@ -1,6 +1,7 @@
 use poise::serenity_prelude as serenity;
 
 pub mod cdn;
+pub mod checks;
 pub mod color;
 pub mod embed;
 pub mod help;
