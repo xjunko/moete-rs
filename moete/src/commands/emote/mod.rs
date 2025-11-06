@@ -2,8 +2,10 @@ pub mod listener;
 
 pub use refresh::refresh;
 
+mod add;
 mod main;
 mod refresh;
+mod remove;
 mod search;
 mod text;
 

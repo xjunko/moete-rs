@@ -4,6 +4,8 @@ use serenity::all::CreateEmbedFooter;
 use moete_core::{MoeteContext, MoeteError};
 
 /// Subcommands
+use super::add::add;
+use super::remove::remove;
 use super::search::search;
 use super::text::text;
 
@@ -14,7 +16,7 @@ use super::text::text;
     slash_command,
     category = "Emote",
     aliases("emotes", "e"),
-    subcommands("search", "text")
+    subcommands("search", "text", "add", "remove")
 )]
 pub async fn emote(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let cmds = vec![
