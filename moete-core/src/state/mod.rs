@@ -1,6 +1,7 @@
 use sqlx::postgres;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use tracing::error;
 
 use moete_ext::Currencies;
 
@@ -42,12 +43,20 @@ impl State {
     }
 
     pub async fn load(&mut self, ctx: &serenity::Context) -> Result<(), MoeteError> {
-        self.pool = Arc::new(Some(
-            postgres::PgPoolOptions::new()
+        self.pool = Arc::new({
+            let pool_res = postgres::PgPoolOptions::new()
                 .max_connections(5)
                 .connect(&self.config.services.database)
-                .await?,
-        ));
+                .await
+                .ok();
+
+            if pool_res.is_none() {
+                error!("Failed to connect to database, continuing without database.");
+                None
+            } else {
+                pool_res
+            }
+        });
 
         self.emotes
             .lock()
