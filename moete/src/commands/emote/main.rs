@@ -5,6 +5,7 @@ use moete_core::{MoeteContext, MoeteError};
 
 /// Subcommands
 use super::add::add;
+use super::clone::clone;
 use super::remove::remove;
 use super::search::search;
 use super::text::text;
@@ -16,7 +17,7 @@ use super::text::text;
     slash_command,
     category = "Emote",
     aliases("emotes", "e"),
-    subcommands("search", "text", "add", "remove")
+    subcommands("search", "text", "add", "remove", "clone")
 )]
 pub async fn emote(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let cmds = vec![

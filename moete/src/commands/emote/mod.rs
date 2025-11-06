@@ -2,7 +2,10 @@ pub mod listener;
 
 pub use refresh::refresh;
 
+mod regexes;
+
 mod add;
+mod clone;
 mod main;
 mod refresh;
 mod remove;

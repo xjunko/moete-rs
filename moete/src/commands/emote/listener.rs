@@ -1,16 +1,12 @@
-use once_cell::sync::Lazy;
-use regex::Regex;
 use serenity::all::ExecuteWebhook;
 use tracing::{debug, error};
 
 use crate::serenity;
 use moete_core::MoeteError;
 
-const JUNKO: u64 = 736223131240497183;
+use super::regexes::{RE_EMOTE_CLEAN, RE_EMOTE_TYPED};
 
-static RE_EMOTE_TYPED: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"(\B(:|;|\.)[a-zA-Z0-9_-]+(:|;|\.)\B)").unwrap());
-static RE_EMOTE_CLEAN: Lazy<Regex> = Lazy::new(|| Regex::new(r"(:|;|\.)").unwrap());
+const JUNKO: u64 = 736223131240497183;
 
 pub async fn on_message(
     ctx: &serenity::Context,
