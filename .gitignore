@@ -6,8 +6,6 @@ moete-ext/files/*
 moete/src/commands/macros/*
 
 # cloud 
-.dockerignore
-Dockerfile
 fly.toml
 
 # dev
