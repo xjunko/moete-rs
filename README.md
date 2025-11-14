@@ -45,5 +45,12 @@ or if you had `moete-ext` set up
 MOETE_FILTER=info cargo run --features macros
 ```
 
+## using moete-ext
+for a more serious release of the bot, `macros` might be used, of which is not set up by default, due to it's private nature and very specific usecase.
+
+its basically used for memes macro in my case, but it can be used for anything, so a config is not supplied, but an example of it exists [[here]](moete-ext/files/commands.sample.json), make use of it if you want and compile the bot with `--features "macros"` and it'll sort itself out.
+
+the rust compiler will do it's job by first converting the json file into a loads of generated command with [[this]](moete-ext/build.rs).
+
 ## disclaimer
 the source code is public but i don't intend to provide support ever as this is only a personal bot of mine, feel free to make use of the code though, its [[MIT]](LICENSE).

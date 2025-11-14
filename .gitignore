@@ -2,7 +2,7 @@
 /target
 
 # internals
-moete-ext/files/*
+moete-ext/files/commands.json
 moete/src/commands/macros/*
 
 # cloud 

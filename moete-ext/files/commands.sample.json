@@ -1,0 +1,16 @@
+{
+    "macro1": {
+        "aliases": [
+            "alias1",
+            "alias2",
+            "aliases is optional"
+        ],
+        "reply": "can be a single string or an array of strings"
+    },
+    "macro2": {
+        "reply": [
+            "array of strings are sent as random replies",
+            "quite useful for variety"
+        ]
+    }
+}
