@@ -7,7 +7,7 @@ use moete_core::{MoeteContext, MoeteError};
 
 use super::list::list;
 
-const MOETE_ANCHOR: &str = "=== Moete: Colors ===";
+pub const MOETE_ANCHOR: &str = "=== Moete: Colors ===";
 
 pub fn color_to_hex(col: serenity::Color) -> String {
     format!("#{:06X}", col.0)
@@ -76,6 +76,24 @@ pub async fn color(
     #[rest]
     optional_color_hex: Option<String>,
 ) -> Result<(), MoeteError> {
+    // First, we check if the server even supported this feature
+    if is_moete_supported(ctx).await.is_none() {
+        let data: &moete_core::State = ctx.data();
+        let embed = moete_discord::embed::create_embed()
+            .title(format!("{} | Self Color Role", data.config.discord.name))
+            .color(serenity::Color::RED)
+            .thumbnail(
+                ctx.guild()
+                    .unwrap()
+                    .icon_url()
+                    .unwrap_or(ctx.author().face()),
+            ).field("Info", format!("Unable to create color role as this server has not set up Moete color roles.\n\nAn administrator can create a role named \n```{}```\n(without quotes) to enable this feature.\n\n*Do note that the both of the role must be above pretty much everything that has colors, `Moete` comes first before the anchor.", MOETE_ANCHOR), false)
+            .image("https://cdn.discordapp.com/attachments/835878856611069952/1438883253829369927/image.png");
+        ctx.send(CreateReply::default().embed(embed).reply(true))
+            .await?;
+        return Ok(());
+    }
+
     // If valid colors, we set them
     if let Some(color_str) = optional_color_hex
         && let Some(color) = moete_discord::color::from_string(&color_str)

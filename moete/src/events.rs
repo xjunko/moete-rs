@@ -18,5 +18,6 @@ pub async fn on_message(
     commands::emote::listener::on_message(ctx, message, data).await?;
     commands::markov::listener::on_message(ctx, message, data).await?;
     commands::counter::listener::on_message(ctx, message, data).await?;
+    commands::role::housekeeping::on_message(ctx, message, data).await?;
     Ok(())
 }
