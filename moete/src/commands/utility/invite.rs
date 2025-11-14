@@ -12,6 +12,7 @@ pub async fn invite(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
         .description(format!("Click the link below to invite me to your server!\n\n\
         [Invite Me!](https://discord.com/api/oauth2/authorize?client_id={}&permissions=3758615632&scope=bot)", bot_user.id))
         .thumbnail(bot_user.face());
-    ctx.send(CreateReply::default().embed(embed)).await?;
+    ctx.send(CreateReply::default().embed(embed).reply(true))
+        .await?;
     Ok(())
 }

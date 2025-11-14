@@ -112,7 +112,8 @@ pub async fn convert(
                     base
                 ))
                 .color(Color::from_rgb(255, 0, 0));
-            ctx.send(CreateReply::default().embed(embed)).await?;
+            ctx.send(CreateReply::default().embed(embed).reply(true))
+                .await?;
             return Ok(());
         }
 
@@ -123,7 +124,8 @@ pub async fn convert(
                     target
                 ))
                 .color(Color::from_rgb(255, 0, 0));
-            ctx.send(CreateReply::default().embed(embed)).await?;
+            ctx.send(CreateReply::default().embed(embed).reply(true))
+                .await?;
             return Ok(());
         }
 
@@ -138,7 +140,8 @@ pub async fn convert(
                     base_currency.name, target_currency.name
                 ))
                 .color(Color::from_rgb(255, 0, 0));
-            ctx.send(CreateReply::default().embed(embed)).await?;
+            ctx.send(CreateReply::default().embed(embed).reply(true))
+                .await?;
             return Ok(());
         }
 
@@ -153,7 +156,8 @@ pub async fn convert(
                 target_currency.name.to_uppercase()
             ))
             .footer(CreateEmbedFooter::new(""));
-        ctx.send(CreateReply::default().embed(embed)).await?;
+        ctx.send(CreateReply::default().embed(embed).reply(true))
+            .await?;
     } else {
         let embed = discord::embed::create_embed()
             .title(format!(
@@ -226,7 +230,8 @@ pub async fn convert(
                 ),
                 false,
             );
-        ctx.send(CreateReply::default().embed(embed)).await?;
+        ctx.send(CreateReply::default().embed(embed).reply(true))
+            .await?;
     }
 
     Ok(())

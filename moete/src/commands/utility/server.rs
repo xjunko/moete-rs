@@ -97,7 +97,8 @@ pub async fn server(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
             )
     };
 
-    ctx.send(CreateReply::default().embed(embed)).await?;
+    ctx.send(CreateReply::default().embed(embed).reply(true))
+        .await?;
     Ok(())
 }
 
@@ -127,7 +128,8 @@ pub async fn emote(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
         embed
     };
 
-    ctx.send(CreateReply::default().embed(embed)).await?;
+    ctx.send(CreateReply::default().embed(embed).reply(true))
+        .await?;
     Ok(())
 }
 
@@ -160,6 +162,7 @@ pub async fn role(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
 
         embed
     };
-    ctx.send(CreateReply::default().embed(embed)).await?;
+    ctx.send(CreateReply::default().embed(embed).reply(true))
+        .await?;
     Ok(())
 }

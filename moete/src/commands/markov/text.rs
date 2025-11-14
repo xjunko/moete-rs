@@ -130,7 +130,8 @@ pub async fn markov(
         let embed = moete_discord::embed::create_embed()
             .title("Markovify | Main")
             .field("Available", available_users.join("\n"), true);
-        ctx.send(CreateReply::default().embed(embed)).await?;
+        ctx.send(CreateReply::default().embed(embed).reply(true))
+            .await?;
     }
 
     Ok(())

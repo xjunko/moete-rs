@@ -38,6 +38,7 @@ pub async fn machine(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
             false,
         );
 
-    ctx.send(CreateReply::default().embed(embed)).await?;
+    ctx.send(CreateReply::default().embed(embed).reply(true))
+        .await?;
     Ok(())
 }

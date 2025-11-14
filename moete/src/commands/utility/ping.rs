@@ -17,7 +17,8 @@ pub async fn ping(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
         ctx,
         poise::CreateReply::default()
             .content("")
-            .embed(embed_response),
+            .embed(embed_response)
+            .reply(true),
     )
     .await?;
     Ok(())

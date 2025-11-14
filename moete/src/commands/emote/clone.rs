@@ -104,13 +104,15 @@ pub async fn clone(
             progress
                 .edit(
                     ctx,
-                    CreateReply::default().content(format!(
-                        "Progress: {}/{} | Success: {} | Failed: {}",
-                        i + 1,
-                        emotes.len(),
-                        success,
-                        failed
-                    )),
+                    CreateReply::default()
+                        .content(format!(
+                            "Progress: {}/{} | Success: {} | Failed: {}",
+                            i + 1,
+                            emotes.len(),
+                            success,
+                            failed
+                        ))
+                        .reply(true),
                 )
                 .await?;
         }

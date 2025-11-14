@@ -50,10 +50,8 @@ pub async fn info(
     // picture
     embed = embed.thumbnail(emote.url());
 
-    let mut reply = CreateReply::default().embed(embed);
+    let mut reply = CreateReply::default().embed(embed).reply(true);
     reply.content = format!("**Link**: {}", emote.url()).into();
-    reply = reply.reply(true);
-
     ctx.send(reply).await?;
 
     Ok(())

@@ -45,6 +45,7 @@ pub async fn emote(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
         .footer(CreateEmbedFooter::new(
             "You need to be whitelisted to use the command with the *.",
         ));
-    ctx.send(CreateReply::default().embed(embed)).await?;
+    ctx.send(CreateReply::default().embed(embed).reply(true))
+        .await?;
     Ok(())
 }

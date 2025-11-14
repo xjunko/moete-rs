@@ -18,6 +18,7 @@ pub async fn paginate(ctx: MoeteContext<'_>, pages: Vec<String>) -> Result<(), s
         poise::CreateReply::default()
             .embed(embed::create_embed().description(&pages[0]))
             .components(vec![components])
+            .reply(true)
     };
 
     let msg = ctx.send(reply).await?;
@@ -62,7 +63,8 @@ pub async fn paginate(ctx: MoeteContext<'_>, pages: Vec<String>) -> Result<(), s
         ctx,
         CreateReply::default()
             .embed(embed::create_embed().description(&pages[current_page]))
-            .components(vec![]),
+            .components(vec![])
+            .reply(true),
     )
     .await?;
 
@@ -87,6 +89,7 @@ pub async fn paginate_embed(
         poise::CreateReply::default()
             .embed(pages[0].clone())
             .components(vec![components])
+            .reply(true)
     };
 
     let msg = ctx.send(reply).await?;
@@ -131,7 +134,8 @@ pub async fn paginate_embed(
         ctx,
         CreateReply::default()
             .embed(pages[current_page].clone())
-            .components(vec![]),
+            .components(vec![])
+            .reply(true),
     )
     .await?;
 

@@ -114,7 +114,9 @@ pub async fn color(
 
         // Check
         let checking = embed.clone().field("Progress", "```Checking```", false);
-        let msg = ctx.send(CreateReply::default().embed(checking)).await?;
+        let msg = ctx
+            .send(CreateReply::default().embed(checking).reply(true))
+            .await?;
 
         // Can start checking
         let (guild_id, roles) = {
@@ -132,7 +134,8 @@ pub async fn color(
                 // Have we already got the role?
                 if user_role.id == role.id {
                     embed = embed.field("Progress", "```Already applied```", false);
-                    msg.edit(ctx, CreateReply::default().embed(embed)).await?;
+                    msg.edit(ctx, CreateReply::default().embed(embed).reply(true))
+                        .await?;
                     return Ok(());
                 }
 
@@ -148,7 +151,8 @@ pub async fn color(
         // // Erm, add the role.
         member.add_role(ctx.http(), role.id).await?;
         embed = embed.field("Progress", "```Added!```", false);
-        msg.edit(ctx, CreateReply::default().embed(embed)).await?;
+        msg.edit(ctx, CreateReply::default().embed(embed).reply(true))
+            .await?;
         return Ok(());
     }
 
@@ -182,7 +186,8 @@ pub async fn color(
             .field("Tutorial", "_ _", false)
             .image("https://cdn.discordapp.com/attachments/1390250982855938172/1392011529599193108/weHwReg.png");
 
-    ctx.send(CreateReply::default().embed(embed)).await?;
+    ctx.send(CreateReply::default().embed(embed).reply(true))
+        .await?;
 
     Ok(())
 }
