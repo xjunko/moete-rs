@@ -13,7 +13,10 @@ pub static WORDS: Lazy<HashMap<String, Vec<String>>> = Lazy::new(|| {
         let (main, variations) = entry.split_once(":").unwrap();
         map.insert(
             main.to_string(),
-            variations.split(",").map(|s| s.to_string()).collect(),
+            variations
+                .split(",")
+                .map(|s| s.to_string().to_ascii_lowercase())
+                .collect(),
         );
     }
     map
@@ -48,7 +51,9 @@ pub async fn on_message(
 
         for (main, variations) in &*WORDS {
             for variation in variations {
-                if message.content.to_lowercase().contains(variation) {
+                if message.content.to_lowercase().contains(variation)
+                    || message.content.to_lowercase().contains(main)
+                {
                     to_increment.push(main.clone());
                     break;
                 }
