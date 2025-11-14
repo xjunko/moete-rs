@@ -68,7 +68,7 @@ pub async fn text(
     prefix_command,
     slash_command,
     category = "Emote",
-    aliases("ta", "textas")
+    aliases("ta", "ft", "textas")
 )]
 pub async fn text_as(
     ctx: MoeteContext<'_>,

@@ -23,5 +23,6 @@ pub fn commands() -> Vec<poise::Command<moete_core::State, moete_core::MoeteErro
         text::text(),
         text::text_as(),
         search::search(),
+        info::info(),
     ]
 }

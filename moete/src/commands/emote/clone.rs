@@ -6,7 +6,7 @@ use poise::CreateReply;
 use super::regexes::RE_EMOTE;
 
 /// Clones an emoji from a message, message_id, reference, url or literal emote.
-#[poise::command(prefix_command, slash_command, category = "Utility")]
+#[poise::command(prefix_command, slash_command, category = "Utility", aliases("steal"))]
 pub async fn clone(
     ctx: MoeteContext<'_>,
     #[description = "Message URL, ID, Reply or Emote"] message_or_emote_opt: Option<String>,

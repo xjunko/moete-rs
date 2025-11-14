@@ -5,7 +5,12 @@ use moete_core::{MoeteContext, MoeteError};
 
 /// Get info about an emote.
 #[allow(deprecated)]
-#[poise::command(prefix_command, slash_command, category = "Utility")]
+#[poise::command(
+    prefix_command,
+    slash_command,
+    category = "Utility",
+    aliases("ei", "emoteinfo")
+)]
 pub async fn info(
     ctx: MoeteContext<'_>,
     #[description = "Emote to get info about"]

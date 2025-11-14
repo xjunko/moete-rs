@@ -5,7 +5,7 @@ use moete_core::{MoeteContext, MoeteError};
     prefix_command,
     slash_command,
     category = "Emote",
-    aliases("list", "ls")
+    aliases("list", "ls", "es", "se", "el")
 )]
 pub async fn search(
     ctx: MoeteContext<'_>,
