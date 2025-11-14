@@ -156,7 +156,11 @@ impl EmoteManager {
     pub fn get_many(&self, query: &str) -> Vec<&serenity::Emoji> {
         self.global()
             .filter(|e| e.available)
-            .filter(|e| e.name.contains(query))
+            .filter(|e| {
+                e.name
+                    .to_ascii_lowercase()
+                    .contains(&query.to_ascii_lowercase())
+            })
             .collect()
     }
 
