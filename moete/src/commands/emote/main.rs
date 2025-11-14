@@ -9,7 +9,7 @@ use super::clone::clone;
 use super::info::info;
 use super::remove::remove;
 use super::search::search;
-use super::text::text;
+use super::text::{text, text_as};
 
 /// Help command for the emote system.
 #[allow(clippy::useless_vec)]
@@ -18,7 +18,7 @@ use super::text::text;
     slash_command,
     category = "Emote",
     aliases("emotes", "e"),
-    subcommands("search", "text", "add", "remove", "clone", "info")
+    subcommands("search", "text", "text_as", "add", "remove", "clone", "info")
 )]
 pub async fn emote(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let cmds = vec![

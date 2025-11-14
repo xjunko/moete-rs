@@ -18,5 +18,10 @@ pub fn commands() -> Vec<poise::Command<moete_core::State, moete_core::MoeteErro
     // adding the emote-prefixed commands then
     // the subcommands without the prefix, because thats how it was
     // originally set up
-    vec![main::emote(), text::text(), search::search()]
+    vec![
+        main::emote(),
+        text::text(),
+        text::text_as(),
+        search::search(),
+    ]
 }
