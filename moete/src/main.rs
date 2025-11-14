@@ -67,7 +67,9 @@ async fn main() {
                             format!("**{}**\n{}", error, usage)
                         };
 
-                        if response.contains("Too many arguments were passed") {
+                        if response.contains("Too many arguments were passed")
+                            || response.contains("Too few arguments were passed")
+                        {
                             // custom handler for this scenario
                             let _ = moete_discord::help::help(
                                 ctx,
