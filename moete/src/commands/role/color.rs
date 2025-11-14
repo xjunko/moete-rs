@@ -6,6 +6,7 @@ use crate::serenity;
 use moete_core::{MoeteContext, MoeteError};
 
 use super::list::list;
+use super::remove::clear;
 
 pub const MOETE_ANCHOR: &str = "=== Moete: Colors ===";
 
@@ -69,7 +70,12 @@ pub async fn get_colour_role_from_server_if_exists_else_make_one(
 }
 
 /// Sets a custom colour role for the user.
-#[poise::command(prefix_command, slash_command, category = "Role", subcommands("list"))]
+#[poise::command(
+    prefix_command,
+    slash_command,
+    category = "Role",
+    subcommands("list", "clear")
+)]
 pub async fn color(
     ctx: MoeteContext<'_>,
     #[description = "Color to use for user's role"]
@@ -171,7 +177,10 @@ pub async fn color(
                 "Example",
                 format!("**With Hex Value**:```{}color #ADD8E6```\nRefer to the picture below for tutorial.\n", prefix),
                 false,
-            ).field("Info", format!("Created Roles: `{}`", moete_roles.len()), false).field("Tutorial", "_ _", false).image("https://cdn.discordapp.com/attachments/1390250982855938172/1392011529599193108/weHwReg.png");
+            ).field("Info", format!("Created Roles: `{}`", moete_roles.len()), false)
+            .field("Subcommands", "```list - Gets the list of available colors\nclear - Removes your current color role```", false)
+            .field("Tutorial", "_ _", false)
+            .image("https://cdn.discordapp.com/attachments/1390250982855938172/1392011529599193108/weHwReg.png");
 
     ctx.send(CreateReply::default().embed(embed)).await?;
 
