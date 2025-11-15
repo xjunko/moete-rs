@@ -1,7 +1,7 @@
-use crate::serenity;
 use moete_core::MoeteError;
 
 use super::ALLOWED;
+use crate::serenity;
 
 const COMMON_BOT_PREFIXES: &[&str] = &[
     ";", "t!", "pls ", "please ", "p ", "->", "!", "`", "``", ";;", "~>", ">", "<", "$", "k!",

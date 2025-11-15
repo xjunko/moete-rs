@@ -1,6 +1,5 @@
-use poise::CreateReply;
-
 use moete_core::{MoeteContext, MoeteError};
+use poise::CreateReply;
 
 /// Calculate the factorial of a number.
 #[poise::command(

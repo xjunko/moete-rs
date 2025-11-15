@@ -1,8 +1,11 @@
-use poise::CreateReply;
-use rhai::{Engine, packages::BasicMathPackage, packages::Package};
 use std::sync::{Arc, RwLock};
 
 use moete_core::{MoeteContext, MoeteError};
+use poise::CreateReply;
+use rhai::{
+    Engine,
+    packages::{BasicMathPackage, Package},
+};
 
 /// Creates a barebones Rhai engine.
 fn create_engine() -> Engine {

@@ -1,9 +1,9 @@
+use std::{collections::HashMap, env};
+
+use moete_core::MoeteError;
 use once_cell::sync::Lazy;
-use std::collections::HashMap;
-use std::env;
 
 use crate::serenity;
-use moete_core::MoeteError;
 
 pub static WORDS: Lazy<HashMap<String, Vec<String>>> = Lazy::new(|| {
     let mut map = HashMap::new();

@@ -1,9 +1,8 @@
-use crate::serenity;
-
 use moete_core::{MoeteContext, MoeteError};
 use poise::CreateReply;
 
 use super::regexes::RE_EMOTE;
+use crate::serenity;
 
 /// Clones an emoji from a message, message_id, reference, url or literal emote.
 #[poise::command(prefix_command, slash_command, category = "Utility", aliases("steal"))]
@@ -93,10 +92,10 @@ pub async fn clone(
                     Ok(emoji) => {
                         success += 1;
                         emotes_manager.add_emoji(emoji);
-                    }
+                    },
                     Err(_) => {
                         failed += 1;
-                    }
+                    },
                 }
             }
 

@@ -1,6 +1,7 @@
+use std::sync::Arc;
+
 use base64::{Engine as _, engine::general_purpose};
 use serde_json::json;
-use std::sync::Arc;
 
 pub async fn get_cdn_url(url: &str, config: Arc<moete_core::Config>) -> Option<String> {
     let client = reqwest::Client::new();

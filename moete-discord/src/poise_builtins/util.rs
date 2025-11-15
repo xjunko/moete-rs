@@ -41,7 +41,7 @@ impl<K: Eq, V> OrderedMap<K, V> {
             None => {
                 self.0.push((k, v()));
                 &mut self.0.last_mut().expect("we just inserted").1
-            }
+            },
         }
     }
 }

@@ -1,7 +1,7 @@
-use once_cell::sync::Lazy;
-use serenity::all::CreateWebhook;
-use serenity::all::WebhookType;
 use std::collections::HashMap;
+
+use once_cell::sync::Lazy;
+use serenity::all::{CreateWebhook, WebhookType};
 use tokio::sync::Mutex;
 
 use crate::serenity;
@@ -44,7 +44,7 @@ pub async fn get_or_create_webhook(
                     .await
                     .ok()
             }
-        }
+        },
         Err(_) => {
             // couldn’t list webhooks (no permission) -> try creating one
             channel_id
@@ -56,7 +56,7 @@ pub async fn get_or_create_webhook(
                 )
                 .await
                 .ok()
-        }
+        },
     };
 
     // cache

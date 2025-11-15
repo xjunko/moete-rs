@@ -71,11 +71,11 @@ pub async fn remove(ctx: MoeteContext<'_>, emote_name: String) -> Result<(), Moe
                 if emotes.remove_emoji_by_id(target_emote).is_some() {
                     ctx.reply("Emote deleted successfully.").await?;
                 }
-            }
+            },
 
             Err(e) => {
                 ctx.reply(format!("Failed to delete emote: {}", e)).await?;
-            }
+            },
         }
 
         return Ok(());

@@ -1,8 +1,7 @@
-use once_cell::sync::Lazy;
-use poise::CreateReply;
-
 use moete_core::{MoeteContext, MoeteError};
 use moete_discord as discord;
+use once_cell::sync::Lazy;
+use poise::CreateReply;
 use serenity::all::{Color, CreateEmbedFooter};
 use tokio::sync::Mutex;
 
@@ -82,13 +81,13 @@ pub async fn convert(
     {
         let mut last_refresh = LAST_REFRESH.lock().await;
         match *last_refresh {
-            Some(t) if t.elapsed() < REFRESH_INTERVAL => {}
+            Some(t) if t.elapsed() < REFRESH_INTERVAL => {},
             _ => {
                 let mut currency = ctx.data().currency.lock().await;
                 currency.refresh().await;
 
                 *last_refresh = Some(std::time::Instant::now());
-            }
+            },
         }
     }
 

@@ -1,8 +1,7 @@
-use crate::serenity;
 use moete_core::MoeteError;
 
-use super::learn;
-use super::random;
+use super::{learn, random};
+use crate::serenity;
 
 pub async fn on_message(
     ctx: &serenity::Context,

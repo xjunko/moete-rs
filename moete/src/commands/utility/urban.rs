@@ -1,8 +1,8 @@
+use moete_core::{MoeteContext, MoeteError};
 use serde::Deserialize;
 use serenity::all::CreateEmbedFooter;
 
 use crate::serenity;
-use moete_core::{MoeteContext, MoeteError};
 
 #[derive(Deserialize)]
 struct Urban {
@@ -95,11 +95,11 @@ pub async fn urban(
                 .collect();
 
             moete_discord::paginate::paginate_embed(ctx, pages).await?;
-        }
+        },
         Err(reason) => {
             ctx.say(format!("failed to get urban dictionary entry: {}", reason))
                 .await?;
-        }
+        },
     }
 
     Ok(())

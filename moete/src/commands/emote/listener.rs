@@ -1,10 +1,9 @@
+use moete_core::MoeteError;
 use serenity::all::ExecuteWebhook;
 use tracing::{debug, error};
 
-use crate::serenity;
-use moete_core::MoeteError;
-
 use super::regexes::{RE_EMOTE_CLEAN, RE_EMOTE_TYPED};
+use crate::serenity;
 
 const JUNKO: u64 = 736223131240497183;
 

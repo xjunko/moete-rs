@@ -1,16 +1,13 @@
-use once_cell::sync::Lazy;
-use rand::seq::IndexedRandom;
-use rand::{random, rng};
-use serenity::all::ChannelId;
-use serenity::all::ExecuteWebhook;
 use std::collections::HashMap;
+
+use moete_core::MoeteError;
+use once_cell::sync::Lazy;
+use rand::{random, rng, seq::IndexedRandom};
+use serenity::all::{ChannelId, ExecuteWebhook};
 use tokio::sync::Mutex;
 
+use super::{ALLOWED, text::generate};
 use crate::serenity;
-use moete_core::MoeteError;
-
-use super::ALLOWED;
-use super::text::generate;
 
 const RATE: f32 = 0.02; // 2% 
 const PER_MESSAGE: i32 = 20; // seems reasonable.

@@ -1,10 +1,9 @@
+use moete_core::{MoeteContext, MoeteError};
 use poise::CreateReply;
 use serenity::all::Role;
 
 use super::color::color_to_hex;
-
 use crate::serenity;
-use moete_core::{MoeteContext, MoeteError};
 
 /// Lists all the custom color roles in this server.
 #[poise::command(prefix_command, slash_command, category = "Role")]

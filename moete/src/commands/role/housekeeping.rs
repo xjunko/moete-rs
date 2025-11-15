@@ -1,16 +1,16 @@
+use std::{
+    collections::HashMap,
+    time::{Duration, Instant},
+};
+
+use moete_core::MoeteError;
 use once_cell::sync::Lazy;
-use std::collections::HashMap;
-use std::time::{Duration, Instant};
+use serenity::all::{GuildId, Role, RoleId};
 use tokio::sync::Mutex;
-
-use crate::serenity;
-use serenity::all::Role;
-use serenity::all::{GuildId, RoleId};
-
 use tracing::error;
 
 use super::color::MOETE_ANCHOR;
-use moete_core::MoeteError;
+use crate::serenity;
 
 /// Bit like the one from colors.rs but for serenity::Context
 async fn is_moete_supported(

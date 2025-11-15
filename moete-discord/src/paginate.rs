@@ -1,7 +1,7 @@
+use moete_core::MoeteContext;
 use poise::{CreateReply, serenity_prelude as serenity};
 
 use super::embed;
-use moete_core::MoeteContext;
 
 /// Sends a paginated message from pages passed.
 pub async fn paginate(ctx: MoeteContext<'_>, pages: Vec<String>) -> Result<(), serenity::Error> {

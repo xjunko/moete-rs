@@ -1,7 +1,6 @@
-use poise::CreateReply;
-
 use moete_core::{MoeteContext, MoeteError};
 use moete_discord as discord;
+use poise::CreateReply;
 
 /// Send host machine information.
 #[poise::command(prefix_command, slash_command, category = "Utility")]

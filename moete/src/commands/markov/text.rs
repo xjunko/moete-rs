@@ -1,13 +1,13 @@
+use std::sync::Arc;
+
+use moete_core::{MoeteContext, MoeteError};
 use poise::CreateReply;
 use rand::Rng;
 use serenity::all::{ExecuteWebhook, UserId};
 use sqlx::postgres;
-use std::sync::Arc;
 use tracing::info;
 
 use super::ALLOWED;
-
-use moete_core::{MoeteContext, MoeteError};
 
 async fn load_data(id: u64, pool: Arc<Option<postgres::PgPool>>) -> Option<String> {
     info!("Loading data for user {}", id);

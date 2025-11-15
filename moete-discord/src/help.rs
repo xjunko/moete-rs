@@ -1,10 +1,10 @@
 //! Contains the built-in help command and surrounding infrastructure
-use poise::{CreateReply, serenity_prelude as serenity};
 use std::fmt::Write as _;
 
-use crate::embed;
-use crate::poise_builtins;
 use moete_core::MoeteContext;
+use poise::{CreateReply, serenity_prelude as serenity};
+
+use crate::{embed, poise_builtins};
 
 /// Optional configuration for how the help message from [`help()`] looks
 pub struct HelpConfiguration {
@@ -78,7 +78,7 @@ async fn get_prefix_from_options<U, E>(ctx: poise::Context<'_, U, E>) -> Option<
                     Ok(Some(dynamic_prefix)) => Some(dynamic_prefix),
                     _ => None,
                 }
-            }
+            },
             None => None,
         },
     }
@@ -163,7 +163,7 @@ async fn help_single_command(
                 } else {
                     help_text.clone()
                 }
-            }
+            },
             (Some(description), None) => description.to_owned(),
             (None, Some(help_text)) => help_text.clone(),
             (None, None) => "No help available".to_string(),

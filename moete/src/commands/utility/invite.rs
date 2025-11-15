@@ -1,7 +1,6 @@
-use poise::CreateReply;
-
 use moete_core::{MoeteContext, MoeteError};
 use moete_discord as discord;
+use poise::CreateReply;
 
 /// Sends an invite link to the bot.
 #[poise::command(prefix_command, slash_command, category = "Utility")]

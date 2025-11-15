@@ -112,7 +112,7 @@ pub async fn add_message(
                     .bind(user_id)
                     .fetch_one(pool)
                     .await?
-            }
+            },
         }
     };
 

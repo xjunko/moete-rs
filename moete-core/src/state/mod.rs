@@ -1,9 +1,9 @@
-use sqlx::postgres;
 use std::sync::Arc;
-use tokio::sync::Mutex;
-use tracing::error;
 
 use moete_ext::Currencies;
+use sqlx::postgres;
+use tokio::sync::Mutex;
+use tracing::error;
 
 use super::{Config, EmoteManager};
 use crate::{MoeteError, serenity};

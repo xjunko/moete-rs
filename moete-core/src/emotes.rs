@@ -1,9 +1,8 @@
 use std::sync::Arc;
+
 use tracing::{debug, error};
 
-use super::Config;
-use super::MoeteError;
-use super::serenity;
+use super::{Config, MoeteError, serenity};
 
 /// EmoteManager handles all emoji related operation.
 #[derive(Default, Debug)]

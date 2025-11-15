@@ -1,6 +1,7 @@
 // =======================================================
-use poise::serenity_prelude as serenity;
 use std::{env, sync::Arc};
+
+use poise::serenity_prelude as serenity;
 use tracing::info;
 use tracing_subscriber::{EnvFilter, fmt, prelude::*};
 
@@ -80,11 +81,11 @@ async fn main() {
                         } else {
                             let _ = ctx.say(response).await;
                         }
-                    }
+                    },
 
                     _ => {
                         let _ = poise::builtins::on_error(err).await;
-                    }
+                    },
                 }
             })
         },

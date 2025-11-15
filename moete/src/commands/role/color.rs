@@ -1,12 +1,9 @@
-use poise::CreateReply;
-use serenity::all::EditRole;
-use serenity::all::Role;
-
-use crate::serenity;
 use moete_core::{MoeteContext, MoeteError};
+use poise::CreateReply;
+use serenity::all::{EditRole, Role};
 
-use super::list::list;
-use super::remove::clear;
+use super::{list::list, remove::clear};
+use crate::serenity;
 
 pub const MOETE_ANCHOR: &str = "=== Moete: Colors ===";
 

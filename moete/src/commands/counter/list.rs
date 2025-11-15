@@ -1,9 +1,8 @@
+use moete_core::{MoeteContext, MoeteError};
 use serenity::all::UserId;
 
 use super::listener::WORDS;
-
 use crate::serenity;
-use moete_core::{MoeteContext, MoeteError};
 
 const LIMIT: usize = 20;
 

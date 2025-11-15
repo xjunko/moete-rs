@@ -1,7 +1,6 @@
+use moete_core::{MoeteContext, MoeteError};
 use poise::CreateReply;
 use serenity::all::Emoji;
-
-use moete_core::{MoeteContext, MoeteError};
 
 /// Get info about an emote.
 #[allow(deprecated)]

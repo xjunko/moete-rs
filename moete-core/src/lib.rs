@@ -1,10 +1,9 @@
 use poise::serenity_prelude as serenity;
 use sqlx::postgres;
 
-pub use self::branding::*;
-pub use self::models::*;
-pub use self::types::*;
-pub use self::{config::Config, emotes::EmoteManager, state::State};
+pub use self::{
+    branding::*, config::Config, emotes::EmoteManager, models::*, state::State, types::*,
+};
 
 mod branding;
 mod config;

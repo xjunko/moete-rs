@@ -1,8 +1,7 @@
-use poise::CreateReply;
-use serenity::all::{ChannelType, Mentionable};
-
 use moete_core::{MoeteContext, MoeteError};
 use moete_discord as discord;
+use poise::CreateReply;
+use serenity::all::{ChannelType, Mentionable};
 
 /// Replies with the server's information.
 #[poise::command(

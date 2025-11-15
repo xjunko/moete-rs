@@ -38,11 +38,11 @@ pub async fn add(
                     .await?;
                 emotes.add_emoji(emoji);
                 return Ok(());
-            }
+            },
             Err(e) => {
                 ctx.reply(format!("Failed to add emote: {}", e)).await?;
                 return Ok(());
-            }
+            },
         }
     } else {
         ctx.reply("Failed to fetch image from URL.").await?;

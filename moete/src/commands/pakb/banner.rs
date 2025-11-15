@@ -1,12 +1,10 @@
-use chrono::Datelike;
-use chrono::Local;
-use serenity::all::EditGuild;
-use serenity::all::{CreateAttachment, GuildId};
 use std::sync::Arc;
+
+use chrono::{Datelike, Local};
+use serenity::all::{CreateAttachment, EditGuild, GuildId};
 use tracing::info;
 
 use super::data::SERVER_THEME;
-
 use crate::serenity;
 
 const PAKB: GuildId = GuildId::new(696405704134885466);

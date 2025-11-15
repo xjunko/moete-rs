@@ -1,7 +1,6 @@
+use moete_core::{MoeteContext, MoeteError};
 use serenity::all::ExecuteWebhook;
 use tracing::error;
-
-use moete_core::{MoeteContext, MoeteError};
 
 /// Sends a message
 async fn send_message(

@@ -1,8 +1,8 @@
 use std::collections::HashMap;
-use tracing::debug;
 
 use serde::Deserialize;
 use serde_json::json;
+use tracing::debug;
 
 const API_URL: &str = "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1";
 
