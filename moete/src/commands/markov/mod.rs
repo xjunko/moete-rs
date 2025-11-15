@@ -1,5 +1,7 @@
 pub mod listener;
 
+mod learn;
+mod random;
 mod text;
 
 pub fn commands() -> Vec<poise::Command<moete_core::State, moete_core::MoeteError>> {

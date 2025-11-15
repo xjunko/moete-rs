@@ -29,7 +29,7 @@ async fn load_data(id: u64, pool: Arc<Option<postgres::PgPool>>) -> Option<Strin
     None
 }
 
-async fn generate(picked: i32, pool: Arc<Option<postgres::PgPool>>) -> Option<(String, u64)> {
+pub async fn generate(picked: i32, pool: Arc<Option<postgres::PgPool>>) -> Option<(String, u64)> {
     if picked <= 0 || picked > ALLOWED.len() as i32 {
         return None;
     }
