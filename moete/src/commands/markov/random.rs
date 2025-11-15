@@ -1,6 +1,10 @@
-use ::serenity::all::ExecuteWebhook;
+use once_cell::sync::Lazy;
 use rand::seq::IndexedRandom;
 use rand::{random, rng};
+use serenity::all::ChannelId;
+use serenity::all::ExecuteWebhook;
+use std::collections::HashMap;
+use tokio::sync::Mutex;
 
 use crate::serenity;
 use moete_core::MoeteError;
@@ -8,7 +12,10 @@ use moete_core::MoeteError;
 use super::ALLOWED;
 use super::text::generate;
 
-const RATE: f32 = 0.02;
+const RATE: f32 = 0.02; // 2% 
+const PER_MESSAGE: i32 = 20; // seems reasonable.
+static CHANNEL_COUNTER: Lazy<Mutex<HashMap<ChannelId, i32>>> =
+    Lazy::new(|| Mutex::new(HashMap::new()));
 
 /// Generates a random message whenever possible.
 /// Loosely based on the old impl:
@@ -20,6 +27,18 @@ pub async fn on_message(
 ) -> Result<(), MoeteError> {
     if message.author.bot {
         return Ok(());
+    }
+
+    // we only run the stuff below if we pass the rate check.
+    {
+        let mut counts = CHANNEL_COUNTER.lock().await;
+        let counter = counts.entry(message.channel_id).or_insert(0);
+        *counter += 1;
+
+        if *counter < PER_MESSAGE {
+            return Ok(());
+        }
+        *counter = 0; // reset after hitting the threshold.
     }
 
     if random::<f32>() < RATE
