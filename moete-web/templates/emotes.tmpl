@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://kafu.ovh/static/css/fonts.css">
+    <link rel="stylesheet" href="https://kafu.ovh/static/css/style.css">
+
+    <title>Moete - Emotes List</title>
+
+    <style>
+        #emote-list {{
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 4px;
+            margin-top: 4px;
+        }}
+
+        .emote-item {{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #f9f9f9;
+            border-radius: 0px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }}
+
+        .emote-item:hover {{
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }}
+
+        .emote-item img {{
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+        }}
+
+        .emote-item code {{
+            margin-top: 0px;
+            font-size: 0.85rem;
+            color: #333;
+        }}
+
+        #search {{
+          	background-color: white;
+          	font-family: ArkPixel; 
+          	font-size: 14px;
+            width: 100%;
+            padding: 12px 12px;
+            margin: 0px 0px;
+            border: 1px solid black;
+            border-radius: 0px;
+        }}
+
+        h1 {{
+            margin-bottom: 8px;
+        }}
+    </style>
+
+    <script>
+        function filterEmotes() {{
+            const query = document.getElementById('search').value.toLowerCase();
+            const items = document.getElementsByClassName('emote-item');
+
+            for (let item of items) {{
+                const name = item.getAttribute('data-name').toLowerCase();
+                item.style.display = name.includes(query) ? 'flex' : 'none';
+            }}
+        }}
+    </script>
+</head>
+
+<body>
+    <div class="website-container center-container">
+        <div class="window">
+            <div class="window-title">
+                <p> /services/moete/
+            </div>
+            <div class="window-content">
+                <h2 class="edgy" style="margin: 0"> Emotes </h2>
+                <div class="window">
+                    <div class="window-content">
+                        <div class="center">
+                            <input type="text" id="search" onkeyup="filterEmotes()" placeholder="Search emotes...">
+                        </div>
+                      	<div id="emote-list" class="grid">
+                           {emotes_html}
+                       </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

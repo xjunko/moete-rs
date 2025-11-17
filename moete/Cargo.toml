@@ -32,3 +32,4 @@ sys-info = "0.9.1"
 humantime = "2.3.0"
 human_format = "1.1.0"
 rhai = { version = "1.23.6", features = ["sync"] }
+moete-web = { version = "0.1.5", path = "../moete-web" }

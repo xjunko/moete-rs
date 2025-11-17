@@ -110,6 +110,7 @@ impl Default for Discord {
 #[derive(Debug)]
 pub struct Services {
     pub database: String,
+    pub web: String,
 }
 
 impl Default for Services {
@@ -117,6 +118,7 @@ impl Default for Services {
         Self {
             database: env::var("INSTANCE_DB_URL")
                 .expect("INSTANCE_DB_URL must be set in the environment"),
+            web: env::var("INSTANCE_WEB_URL").unwrap_or("0.0.0.0:8080".to_string()),
         }
     }
 }
