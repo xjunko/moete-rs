@@ -89,6 +89,7 @@ pub struct Discord {
     pub token: String,
     pub token_cdn: String,
     pub prefixes: Vec<String>,
+    pub owner: u64,
 }
 
 impl Default for Discord {
@@ -103,6 +104,10 @@ impl Default for Discord {
                 .split(" ")
                 .map(|s| s.to_string())
                 .collect(),
+            owner: env::var("INSTANCE_OWNER_DISCORD")
+                .expect("Error: INSTANCE_OWNER_DISCORD not set")
+                .parse()
+                .expect("Error: INSTANCE_OWNER_DISCORD must be a valid u64"),
         }
     }
 }

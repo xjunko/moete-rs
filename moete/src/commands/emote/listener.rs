@@ -5,14 +5,12 @@ use tracing::{debug, error};
 use super::regexes::{RE_EMOTE_CLEAN, RE_EMOTE_TYPED};
 use crate::serenity;
 
-const JUNKO: u64 = 736223131240497183;
-
 pub async fn on_message(
     ctx: &serenity::Context,
     message: &serenity::Message,
     data: &moete_core::State,
 ) -> Result<(), MoeteError> {
-    if data.config.flag.debug && message.author.id != JUNKO {
+    if data.config.flag.debug && message.author.id != data.config.discord.owner {
         debug!("Message received: {:?}", message);
         return Ok(());
     }

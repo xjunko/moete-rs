@@ -1,12 +1,7 @@
 use moete_core::MoeteError;
 
-use super::ALLOWED;
+use super::{ALLOWED, COMMON_BOT_PREFIXES};
 use crate::serenity;
-
-const COMMON_BOT_PREFIXES: &[&str] = &[
-    ";", "t!", "pls ", "please ", "p ", "->", "!", "`", "``", ";;", "~>", ">", "<", "$", "k!",
-    ".calc", ".ss", ".google", ".",
-];
 
 /// Process a message for learning into the Markov chain.
 pub async fn on_message(

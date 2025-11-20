@@ -30,3 +30,8 @@ const ALLOWED: &[u64] = &[
     922423503909687317, // Zed
     736223131240497183, // rmhakurei
 ];
+
+const COMMON_BOT_PREFIXES: &[&str] = &[
+    ";", "t!", "pls ", "please ", "p ", "->", "!", "`", "``", ";;", "~>", ">", "<", "$", "k!",
+    ".calc", ".ss", ".google", ".",
+];
