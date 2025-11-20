@@ -1,11 +1,18 @@
 use moete_core::{MoeteContext, MoeteError};
+use moete_discord::checks::is_owner;
 use poise::CreateReply;
 
 use super::regexes::RE_EMOTE;
 use crate::serenity;
 
 /// Clones an emoji from a message, message_id, reference, url or literal emote.
-#[poise::command(prefix_command, slash_command, category = "Utility", aliases("steal"))]
+#[poise::command(
+    prefix_command,
+    slash_command,
+    category = "Utility",
+    check = "is_owner",
+    aliases("steal")
+)]
 pub async fn clone(
     ctx: MoeteContext<'_>,
     #[description = "Message URL, ID, Reply or Emote"] message_or_emote_opt: Option<String>,
