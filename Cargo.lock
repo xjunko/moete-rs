@@ -1461,7 +1461,7 @@ dependencies = [
 
 [[package]]
 name = "moete"
-version = "0.1.5"
+version = "0.1.7"
 dependencies = [
  "chrono",
  "dotenv",
@@ -1490,7 +1490,7 @@ dependencies = [
 
 [[package]]
 name = "moete-core"
-version = "0.1.5"
+version = "0.1.7"
 dependencies = [
  "dashmap 6.1.0",
  "moete-ext",
@@ -1504,7 +1504,7 @@ dependencies = [
 
 [[package]]
 name = "moete-discord"
-version = "0.1.5"
+version = "0.1.7"
 dependencies = [
  "base64 0.22.1",
  "moete-core",
@@ -1520,7 +1520,7 @@ dependencies = [
 
 [[package]]
 name = "moete-ext"
-version = "0.1.5"
+version = "0.1.7"
 dependencies = [
  "reqwest 0.12.23",
  "serde",
