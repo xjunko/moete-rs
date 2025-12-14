@@ -51,6 +51,8 @@ async fn main() {
         on_error: |err| {
             Box::pin(async move {
                 match err {
+                    poise::FrameworkError::UnknownCommand { .. } => { /* noop */ },
+
                     poise::FrameworkError::ArgumentParse {
                         ctx, input, error, ..
                     } => {
