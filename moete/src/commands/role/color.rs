@@ -70,6 +70,7 @@ pub async fn get_colour_role_from_server_if_exists_else_make_one(
 #[poise::command(
     prefix_command,
     slash_command,
+    guild_only,
     category = "Role",
     subcommands("list", "clear")
 )]

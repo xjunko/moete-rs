@@ -6,6 +6,7 @@ use super::color::is_moete_supported;
 #[poise::command(
     prefix_command,
     slash_command,
+    guild_only,
     category = "Role",
     aliases("clean", "remove")
 )]

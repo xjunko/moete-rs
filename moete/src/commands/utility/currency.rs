@@ -128,8 +128,8 @@ pub async fn convert(
             return Ok(());
         }
 
-        let base_currency = base_currency.unwrap();
-        let target_currency = target_currency.unwrap();
+        let base_currency = base_currency.unwrap(); // safe due to the is_none check above.
+        let target_currency = target_currency.unwrap(); // same as above.
         let rate = base_currency.get_rate_to(&target_currency.name);
 
         if rate.is_none() {
@@ -144,7 +144,7 @@ pub async fn convert(
             return Ok(());
         }
 
-        let rate = rate.unwrap();
+        let rate = rate.unwrap(); // safe due to the is_none check above.
         let converted_amount = readable_number(amount * rate);
         embed = embed
             .description(format!(

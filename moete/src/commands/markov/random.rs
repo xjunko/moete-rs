@@ -50,6 +50,7 @@ pub async fn on_message(
             }
         }
 
+        // no available members, skip.
         if avail_members.is_empty() {
             return Ok(());
         }
@@ -59,7 +60,7 @@ pub async fn on_message(
             let mut rng = rng();
             avail_members
                 .choose(&mut rng)
-                .unwrap_or(avail_members.first().unwrap())
+                .unwrap_or(avail_members.first().unwrap()) // the unwraps are safe due to the is_empty check above.
         };
 
         let picked_option = ALLOWED
