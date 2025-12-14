@@ -2,7 +2,12 @@ use poise::serenity_prelude as serenity;
 use sqlx::postgres;
 
 pub use self::{
-    branding::*, config::Config, emotes::EmoteManager, models::*, state::State, types::*,
+    branding::*,
+    config::Config,
+    models::*,
+    state::State,
+    types::*,
+    {emotes::EmoteManager, models::shortcut::ShortcutCache},
 };
 
 mod branding;

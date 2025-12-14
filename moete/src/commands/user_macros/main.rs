@@ -65,10 +65,15 @@ pub async fn shortcut(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
             description.push_str("```bash\n");
             for (n, shortcut) in shortcuts.iter().enumerate() {
                 description.push_str(&format!(
-                    "{}) {}\n\t- {}\n",
+                    "{}) {}\n{}\n",
                     n + 1,
                     shortcut.trigger,
-                    shortcut.response
+                    shortcut
+                        .responses()
+                        .iter()
+                        .map(|s| format!("\t- {}", s))
+                        .collect::<Vec<_>>()
+                        .join("\n")
                 ));
             }
             description.push_str("```");
@@ -110,6 +115,7 @@ pub async fn add(
             return Ok(());
         },
     };
+    let cache = state.shortcut_cache.clone();
 
     let mut embed = moete_discord::embed::create_embed()
         .title("Shortcuts | Add")
@@ -158,6 +164,7 @@ pub async fn add(
             ctx.guild_id().unwrap().into(),
             &trigger,
             &response,
+            &cache,
         )
         .await
         {
@@ -210,6 +217,7 @@ pub async fn remove(
             return Ok(());
         },
     };
+    let cache = state.shortcut_cache.clone();
 
     let mut embed = moete_discord::embed::create_embed()
         .title("Shortcuts | Remove")
@@ -223,8 +231,13 @@ pub async fn remove(
             }
         });
 
-    match moete_core::shortcut::remove_shortcut(pool, ctx.guild_id().unwrap().into(), &trigger)
-        .await
+    match moete_core::shortcut::remove_shortcut(
+        pool,
+        ctx.guild_id().unwrap().into(),
+        &trigger,
+        &cache,
+    )
+    .await
     {
         Err(e) => {
             embed = embed
@@ -274,6 +287,7 @@ pub async fn update(
             return Ok(());
         },
     };
+    let cache = state.shortcut_cache.clone();
 
     let mut embed = moete_discord::embed::create_embed()
         .title("Shortcuts | Remove")
@@ -292,6 +306,7 @@ pub async fn update(
         ctx.guild_id().unwrap().into(),
         &trigger,
         &new_response,
+        &cache,
     )
     .await
     {

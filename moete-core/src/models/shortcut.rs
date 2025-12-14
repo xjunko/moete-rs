@@ -1,3 +1,6 @@
+use std::sync::Arc;
+
+use dashmap::DashMap;
 use sqlx::postgres;
 use tracing::info;
 
@@ -8,6 +11,31 @@ pub struct Shortcut {
     pub guild_id: i64,
     pub trigger: String,
     pub response: String,
+}
+
+impl Shortcut {
+    pub fn responses(&self) -> Vec<String> {
+        self.response.split(",").map(|s| s.to_string()).collect()
+    }
+}
+
+#[derive(Default, Debug)]
+pub struct ShortcutCache {
+    data: DashMap<i64, Arc<Vec<Shortcut>>>,
+}
+
+impl ShortcutCache {
+    pub fn get(&self, guild_id: i64) -> Option<Arc<Vec<Shortcut>>> {
+        self.data.get(&guild_id).map(|v| v.clone())
+    }
+
+    pub fn insert(&self, guild_id: i64, shortcuts: Vec<Shortcut>) {
+        self.data.insert(guild_id, Arc::new(shortcuts));
+    }
+
+    pub fn remove(&self, guild_id: i64) {
+        self.data.remove(&guild_id);
+    }
 }
 
 pub async fn build(pool: &postgres::PgPool) -> Result<(), sqlx::Error> {
@@ -61,6 +89,7 @@ pub async fn remove_shortcut(
     pool: &postgres::PgPool,
     guild_id: i64,
     trigger: &str,
+    cache: &ShortcutCache,
 ) -> Result<bool, sqlx::Error> {
     let res = sqlx::query("DELETE FROM shortcuts WHERE guild_id = $1 AND trigger = $2")
         .bind(guild_id)
@@ -69,6 +98,7 @@ pub async fn remove_shortcut(
         .await?;
 
     if res.rows_affected() > 0 {
+        cache.remove(guild_id);
         return Ok(true);
     }
 
@@ -80,6 +110,7 @@ pub async fn add_shortcut(
     guild_id: i64,
     trigger: &str,
     response: &str,
+    cache: &ShortcutCache,
 ) -> Result<(), sqlx::Error> {
     sqlx::query("INSERT INTO shortcuts (guild_id, trigger, response) VALUES ($1, $2, $3)")
         .bind(guild_id)
@@ -87,6 +118,7 @@ pub async fn add_shortcut(
         .bind(response)
         .execute(pool)
         .await?;
+    cache.remove(guild_id);
 
     Ok(())
 }
@@ -96,11 +128,12 @@ pub async fn edit_shortcut(
     guild_id: i64,
     trigger: &str,
     new_response: &str,
+    cache: &ShortcutCache,
 ) -> Result<bool, sqlx::Error> {
     // abstract away the addition if it doesn't exist
     {
         if get_shortcut(pool, guild_id, trigger).await?.is_none() {
-            add_shortcut(pool, guild_id, trigger, new_response).await?;
+            add_shortcut(pool, guild_id, trigger, new_response, cache).await?;
             return Ok(true);
         }
     }
@@ -114,6 +147,7 @@ pub async fn edit_shortcut(
             .await?;
 
     if res.rows_affected() > 0 {
+        cache.remove(guild_id);
         return Ok(true);
     }
 
