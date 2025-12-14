@@ -33,32 +33,48 @@ pub async fn on_message(
             .expect("missing cache after insertion")
     };
 
-    let (main_prefix, additional_prefixes) = data.config.get_prefixes();
-    let content = message.content.to_lowercase();
+    // NOTE: This is the modified implementation to match KAGI's behavior.
+    // It triggers the shortcut response when the message content exactly matches the trigger.
+    let content = message.content.clone();
+    for shortcut in shortcuts.iter() {
+        if content == shortcut.trigger {
+            let responses: Vec<String> = shortcut.responses();
+            let response = responses
+                .get(rand::rng().random_range(0..responses.len()))
+                .unwrap()
+                .clone();
 
-    for prefix in ["/", main_prefix.as_str()]
-        .iter()
-        .chain(additional_prefixes.iter().map(|s| match s {
-            poise::Prefix::Literal(s) => s,
-            _ => panic!("Expecting Literal prefixes, received Regex"),
-        }))
-    {
-        if content.starts_with(prefix)
-            && let Some(content_without_prefix) = content.strip_prefix(prefix)
-        {
-            for shortcut in shortcuts.iter() {
-                if content_without_prefix.starts_with(&shortcut.trigger) {
-                    let responses: Vec<String> = shortcut.responses();
-                    let response = responses
-                        .get(rand::rng().random_range(0..responses.len()))
-                        .unwrap()
-                        .clone();
-
-                    message.reply(ctx.http(), response).await?;
-                }
-            }
+            message.reply(ctx.http(), response).await?;
         }
     }
+
+    // NOTE: This is the original implementation but it seems that KAGI has a different approach to it.
+    // let (main_prefix, additional_prefixes) = data.config.get_prefixes();
+    // let content = message.content.to_lowercase();
+
+    // for prefix in ["/", main_prefix.as_str()]
+    //     .iter()
+    //     .chain(additional_prefixes.iter().map(|s| match s {
+    //         poise::Prefix::Literal(s) => s,
+    //         _ => panic!("Expecting Literal prefixes, received Regex"),
+    //     }))
+    // {
+    //     if content.starts_with(prefix)
+    //         && let Some(content_without_prefix) = content.strip_prefix(prefix)
+    //     {
+    //         for shortcut in shortcuts.iter() {
+    //             if content_without_prefix.starts_with(&shortcut.trigger) {
+    //                 let responses: Vec<String> = shortcut.responses();
+    //                 let response = responses
+    //                     .get(rand::rng().random_range(0..responses.len()))
+    //                     .unwrap()
+    //                     .clone();
+
+    //                 message.reply(ctx.http(), response).await?;
+    //             }
+    //         }
+    //     }
+    // }
 
     Ok(())
 }

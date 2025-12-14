@@ -35,7 +35,8 @@ pub async fn shortcut(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
             .thumbnail(icon_url)
             .description(
                 "`Admins can create a server-sided macro/shortcuts.` \n\n\
-                **The shortcuts will run as a normal command, so use it with the bot's prefix.**",
+                For randomized responses, separate each response with `,` (comma). \n\
+                **No checks will be done on the responses, so be careful with what you put in there!**",
             );
 
         // help
