@@ -8,7 +8,7 @@ use moete_core::{MoeteContext, MoeteError};
     prefix_command,
     slash_command,
     guild_only,
-    category = "Utility",
+    category = "Shortcut",
     aliases("macro", "macros", "shortcuts"),
     subcommands("add", "remove", "update")
 )]
@@ -96,7 +96,7 @@ pub async fn shortcut(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     prefix_command,
     slash_command,
     guild_only,
-    category = "Utility",
+    category = "Shortcut",
     required_permissions = "ADMINISTRATOR"
 )]
 pub async fn add(
@@ -128,6 +128,45 @@ pub async fn add(
                 ctx.author().face()
             }
         });
+
+    // check if colliding with bot's command
+    {
+        let illegal_triggers: Vec<String> = {
+            let mut result = Vec::new();
+
+            for cmd in ctx.framework().options().commands.iter() {
+                result.push(cmd.name.to_lowercase());
+                for alias in cmd.aliases.iter() {
+                    result.push(alias.to_lowercase());
+                }
+                for subcmd in cmd.subcommands.iter() {
+                    result.push(subcmd.name.to_lowercase());
+                    for alias in subcmd.aliases.iter() {
+                        result.push(alias.to_lowercase());
+                    }
+                }
+            }
+
+            result
+        };
+
+        if illegal_triggers.contains(&trigger.to_lowercase()) {
+            embed = embed
+                .field(
+                    "Error",
+                    format!(
+                        "The trigger `{}` collides with an existing bot command. Please choose a different trigger.",
+                        trigger
+                    ),
+                    false,
+                )
+                .color(Color::RED);
+
+            ctx.send(CreateReply::default().embed(embed).reply(true))
+                .await?;
+            return Ok(());
+        }
+    }
 
     // error handling
     {
@@ -201,7 +240,7 @@ pub async fn add(
     prefix_command,
     slash_command,
     guild_only,
-    category = "Utility",
+    category = "Shortcut",
     required_permissions = "ADMINISTRATOR"
 )]
 pub async fn remove(
@@ -268,7 +307,7 @@ pub async fn remove(
     prefix_command,
     slash_command,
     guild_only,
-    category = "Utility",
+    category = "Shortcut",
     required_permissions = "ADMINISTRATOR"
 )]
 pub async fn update(
