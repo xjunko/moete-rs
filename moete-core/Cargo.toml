@@ -7,6 +7,7 @@ repository.workspace = true
 
 [dependencies]
 moete-ext = { path = "../moete-ext" }
+once_cell.workspace = true
 poise = { workspace = true }
 serenity = { workspace = true }
 sqlx = { workspace = true }

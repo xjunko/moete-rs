@@ -4,6 +4,7 @@ pub mod markov;
 pub mod math;
 pub mod pakb;
 pub mod role;
+pub mod user_macros;
 pub mod utility;
 
 #[cfg(feature = "macros")]
@@ -18,6 +19,7 @@ pub fn commands() -> Vec<poise::Command<moete_core::State, moete_core::MoeteErro
     cmds.extend(utility::commands());
     cmds.extend(markov::commands());
     cmds.extend(role::commands());
+    cmds.extend(user_macros::commands());
 
     #[cfg(feature = "macros")]
     cmds.extend(macros::commands());

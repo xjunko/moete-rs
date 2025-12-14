@@ -71,10 +71,18 @@ async fn main() {
                         if response.contains("Too many arguments were passed")
                             || response.contains("Too few arguments were passed")
                         {
+                            let command_name = {
+                                if let Some(parent) = ctx.parent_commands().last() {
+                                    format!("{} {}", parent.name, ctx.command().name)
+                                } else {
+                                    ctx.command().name.to_string()
+                                }
+                            };
+
                             // custom handler for this scenario
                             let _ = moete_discord::help::help(
                                 ctx,
-                                Some(&ctx.command().name),
+                                Some(&command_name),
                                 moete_discord::help::HelpConfiguration::default(),
                             )
                             .await;

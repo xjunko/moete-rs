@@ -15,5 +15,6 @@ mod types;
 pub async fn build_sql(pool: &postgres::PgPool) -> Result<(), sqlx::Error> {
     models::markov::build(pool).await?;
     models::counter::build(pool).await?;
+    models::shortcut::build(pool).await?;
     Ok(())
 }
