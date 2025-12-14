@@ -29,6 +29,7 @@ const ALLOWED: &[u64] = &[
     304512418976104450, // WilsonYogi
     922423503909687317, // Zed
     736223131240497183, // rmhakurei
+    188610034849021952, // Reu
 ];
 
 const COMMON_BOT_PREFIXES: &[&str] = &[
