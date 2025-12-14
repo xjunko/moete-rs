@@ -1,5 +1,5 @@
 use poise::CreateReply;
-use serenity::all::Color;
+use serenity::all::{Color, CreateEmbed};
 
 use moete_core::{MoeteContext, MoeteError};
 
@@ -30,17 +30,19 @@ pub async fn shortcut(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
             }
         };
 
-        let mut embed = moete_discord::embed::create_embed()
+        let mut embeds: Vec<CreateEmbed> = Vec::new();
+
+        // first page, massive hardcoded info page
+        {
+            embeds.push(
+moete_discord::embed::create_embed()
             .title("Shortcuts | Main")
-            .thumbnail(icon_url)
+            .thumbnail(icon_url.clone())
             .description(
                 "`Admins can create a server-sided macro/shortcuts.` \n\n\
                 For randomized responses, separate each response with `,` (comma). \n\
                 **No checks will be done on the responses, so be careful with what you put in there!**",
-            );
-
-        // help
-        embed = embed.field(
+            ).field(
             "Commands",
             r#"
 ```
@@ -56,35 +58,49 @@ pub async fn shortcut(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
 * Requires `ADMINISTRATOR` permission to use.
 ```"#,
             false,
+        ).field("Shortcuts", "***To see all the available macros, go to the next page.***", false)
         );
+        }
 
-        // list (if any)
-        let shortcuts_text = if shortcuts.is_empty() {
-            "`No shortcuts found for this server.`".to_string()
-        } else {
-            let mut description = String::new();
-            description.push_str("```bash\n");
-            for (n, shortcut) in shortcuts.iter().enumerate() {
-                description.push_str(&format!(
-                    "{}) {}\n{}\n",
-                    n + 1,
-                    shortcut.trigger,
-                    shortcut
-                        .responses()
-                        .iter()
-                        .map(|s| format!("\t- {}", s))
-                        .collect::<Vec<_>>()
-                        .join("\n")
-                ));
+        // dynamically generate pages until all of the shortcuts are filled.
+        let mut shortcuts_page = moete_discord::embed::create_embed().title("Shortcuts | List");
+        let mut shortcuts_text = String::new();
+        shortcuts_text.push_str("```\n");
+
+        for (n, shortcut) in shortcuts.iter().enumerate() {
+            let current_shortcut = format!(
+                "{}) {}\n{}\n",
+                n + 1,
+                shortcut.trigger,
+                shortcut
+                    .responses()
+                    .iter()
+                    .map(|s| format!("\t- {}", s))
+                    .collect::<Vec<_>>()
+                    .join("\n")
+            );
+
+            if (shortcuts_text.len() + current_shortcut.len()) > super::MAX_LENGTH {
+                // push current page
+                shortcuts_text.push_str("```\n");
+                shortcuts_page = shortcuts_page.description(shortcuts_text);
+                embeds.push(shortcuts_page);
+
+                // reset for next page
+                shortcuts_page =
+                    moete_discord::embed::create_embed().title("Shortcuts | List (cont.)");
+                shortcuts_text = String::new();
+                shortcuts_text.push_str("```\n");
             }
-            description.push_str("```");
-            description
-        };
 
-        embed = embed.field("Shortcuts", &shortcuts_text, false);
+            shortcuts_text.push_str(&current_shortcut);
+        }
 
-        ctx.send(CreateReply::default().embed(embed).reply(true))
-            .await?;
+        // last page
+        shortcuts_text.push_str("```\n");
+        embeds.push(shortcuts_page.description(shortcuts_text));
+
+        moete_discord::paginate::paginate_embed(ctx, embeds).await?;
     } else {
         ctx.say("Failed to get any info, database is not connected, if this happens in production, report to @rmhakurei.").await?;
     }
@@ -161,6 +177,22 @@ pub async fn add(
                     ),
                     false,
                 )
+                .color(Color::RED);
+
+            ctx.send(CreateReply::default().embed(embed).reply(true))
+                .await?;
+            return Ok(());
+        }
+    }
+
+    // check if too long
+    {
+        if response.len() > super::MAX_LENGTH {
+            embed = embed
+                .description(format!(
+                    "Failed to add shortcut: Response length exceeds maximum length of {} characters.",
+                    super::MAX_LENGTH
+                ))
                 .color(Color::RED);
 
             ctx.send(CreateReply::default().embed(embed).reply(true))
@@ -340,6 +372,22 @@ pub async fn update(
                 ctx.author().face()
             }
         });
+
+    // check if too long
+    {
+        if new_response.len() > super::MAX_LENGTH {
+            embed = embed
+                .description(format!(
+                    "Failed to update shortcut: Response length exceeds maximum length of {} characters.",
+                    super::MAX_LENGTH
+                ))
+                .color(Color::RED);
+
+            ctx.send(CreateReply::default().embed(embed).reply(true))
+                .await?;
+            return Ok(());
+        }
+    }
 
     match moete_core::shortcut::edit_shortcut(
         pool,
