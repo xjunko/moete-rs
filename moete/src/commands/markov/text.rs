@@ -29,20 +29,25 @@ async fn load_data(id: u64, pool: Arc<Option<postgres::PgPool>>) -> Option<Strin
     None
 }
 
-pub async fn generate(picked: i32, pool: Arc<Option<postgres::PgPool>>) -> Option<(String, u64)> {
+pub async fn generate(
+    picked: i32,
+    starter: Option<String>,
+    pool: Arc<Option<postgres::PgPool>>,
+) -> Option<(Option<String>, u64)> {
     if picked <= 0 || picked > ALLOWED.len() as i32 {
         return None;
     }
 
     let outer = std::time::Instant::now();
     let user_id = ALLOWED[picked as usize - 1];
-    let result: String = {
+    let result: Option<String> = {
         // load data
         let start = std::time::Instant::now();
         let data = load_data(user_id, pool).await?;
         if data.is_empty() {
-            return Some(("Not enough data!".to_string(), user_id));
+            return None;
         }
+
         info!("Loaded data in {:?}", start.elapsed());
 
         // build model
@@ -53,11 +58,35 @@ pub async fn generate(picked: i32, pool: Arc<Option<postgres::PgPool>>) -> Optio
         // generate text
         let start = std::time::Instant::now();
         let mut rng = rand::rng();
-        let res = text.generate(marukov::TextOptions {
+        let options = marukov::TextOptions {
             tries: 999,
             min_words: rng.random_range(0..10),
             max_words: rng.random_range(50..100),
-        });
+            ..Default::default()
+        };
+
+        let res = if let Some(starter) = starter {
+            // HACK: the user might think that the starter is multiple words.
+            // so we just take the last word as the actual starter.
+            // if failed, we fallback to normal generation.
+            let (others, last_word) = {
+                let mut parts = starter.split_whitespace();
+                let last = parts.next_back()?.to_string();
+                let rest = parts.collect::<Vec<_>>().join(" ");
+                (rest, last)
+            };
+
+            info!("Using starter word: {}", last_word);
+
+            if let Some(generated) = text.generate_with_start(&last_word, options.clone()) {
+                Some(format!("{} {}", others, generated))
+            } else {
+                text.generate(options)
+            }
+        } else {
+            text.generate(options)
+        };
+
         info!("Generated text in {:?}", start.elapsed());
 
         std::mem::drop(text);
@@ -65,6 +94,7 @@ pub async fn generate(picked: i32, pool: Arc<Option<postgres::PgPool>>) -> Optio
 
         res
     };
+
     info!("Total time: {:?}", outer.elapsed());
 
     // text generation uses a lot of memory, trim the memory here.
@@ -72,7 +102,7 @@ pub async fn generate(picked: i32, pool: Arc<Option<postgres::PgPool>>) -> Optio
         libc::malloc_trim(0);
     }
 
-    Some((result.clone(), user_id))
+    Some((result, user_id))
 }
 
 /// Generates a random text based on the user's messages.
@@ -80,12 +110,19 @@ pub async fn generate(picked: i32, pool: Arc<Option<postgres::PgPool>>) -> Optio
 pub async fn markov(
     ctx: MoeteContext<'_>,
     #[description = "User to generate text for"] picked: Option<i32>,
+    #[description = "Starting text"]
+    #[rest]
+    starter: Option<String>,
 ) -> Result<(), MoeteError> {
     let state: &moete_core::State = ctx.data();
 
     if let Some(picked) = picked
-        && let Some((content, user_id)) = generate(picked, state.pool.clone()).await
+        && let Some((content, user_id)) = generate(picked, starter, state.pool.clone()).await
     {
+        // handle empty content
+        let content =
+            content.unwrap_or("Generation failed, must've been insufficient data.".to_string());
+
         if let Ok(user) = UserId::new(user_id).to_user(ctx.http()).await
             && let Some(webhook) = moete_discord::webhook::get_or_create_webhook(
                 ctx.serenity_context(),

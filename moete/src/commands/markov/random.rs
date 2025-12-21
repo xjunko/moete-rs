@@ -1,16 +1,20 @@
 use std::collections::HashMap;
 
+use ::serenity::all::GetMessages;
 use moete_core::MoeteError;
 use once_cell::sync::Lazy;
-use rand::{random, rng, seq::IndexedRandom};
+use rand::{
+    random, rng,
+    seq::{IndexedRandom, SliceRandom},
+};
 use serenity::all::{ChannelId, ExecuteWebhook};
 use tokio::sync::Mutex;
 
 use super::{ALLOWED, text::generate};
 use crate::serenity;
 
-const RATE: f32 = 0.02; // 2% 
-const PER_MESSAGE: i32 = 20; // seems reasonable.
+const RATE: f32 = 0.05; // 5% 
+const PER_MESSAGE: i32 = 10; // seems reasonable.
 static CHANNEL_COUNTER: Lazy<Mutex<HashMap<ChannelId, i32>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
 
@@ -55,6 +59,30 @@ pub async fn on_message(
             return Ok(());
         }
 
+        // pick any recent messages and use that to seed the generation.
+        // also somewhat expensive on the API side, we might get rate limited here.
+        let seed_word = if let Ok(mut recent_messages) = message
+            .channel_id
+            .messages(
+                ctx.http.clone(),
+                GetMessages::new().before(message.id).limit(25),
+            )
+            .await
+        {
+            let mut rng = rand::rng();
+            recent_messages.shuffle(&mut rng);
+
+            recent_messages
+                .into_iter()
+                .find(|m| !m.author.bot && !m.content.is_empty())
+                .and_then(|m| {
+                    let words: Vec<&str> = m.content.split_whitespace().collect();
+                    words.choose(&mut rng).map(|s| s.to_string())
+                })
+        } else {
+            None
+        };
+
         // start generating based on the available members.
         let target_member = {
             let mut rng = rng();
@@ -69,7 +97,9 @@ pub async fn on_message(
             .map(|idx| idx as i32 + 1); // offset by one since generate uses 1-based index.
 
         // safe to assume we can generate now.
-        if let Some((content, _)) = generate(picked_option.unwrap_or(1), data.pool.clone()).await
+        if let Some((content, _)) =
+            generate(picked_option.unwrap_or(1), seed_word, data.pool.clone()).await
+            && let Some(content) = content
             && let Ok(user) = target_member.to_user(ctx.http.clone()).await
             && let Some(webhook) =
                 moete_discord::webhook::get_or_create_webhook(ctx, message.channel_id).await
