@@ -14,7 +14,7 @@ use super::{ALLOWED, text::generate};
 use crate::serenity;
 
 const RATE: f32 = 0.05; // 5% 
-const PER_MESSAGE: i32 = 10; // seems reasonable.
+const PER_MESSAGE: i32 = 30; // seems reasonable.
 static CHANNEL_COUNTER: Lazy<Mutex<HashMap<ChannelId, i32>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
 
