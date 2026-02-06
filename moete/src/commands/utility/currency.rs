@@ -43,12 +43,13 @@ fn parse_shorthand(input: &str) -> Option<f64> {
         .partition::<String, _>(|c| c.is_ascii_digit() || *c == '.');
 
     let num: f64 = num_str.parse().ok()?;
-    let multiplier = match suffix.as_str() {
+    let multiplier = match suffix.to_lowercase().as_str() {
         "" => 1.0,
-        "k" => 1_000.0,
-        "m" => 1_000_000.0,
-        "b" => 1_000_000_000.0,
-        "t" => 1_000_000_000_000.0,
+        "k" => 1e3,
+        "m" => 1e6,
+        "b" => 1e9,
+        "t" => 1e12,
+        "q" => 1e15,
         _ => return None,
     };
 
@@ -90,6 +91,10 @@ pub async fn convert(
             },
         }
     }
+
+    // NOTE: because some people are dumb, user might give commas in the amount
+    // IE: 1,000 -> 1000
+    let amount = amount.map(|a| a.replace(",", ""));
 
     // if all argument is valid
     if let Some(base) = base_currency
@@ -215,6 +220,7 @@ pub async fn convert(
                 ),
                 false,
             )
+            .field("Note", "```You can use shorthand notation for amounts (e.g., 1k = 1000, 2.5M = 2500000, etc.)\nIt only goes up to 1Q (quadrillion).```", false)
             .field(
                 "Last updated",
                 format!(
