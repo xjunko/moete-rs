@@ -70,7 +70,8 @@ pub async fn refresh(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     prefix_command,
     slash_command,
     category = "Utility",
-    subcommands("refresh")
+    subcommands("refresh"),
+    aliases("cvt")
 )]
 pub async fn convert(
     ctx: MoeteContext<'_>,
