@@ -50,25 +50,29 @@ fn main() {
     out.push_str("use rand::Rng;\n");
 
     for (name, def) in data {
-        let mut maybe_aliases = String::new();
+        // scope: optional aliases
+        {
+            let mut maybe_aliases = String::new();
 
-        if def.aliases.is_some() {
-            maybe_aliases.push_str(&format!(
-                ", aliases({})",
-                def.aliases
-                    .unwrap()
-                    .iter()
-                    .map(|a| format!("\"{}\"", a))
-                    .collect::<Vec<String>>()
-                    .join(", ")
+            if let Some(aliases) = def.aliases {
+                maybe_aliases.push_str(&format!(
+                    ", aliases({})",
+                    aliases
+                        .iter()
+                        .map(|a| format!("\"{}\"", a))
+                        .collect::<Vec<String>>()
+                        .join(", ")
+                ));
+            }
+
+            out.push_str(&format!(
+                "#[cfg(feature = \"macros\")]\n\
+            #[poise::command(prefix_command, slash_command, category = \"Fun\"{})]\n",
+                maybe_aliases
             ));
         }
 
-        out.push_str(&format!(
-            "#[cfg(feature = \"macros\")]\n\
-            #[poise::command(prefix_command, slash_command, category = \"Fun\"{})]\n",
-            maybe_aliases
-        ));
+        // normal declaration
         out.push_str(&format!(
             "pub async fn {}(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {{\n",
             name
