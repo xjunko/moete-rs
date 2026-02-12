@@ -1,8 +1,11 @@
+use chrono::Duration;
 use moete_core::{MoeteContext, MoeteError};
 use moete_discord as discord;
 use once_cell::sync::Lazy;
+use plotters::prelude::*;
+use plotters::style::Color as PlotColor;
 use poise::CreateReply;
-use serenity::all::{Color, CreateEmbedFooter};
+use serenity::all::{Color, CreateAttachment, CreateEmbedFooter};
 use tokio::sync::Mutex;
 
 static FMT_NUMBER: Lazy<human_format::Formatter> = Lazy::new(|| {
@@ -14,6 +17,15 @@ static FMT_NUMBER: Lazy<human_format::Formatter> = Lazy::new(|| {
 
 static LAST_REFRESH: Lazy<Mutex<Option<std::time::Instant>>> = Lazy::new(|| Mutex::new(None));
 const REFRESH_INTERVAL: std::time::Duration = std::time::Duration::from_secs(60 * 60 * 6); // 6 hours
+
+/// Returns the date string in "YYYY-MM-DD" format for a given optional date else uses today's date.
+fn get_date_string(date_opt: Option<chrono::DateTime<chrono::Local>>) -> String {
+    if let Some(date) = date_opt {
+        date.format("%Y-%m-%d").to_string()
+    } else {
+        chrono::Local::now().format("%Y-%m-%d").to_string()
+    }
+}
 
 /// Returns a number in a human readable format.
 fn readable_number(num: f64) -> String {
@@ -96,9 +108,16 @@ pub async fn convert(
         && let Some(amount) = amount
         && let Some(amount) = parse_shorthand(&amount)
     {
+        let today = chrono::Local::now();
+        let today_fmt = get_date_string(Some(today));
+
         let mut currency = ctx.data().currency.lock().await;
-        let base_currency = currency.fetch(&base.to_lowercase()).await?;
-        let target_currency = currency.fetch(&target.to_lowercase()).await?;
+        let base_currency = currency
+            .fetch(&base.to_lowercase(), Some(&today_fmt))
+            .await?;
+        let target_currency = currency
+            .fetch(&target.to_lowercase(), Some(&today_fmt))
+            .await?;
 
         // default is green
         let mut embed = discord::embed::create_embed().color(Color::from_rgb(0, 255, 0));
@@ -146,16 +165,138 @@ pub async fn convert(
         let rate = rate.unwrap(); // safe due to the is_none check above.
         let converted_amount = readable_number(amount * rate);
         embed = embed
-            .description(format!(
-                "**{} {} = {} {}**",
-                readable_number(amount),
-                base_currency.name.to_uppercase(),
-                converted_amount,
-                target_currency.name.to_uppercase()
+            .title(format!(
+                "{} | Currency Conversion",
+                ctx.data().config.discord.name
             ))
+            .field(
+                "Latest",
+                format!(
+                    "**{} {} = {} {}**",
+                    readable_number(amount),
+                    base_currency.name.to_uppercase(),
+                    converted_amount,
+                    target_currency.name.to_uppercase()
+                ),
+                false,
+            )
             .footer(CreateEmbedFooter::new(""));
-        ctx.send(CreateReply::default().embed(embed).reply(true))
-            .await?;
+
+        // generate plots
+        // fetches history over the past 7 days
+        let mut rates = Vec::new();
+        for days_ago in (0..7).rev() {
+            let date = today - Duration::days(days_ago);
+            let date_fmt = get_date_string(Some(date));
+            if let Some(base_rate) = currency.fetch(&base_currency.name, Some(&date_fmt)).await? {
+                if let Some(_) = currency
+                    .fetch(&target_currency.name, Some(&date_fmt))
+                    .await?
+                {
+                    if let Some(rate) = base_rate.get_rate_to(&target_currency.name) {
+                        rates.push(rate);
+                    }
+                }
+            }
+        }
+
+        let smallest_rate = rates.iter().cloned().fold(f64::INFINITY, |a, b| a.min(b));
+        let largest_rate = rates
+            .iter()
+            .cloned()
+            .fold(f64::NEG_INFINITY, |a, b| a.max(b));
+        let plot_id = ctx.id();
+
+        let path = format!(
+            ".tmp/charts/{}_{}-{}.png",
+            plot_id, base_currency.name, target_currency.name
+        );
+        let plot_path = path.clone();
+
+        // plot the rates
+        tokio::task::spawn_blocking(
+            move || -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+                let root = BitMapBackend::new(&plot_path, (1024, 768)).into_drawing_area();
+                root.fill(&RGBColor(56, 58, 64))?;
+
+                let (to_date, from_date) = (today, today - Duration::days(6));
+
+                // padding
+                let padding = (largest_rate - smallest_rate) * 0.05;
+                let y_min = smallest_rate - padding;
+                let y_max = largest_rate + padding;
+
+                // use red/green based on rate change
+                let rate_color = if rates.last().unwrap_or(&0.0) >= rates.first().unwrap_or(&0.0) {
+                    RGBColor(0, 128, 255)
+                } else {
+                    RGBColor(255, 0, 0)
+                };
+
+                let mut chart = ChartBuilder::on(&root)
+                    .margin(40)
+                    .x_label_area_size(40)
+                    .y_label_area_size(60)
+                    .caption(
+                        format!(
+                            "{} → {} (Last 7 Days)",
+                            base_currency.name.to_uppercase(),
+                            target_currency.name.to_uppercase()
+                        ),
+                        ("sans-serif", 40).into_font().color(&WHITE),
+                    )
+                    .build_cartesian_2d(from_date..to_date, y_min..y_max)?;
+
+                chart
+                    .configure_mesh()
+                    .x_labels(7)
+                    .x_label_style(("sans-serif", 25).into_font().color(&WHITE))
+                    .x_label_formatter(&|date| format!("{}", date.format("%m/%d")))
+                    .y_labels(16)
+                    .y_label_style(("sans-serif", 25).into_font().color(&WHITE))
+                    .y_label_formatter(&|rate| readable_number(*rate))
+                    .light_line_style(RGBAColor(1, 1, 1, 0.1))
+                    .draw()?;
+
+                let data: Vec<_> = rates
+                    .iter()
+                    .enumerate()
+                    .map(|(i, rate)| {
+                        let date = today - Duration::days((6 - i) as i64);
+                        (date, *rate)
+                    })
+                    .collect();
+
+                chart.draw_series(AreaSeries::new(data.clone(), y_min, &rate_color.mix(0.15)))?;
+
+                chart.draw_series(LineSeries::new(data.clone(), &rate_color))?;
+
+                chart.draw_series(
+                    data.iter()
+                        .map(|(date, rate)| Circle::new((*date, *rate), 5, rate_color.filled())),
+                )?;
+
+                root.present()?;
+                Ok(())
+            },
+        )
+        .await??;
+
+        // attach the picture
+        let bytes = std::fs::read(&path)?;
+        let attachment = CreateAttachment::bytes(bytes, "greg.png");
+        embed = embed.image("attachment://greg.png");
+
+        ctx.send(
+            CreateReply::default()
+                .embed(embed)
+                .attachment(attachment)
+                .reply(true),
+        )
+        .await?;
+
+        // should safe ot delete now
+        std::fs::remove_file(&path)?;
     } else {
         let embed = discord::embed::create_embed()
             .title(format!(
@@ -168,38 +309,6 @@ pub async fn convert(
                 "```<FROM>: - What currency as a base\n\
             <TO>: - What currency to convert it to\n\
             <AMOUNT>: - The amount to convert```",
-                false,
-            )
-            .field(
-                "1 USD to other currencies",
-                {
-                    let mut currency = ctx.data().currency.lock().await;
-                    let base_currency = currency.fetch("usd").await?;
-
-                    if let Some(base_currency) = base_currency {
-                        format!(
-                            "```{}```",
-                            currency
-                                .rates
-                                .iter()
-                                .filter(|(code, _)| *code != "usd")
-                                .map(|(code, rate)| {
-                                    format!(
-                                        "{} | {} | {}",
-                                        rate.date,
-                                        code.to_uppercase(),
-                                        readable_number(
-                                            base_currency.get_rate_to(code).unwrap_or(0.0)
-                                        )
-                                    )
-                                })
-                                .collect::<Vec<String>>()
-                                .join("\n")
-                        )
-                    } else {
-                        "No currency loaded yet".to_string()
-                    }
-                },
                 false,
             )
             .field(
