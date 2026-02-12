@@ -17,6 +17,7 @@ async fn main() {
         Ok(env) => env,
         Err(err) => panic!("Failed to load enviroment: {}", err),
     };
+    moete_core::create_required_folders().expect("Failed to create required folders");
 
     logging_init().await;
 

@@ -19,6 +19,11 @@ mod models;
 mod state;
 mod types;
 
+pub fn create_required_folders() -> std::io::Result<()> {
+    std::fs::create_dir_all(".tmp/charts/")?;
+    Ok(())
+}
+
 pub async fn build_sql(pool: &postgres::PgPool) -> Result<(), sqlx::Error> {
     models::markov::build(pool).await?;
     models::counter::build(pool).await?;
