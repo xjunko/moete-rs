@@ -101,9 +101,7 @@ pub async fn calc(
     // clean everything else
     std::mem::drop(engine);
     std::mem::drop(logs);
-    unsafe {
-        libc::malloc_trim(0);
-    }
+    moete_core::memory::trim_memory();
 
     Ok(())
 }

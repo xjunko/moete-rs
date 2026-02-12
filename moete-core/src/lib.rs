@@ -10,6 +10,8 @@ pub use self::{
     {emotes::EmoteManager, models::shortcut::ShortcutCache},
 };
 
+pub mod memory;
+
 mod branding;
 mod config;
 mod emotes;

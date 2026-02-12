@@ -25,9 +25,7 @@ pub async fn status_rotate(ctx: Arc<serenity::Context>, config: Arc<moete_core::
 
 pub async fn memory_trim() {
     loop {
-        unsafe {
-            libc::malloc_trim(0);
-        }
+        moete_core::memory::trim_memory();
         sleep(Duration::from_secs(30)).await;
     }
 }

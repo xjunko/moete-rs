@@ -98,9 +98,7 @@ pub async fn generate(
     info!("Total time: {:?}", outer.elapsed());
 
     // text generation uses a lot of memory, trim the memory here.
-    unsafe {
-        libc::malloc_trim(0);
-    }
+    moete_core::memory::trim_memory();
 
     Some((result, user_id))
 }
