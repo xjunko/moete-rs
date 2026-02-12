@@ -12,21 +12,14 @@ static FMT_NUMBER: Lazy<human_format::Formatter> = Lazy::new(|| {
     formatter
 });
 
-static FMT_NUMBER_SMALL: Lazy<human_format::Formatter> = Lazy::new(|| {
-    let mut formatter = human_format::Formatter::new();
-    formatter.with_decimals(16);
-    formatter.with_separator("");
-    formatter
-});
-
 static LAST_REFRESH: Lazy<Mutex<Option<std::time::Instant>>> = Lazy::new(|| Mutex::new(None));
 const REFRESH_INTERVAL: std::time::Duration = std::time::Duration::from_secs(60 * 60 * 6); // 6 hours
 
 /// Returns a number in a human readable format.
 fn readable_number(num: f64) -> String {
     match num {
-        n if n >= 0.01 => FMT_NUMBER.format(num),
-        _ => FMT_NUMBER_SMALL.format(num),
+        n if n >= 1.00 => FMT_NUMBER.format(num),
+        _ => format!("{:.6}", num),
     }
 }
 
