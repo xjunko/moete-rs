@@ -8,7 +8,6 @@ pub struct Counter {
     pub word: String,
     pub count: i64,
 }
-
 pub async fn build(pool: &postgres::PgPool) -> Result<(), sqlx::Error> {
     let res_counters = sqlx::query(
         r#"

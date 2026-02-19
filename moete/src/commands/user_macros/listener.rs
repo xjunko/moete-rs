@@ -25,7 +25,8 @@ pub async fn on_message(
             Some(p) => p,
             None => return Ok(()),
         };
-        let rows = moete_core::shortcut::get_all_shortcuts_for_guild(pool, guild_id.into()).await?;
+        let rows =
+            moete_database::shortcut::get_all_shortcuts_for_guild(pool, guild_id.into()).await?;
 
         data.shortcut_cache.insert(guild_id.into(), rows);
         data.shortcut_cache

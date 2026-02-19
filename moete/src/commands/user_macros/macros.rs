@@ -16,9 +16,11 @@ pub async fn shortcut(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let state: &moete_core::State = ctx.data();
 
     if let Some(pool) = state.pool.as_ref() {
-        let shortcuts =
-            moete_core::shortcut::get_all_shortcuts_for_guild(pool, ctx.guild_id().unwrap().into())
-                .await?;
+        let shortcuts = moete_database::shortcut::get_all_shortcuts_for_guild(
+            pool,
+            ctx.guild_id().unwrap().into(),
+        )
+        .await?;
 
         let icon_url = {
             if let Some(guild) = ctx.guild()
@@ -204,7 +206,7 @@ pub async fn add(
     // error handling
     {
         let mut error_occurred = false;
-        match moete_core::shortcut::get_shortcut(pool, ctx.guild_id().unwrap().into(), &trigger)
+        match moete_database::shortcut::get_shortcut(pool, ctx.guild_id().unwrap().into(), &trigger)
             .await
         {
             Err(e) => {
@@ -231,7 +233,7 @@ pub async fn add(
 
     // add shortcut
     {
-        match moete_core::shortcut::add_shortcut(
+        match moete_database::shortcut::add_shortcut(
             pool,
             ctx.guild_id().unwrap().into(),
             &trigger,
@@ -303,7 +305,7 @@ pub async fn remove(
             }
         });
 
-    match moete_core::shortcut::remove_shortcut(
+    match moete_database::shortcut::remove_shortcut(
         pool,
         ctx.guild_id().unwrap().into(),
         &trigger,
@@ -389,7 +391,7 @@ pub async fn update(
         }
     }
 
-    match moete_core::shortcut::edit_shortcut(
+    match moete_database::shortcut::edit_shortcut(
         pool,
         ctx.guild_id().unwrap().into(),
         &trigger,

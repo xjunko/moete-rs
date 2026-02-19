@@ -10,8 +10,8 @@ moete-ext = { path = "../moete-ext" }
 once_cell.workspace = true
 poise = { workspace = true }
 serenity = { workspace = true }
-sqlx = { workspace = true }
 tokio.workspace = true
 tracing = { workspace = true }
-dashmap = { workspace = true }
 libc.workspace = true
+moete-database = { version = "0.1.7", path = "../moete-database" }
+sqlx.workspace = true

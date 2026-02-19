@@ -126,7 +126,7 @@ async fn main() {
 
                 // build sql
                 if let Some(pool) = state.pool.as_ref() {
-                    moete_core::build_sql(pool).await?;
+                    moete_database::build(pool).await?;
                 }
 
                 // poise thingamajig

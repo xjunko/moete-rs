@@ -39,7 +39,8 @@ pub async fn on_message(
             return Ok(());
         }
 
-        moete_core::markov::add_message(pool, message.author.id.into(), &message.content).await?;
+        moete_database::markov::add_message(pool, message.author.id.into(), &message.content)
+            .await?;
     }
 
     Ok(())

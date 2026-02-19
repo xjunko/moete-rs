@@ -1,5 +1,5 @@
 [workspace]
-members = ["moete", "moete-core", "moete-discord", "moete-ext"]
+members = ["moete", "moete-core", "moete-database", "moete-discord", "moete-ext"]
 resolver = "3"
 
 [workspace.package]

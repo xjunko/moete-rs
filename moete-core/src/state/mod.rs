@@ -5,7 +5,7 @@ use sqlx::postgres;
 use tokio::sync::Mutex;
 use tracing::error;
 
-use super::{Config, EmoteManager, ShortcutCache};
+use super::{Config, EmoteManager};
 use crate::{MoeteError, serenity};
 
 #[derive(Debug)]
@@ -17,7 +17,7 @@ pub struct State {
     pub pool: Arc<Option<postgres::PgPool>>,
     pub currency: Arc<Mutex<Currencies>>,
 
-    pub shortcut_cache: Arc<ShortcutCache>,
+    pub shortcut_cache: Arc<moete_database::shortcut::ShortcutCache>,
 }
 
 impl Clone for State {
@@ -42,7 +42,7 @@ impl State {
             emotes: Arc::new(Mutex::new(EmoteManager::new())),
             pool: Arc::new(None),
             currency: Arc::new(Mutex::new(Currencies::new())),
-            shortcut_cache: Arc::new(ShortcutCache::default()),
+            shortcut_cache: Arc::new(moete_database::shortcut::ShortcutCache::default()),
         }
     }
 

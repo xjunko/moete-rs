@@ -1,0 +1,11 @@
+[package]
+name = "moete-database"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+dashmap.workspace = true
+sqlx.workspace = true
+tracing.workspace = true

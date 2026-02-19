@@ -13,7 +13,7 @@ async fn load_data(id: u64, pool: Arc<Option<postgres::PgPool>>) -> Option<Strin
     info!("Loading data for user {}", id);
 
     if let Some(pool) = pool.as_ref()
-        && let Ok(user_data) = moete_core::markov::get_user(pool, id.try_into().ok()?).await
+        && let Ok(user_data) = moete_database::markov::get_user(pool, id.try_into().ok()?).await
         && let Some(data) = user_data
     {
         info!("Loaded {} messages for user {}", data.messages.len(), id);
@@ -146,7 +146,7 @@ pub async fn markov(
         for (n, id) in ALLOWED.iter().enumerate() {
             // Get user count
             let count = if let Some(pool) = state.pool.as_ref() {
-                match moete_core::markov::get_user_count(pool, *id as i64).await {
+                match moete_database::markov::get_user_count(pool, *id as i64).await {
                     Ok(Some(c)) => c,
                     _ => 0,
                 }
