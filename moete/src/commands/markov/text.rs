@@ -112,7 +112,7 @@ pub async fn markov(
 ) -> Result<(), MoeteError> {
     let state: &moete_core::State = ctx.data();
 
-    if let Some(database) = &state.database
+    if let Some(database) = state.database.as_ref()
         && let Some(picked) = picked
         && let Some((content, user_id)) = generate(picked, starter, database).await
     {
@@ -144,7 +144,7 @@ pub async fn markov(
         let cache = Arc::clone(&ctx.serenity_context().cache);
         for (n, id) in ALLOWED.iter().enumerate() {
             // Get user count
-            let count = if let Some(database) = &state.database {
+            let count = if let Some(database) = state.database.as_ref() {
                 match database.get_user_count(*id as i64).await {
                     Ok(Some(c)) => c,
                     _ => 0,

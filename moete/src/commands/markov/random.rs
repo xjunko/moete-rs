@@ -44,7 +44,7 @@ pub async fn on_message(
 
     if random::<f32>() < RATE
         && let Some(guild_id) = message.guild_id
-        && let Some(database) = &data.database
+        && let Some(database) = data.database.as_ref()
     {
         let mut avail_members = Vec::new();
 

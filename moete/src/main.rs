@@ -125,7 +125,7 @@ async fn main() {
                 state.load(ctx).await?;
 
                 // build sql
-                if let Some(database) = &state.database {
+                if let Some(database) = state.database.as_ref() {
                     database.build().await?;
                 }
 

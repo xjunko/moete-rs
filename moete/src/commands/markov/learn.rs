@@ -13,7 +13,7 @@ pub async fn on_message(
         return Ok(());
     }
 
-    if let Some(database) = &data.database {
+    if let Some(database) = data.database.as_ref() {
         let (main_prefix, additional_prefixes) = data.config.get_prefixes();
         // Checks to make sure the content of the message met certain criteria
 

@@ -61,7 +61,7 @@ pub async fn on_message(
         }
 
         // increment in database
-        if let Some(database) = &data.database {
+        if let Some(database) = data.database.as_ref() {
             for word in to_increment {
                 database
                     .increment_counter(message.author.id.into(), &word)

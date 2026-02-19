@@ -25,7 +25,7 @@ pub async fn count(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
             ))
             .thumbnail(ctx.author().face());
 
-        if let Some(database) = &data.database {
+        if let Some(database) = data.database.as_ref() {
             let counters = database.get_counters(word).await?;
 
             // user info

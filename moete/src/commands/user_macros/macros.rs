@@ -15,7 +15,7 @@ use moete_core::{MoeteContext, MoeteError};
 pub async fn shortcut(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let state: &moete_core::State = ctx.data();
 
-    if let Some(database) = &state.database {
+    if let Some(database) = state.database.as_ref() {
         let shortcuts = database
             .get_all_shortcuts(ctx.guild_id().unwrap().into())
             .await?;
@@ -124,7 +124,7 @@ pub async fn add(
     response: String,
 ) -> Result<(), MoeteError> {
     let state: &moete_core::State = ctx.data();
-    let database = match &state.database {
+    let database = match state.database.as_ref() {
         Some(p) => p,
         None => {
             ctx.say("Database is not connected, cannot add shortcut.")
@@ -277,7 +277,7 @@ pub async fn remove(
     #[description = "Shortcut name to remove"] trigger: String,
 ) -> Result<(), MoeteError> {
     let state: &moete_core::State = ctx.data();
-    let database = match &state.database {
+    let database = match state.database.as_ref() {
         Some(p) => p,
         None => {
             ctx.say("Database is not connected, cannot remove shortcut.")
@@ -343,7 +343,7 @@ pub async fn update(
     new_response: String,
 ) -> Result<(), MoeteError> {
     let state: &moete_core::State = ctx.data();
-    let database = match &state.database {
+    let database = match state.database.as_ref() {
         Some(p) => p,
         None => {
             ctx.say("Database is not connected, cannot update shortcut.")
