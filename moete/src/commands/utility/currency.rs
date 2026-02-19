@@ -188,15 +188,14 @@ pub async fn convert(
         for days_ago in (0..7).rev() {
             let date = today - Duration::days(days_ago);
             let date_fmt = get_date_string(Some(date));
-            if let Some(base_rate) = currency.fetch(&base_currency.name, Some(&date_fmt)).await? {
-                if let Some(_) = currency
+            if let Some(base_rate) = currency.fetch(&base_currency.name, Some(&date_fmt)).await?
+                && currency
                     .fetch(&target_currency.name, Some(&date_fmt))
                     .await?
-                {
-                    if let Some(rate) = base_rate.get_rate_to(&target_currency.name) {
-                        rates.push(rate);
-                    }
-                }
+                    .is_some()
+                && let Some(rate) = base_rate.get_rate_to(&target_currency.name)
+            {
+                rates.push(rate);
             }
         }
 
@@ -267,7 +266,7 @@ pub async fn convert(
                     })
                     .collect();
 
-                chart.draw_series(AreaSeries::new(data.clone(), y_min, &rate_color.mix(0.15)))?;
+                chart.draw_series(AreaSeries::new(data.clone(), y_min, rate_color.mix(0.15)))?;
 
                 chart.draw_series(LineSeries::new(data.clone(), &rate_color))?;
 
