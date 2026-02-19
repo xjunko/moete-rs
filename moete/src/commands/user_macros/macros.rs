@@ -15,12 +15,10 @@ use moete_core::{MoeteContext, MoeteError};
 pub async fn shortcut(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let state: &moete_core::State = ctx.data();
 
-    if let Some(pool) = state.pool.as_ref() {
-        let shortcuts = moete_database::shortcut::get_all_shortcuts_for_guild(
-            pool,
-            ctx.guild_id().unwrap().into(),
-        )
-        .await?;
+    if let Some(database) = &state.database {
+        let shortcuts = database
+            .get_all_shortcuts(ctx.guild_id().unwrap().into())
+            .await?;
 
         let icon_url = {
             if let Some(guild) = ctx.guild()
@@ -126,7 +124,7 @@ pub async fn add(
     response: String,
 ) -> Result<(), MoeteError> {
     let state: &moete_core::State = ctx.data();
-    let pool = match state.pool.as_ref() {
+    let database = match &state.database {
         Some(p) => p,
         None => {
             ctx.say("Database is not connected, cannot add shortcut.")
@@ -206,7 +204,8 @@ pub async fn add(
     // error handling
     {
         let mut error_occurred = false;
-        match moete_database::shortcut::get_shortcut(pool, ctx.guild_id().unwrap().into(), &trigger)
+        match database
+            .get_shortcut(ctx.guild_id().unwrap().into(), &trigger)
             .await
         {
             Err(e) => {
@@ -233,14 +232,9 @@ pub async fn add(
 
     // add shortcut
     {
-        match moete_database::shortcut::add_shortcut(
-            pool,
-            ctx.guild_id().unwrap().into(),
-            &trigger,
-            &response,
-            &cache,
-        )
-        .await
+        match database
+            .add_shortcut(ctx.guild_id().unwrap().into(), &trigger, &response, cache)
+            .await
         {
             Err(e) => {
                 embed = embed
@@ -283,7 +277,7 @@ pub async fn remove(
     #[description = "Shortcut name to remove"] trigger: String,
 ) -> Result<(), MoeteError> {
     let state: &moete_core::State = ctx.data();
-    let pool = match state.pool.as_ref() {
+    let database = match &state.database {
         Some(p) => p,
         None => {
             ctx.say("Database is not connected, cannot remove shortcut.")
@@ -305,13 +299,9 @@ pub async fn remove(
             }
         });
 
-    match moete_database::shortcut::remove_shortcut(
-        pool,
-        ctx.guild_id().unwrap().into(),
-        &trigger,
-        &cache,
-    )
-    .await
+    match database
+        .remove_shortcut(ctx.guild_id().unwrap().into(), &trigger, cache)
+        .await
     {
         Err(e) => {
             embed = embed
@@ -353,10 +343,10 @@ pub async fn update(
     new_response: String,
 ) -> Result<(), MoeteError> {
     let state: &moete_core::State = ctx.data();
-    let pool = match state.pool.as_ref() {
+    let database = match &state.database {
         Some(p) => p,
         None => {
-            ctx.say("Database is not connected, cannot remove shortcut.")
+            ctx.say("Database is not connected, cannot update shortcut.")
                 .await?;
             return Ok(());
         },
@@ -364,7 +354,7 @@ pub async fn update(
     let cache = state.shortcut_cache.clone();
 
     let mut embed = moete_discord::embed::create_embed()
-        .title("Shortcuts | Remove")
+        .title("Shortcuts | Update")
         .thumbnail({
             if let Some(guild) = ctx.guild()
                 && let Some(guild_url) = guild.icon_url()
@@ -391,14 +381,14 @@ pub async fn update(
         }
     }
 
-    match moete_database::shortcut::edit_shortcut(
-        pool,
-        ctx.guild_id().unwrap().into(),
-        &trigger,
-        &new_response,
-        &cache,
-    )
-    .await
+    match database
+        .edit_shortcut(
+            ctx.guild_id().unwrap().into(),
+            &trigger,
+            &new_response,
+            cache,
+        )
+        .await
     {
         Err(e) => {
             embed = embed

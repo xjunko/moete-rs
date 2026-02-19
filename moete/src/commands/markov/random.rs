@@ -44,6 +44,7 @@ pub async fn on_message(
 
     if random::<f32>() < RATE
         && let Some(guild_id) = message.guild_id
+        && let Some(database) = &data.database
     {
         let mut avail_members = Vec::new();
 
@@ -97,8 +98,7 @@ pub async fn on_message(
             .map(|idx| idx as i32 + 1); // offset by one since generate uses 1-based index.
 
         // safe to assume we can generate now.
-        if let Some((content, _)) =
-            generate(picked_option.unwrap_or(1), seed_word, data.pool.clone()).await
+        if let Some((content, _)) = generate(picked_option.unwrap_or(1), seed_word, database).await
             && let Some(content) = content
             && let Ok(user) = target_member.to_user(ctx.http.clone()).await
             && let Some(webhook) =

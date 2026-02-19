@@ -21,13 +21,11 @@ pub async fn on_message(
     let shortcuts = if let Some(cached) = data.shortcut_cache.get(guild_id.into()) {
         cached
     } else {
-        let pool = match data.pool.as_ref() {
+        let database = match data.database.as_ref() {
             Some(p) => p,
             None => return Ok(()),
         };
-        let rows =
-            moete_database::shortcut::get_all_shortcuts_for_guild(pool, guild_id.into()).await?;
-
+        let rows = database.get_all_shortcuts(guild_id.into()).await?;
         data.shortcut_cache.insert(guild_id.into(), rows);
         data.shortcut_cache
             .get(guild_id.into())

@@ -13,7 +13,7 @@ pub async fn on_message(
         return Ok(());
     }
 
-    if let Some(pool) = data.pool.as_ref() {
+    if let Some(database) = &data.database {
         let (main_prefix, additional_prefixes) = data.config.get_prefixes();
         // Checks to make sure the content of the message met certain criteria
 
@@ -39,7 +39,8 @@ pub async fn on_message(
             return Ok(());
         }
 
-        moete_database::markov::add_message(pool, message.author.id.into(), &message.content)
+        database
+            .add_message(message.author.id.into(), &message.content)
             .await?;
     }
 

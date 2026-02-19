@@ -125,8 +125,8 @@ async fn main() {
                 state.load(ctx).await?;
 
                 // build sql
-                if let Some(pool) = state.pool.as_ref() {
-                    moete_database::build(pool).await?;
+                if let Some(database) = &state.database {
+                    database.build().await?;
                 }
 
                 // poise thingamajig

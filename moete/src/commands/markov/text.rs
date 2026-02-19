@@ -4,16 +4,14 @@ use moete_core::{MoeteContext, MoeteError};
 use poise::CreateReply;
 use rand::Rng;
 use serenity::all::{ExecuteWebhook, UserId};
-use sqlx::postgres;
 use tracing::info;
 
 use super::ALLOWED;
 
-async fn load_data(id: u64, pool: Arc<Option<postgres::PgPool>>) -> Option<String> {
+async fn load_data(id: u64, database: &moete_database::Database) -> Option<String> {
     info!("Loading data for user {}", id);
 
-    if let Some(pool) = pool.as_ref()
-        && let Ok(user_data) = moete_database::markov::get_user(pool, id.try_into().ok()?).await
+    if let Ok(user_data) = database.get_user(id.try_into().ok()?).await
         && let Some(data) = user_data
     {
         info!("Loaded {} messages for user {}", data.messages.len(), id);
@@ -32,7 +30,7 @@ async fn load_data(id: u64, pool: Arc<Option<postgres::PgPool>>) -> Option<Strin
 pub async fn generate(
     picked: i32,
     starter: Option<String>,
-    pool: Arc<Option<postgres::PgPool>>,
+    database: &moete_database::Database,
 ) -> Option<(Option<String>, u64)> {
     if picked <= 0 || picked > ALLOWED.len() as i32 {
         return None;
@@ -43,7 +41,7 @@ pub async fn generate(
     let result: Option<String> = {
         // load data
         let start = std::time::Instant::now();
-        let data = load_data(user_id, pool).await?;
+        let data = load_data(user_id, database).await?;
         if data.is_empty() {
             return None;
         }
@@ -114,8 +112,9 @@ pub async fn markov(
 ) -> Result<(), MoeteError> {
     let state: &moete_core::State = ctx.data();
 
-    if let Some(picked) = picked
-        && let Some((content, user_id)) = generate(picked, starter, state.pool.clone()).await
+    if let Some(database) = &state.database
+        && let Some(picked) = picked
+        && let Some((content, user_id)) = generate(picked, starter, database).await
     {
         // handle empty content
         let content =
@@ -145,8 +144,8 @@ pub async fn markov(
         let cache = Arc::clone(&ctx.serenity_context().cache);
         for (n, id) in ALLOWED.iter().enumerate() {
             // Get user count
-            let count = if let Some(pool) = state.pool.as_ref() {
-                match moete_database::markov::get_user_count(pool, *id as i64).await {
+            let count = if let Some(database) = &state.database {
+                match database.get_user_count(*id as i64).await {
                     Ok(Some(c)) => c,
                     _ => 0,
                 }
