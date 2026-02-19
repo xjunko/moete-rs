@@ -13,5 +13,5 @@ serenity = { workspace = true }
 tokio.workspace = true
 tracing = { workspace = true }
 libc.workspace = true
-moete-database = { version = "0.1.7", path = "../moete-database" }
+moete-database = { path = "../moete-database" }
 sqlx.workspace = true

@@ -1535,7 +1535,7 @@ dependencies = [
 
 [[package]]
 name = "moete"
-version = "0.1.7"
+version = "0.2.0"
 dependencies = [
  "chrono",
  "dotenv",
@@ -1565,7 +1565,7 @@ dependencies = [
 
 [[package]]
 name = "moete-core"
-version = "0.1.7"
+version = "0.2.0"
 dependencies = [
  "libc",
  "moete-database",
@@ -1580,7 +1580,7 @@ dependencies = [
 
 [[package]]
 name = "moete-database"
-version = "0.1.7"
+version = "0.2.0"
 dependencies = [
  "dashmap 6.1.0",
  "sqlx",
@@ -1589,7 +1589,7 @@ dependencies = [
 
 [[package]]
 name = "moete-discord"
-version = "0.1.7"
+version = "0.2.0"
 dependencies = [
  "base64",
  "moete-core",
@@ -1605,7 +1605,7 @@ dependencies = [
 
 [[package]]
 name = "moete-ext"
-version = "0.1.7"
+version = "0.2.0"
 dependencies = [
  "reqwest",
  "serde",
