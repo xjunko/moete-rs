@@ -1,4 +1,7 @@
-use moete_core::{MoeteContext, MoeteError};
+use moete_core::{
+    MoeteContext,
+    MoeteError,
+};
 
 /// Check if the user is an owner of the bot.
 pub async fn is_owner(ctx: MoeteContext<'_>) -> Result<bool, MoeteError> {

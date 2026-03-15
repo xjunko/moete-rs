@@ -1,4 +1,7 @@
-use moete_core::{MoeteContext, MoeteError};
+use moete_core::{
+    MoeteContext,
+    MoeteError,
+};
 
 /// Replies with a Google search link for the given query.
 #[poise::command(prefix_command, slash_command, category = "Utility")]

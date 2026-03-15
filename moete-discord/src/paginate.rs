@@ -1,5 +1,8 @@
 use moete_core::MoeteContext;
-use poise::{CreateReply, serenity_prelude as serenity};
+use poise::{
+    CreateReply,
+    serenity_prelude as serenity,
+};
 
 use super::embed;
 

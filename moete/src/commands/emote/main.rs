@@ -1,4 +1,7 @@
-use moete_core::{MoeteContext, MoeteError};
+use moete_core::{
+    MoeteContext,
+    MoeteError,
+};
 use poise::CreateReply;
 use serenity::all::CreateEmbedFooter;
 
@@ -8,7 +11,10 @@ use super::clone::clone;
 use super::info::info;
 use super::remove::remove;
 use super::search::search;
-use super::text::{text, text_as};
+use super::text::{
+    text,
+    text_as,
+};
 
 /// Help command for the emote system.
 #[allow(clippy::useless_vec)]

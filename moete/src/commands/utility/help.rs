@@ -1,4 +1,7 @@
-use moete_core::{MoeteContext, MoeteError};
+use moete_core::{
+    MoeteContext,
+    MoeteError,
+};
 
 /// Replies with a list of available commands and their descriptions.
 #[poise::command(prefix_command, slash_command, category = "Utility")]

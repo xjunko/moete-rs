@@ -1,4 +1,7 @@
-use moete_core::{MoeteContext, MoeteError};
+use moete_core::{
+    MoeteContext,
+    MoeteError,
+};
 
 /// Replies with a nhentai link for a given code.
 #[poise::command(

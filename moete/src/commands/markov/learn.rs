@@ -1,6 +1,9 @@
 use moete_core::MoeteError;
 
-use super::{ALLOWED, COMMON_BOT_PREFIXES};
+use super::{
+    ALLOWED,
+    COMMON_BOT_PREFIXES,
+};
 use crate::serenity;
 
 /// Process a message for learning into the Markov chain.

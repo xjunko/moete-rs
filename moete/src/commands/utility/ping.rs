@@ -1,6 +1,9 @@
 use std::time::Instant;
 
-use moete_core::{MoeteContext, MoeteError};
+use moete_core::{
+    MoeteContext,
+    MoeteError,
+};
 
 /// Replies with a message and get the difference in milliseconds.
 #[poise::command(prefix_command, slash_command, category = "Utility")]

@@ -3,9 +3,18 @@ use std::collections::HashMap;
 use ::serenity::all::GetMessages;
 use moete_core::MoeteError;
 use once_cell::sync::Lazy;
-use rand::seq::{IndexedRandom, SliceRandom};
-use rand::{random, rng};
-use serenity::all::{ChannelId, ExecuteWebhook};
+use rand::seq::{
+    IndexedRandom,
+    SliceRandom,
+};
+use rand::{
+    random,
+    rng,
+};
+use serenity::all::{
+    ChannelId,
+    ExecuteWebhook,
+};
 use tokio::sync::Mutex;
 
 use super::ALLOWED;

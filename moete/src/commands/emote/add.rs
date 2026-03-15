@@ -1,4 +1,7 @@
-use moete_core::{MoeteContext, MoeteError};
+use moete_core::{
+    MoeteContext,
+    MoeteError,
+};
 use moete_discord::checks::is_owner;
 
 /// Adds an emoji into the bot's database.

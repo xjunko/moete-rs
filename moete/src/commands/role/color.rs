@@ -1,6 +1,12 @@
-use moete_core::{MoeteContext, MoeteError};
+use moete_core::{
+    MoeteContext,
+    MoeteError,
+};
 use poise::CreateReply;
-use serenity::all::{EditRole, Role};
+use serenity::all::{
+    EditRole,
+    Role,
+};
 
 use super::list::list;
 use super::remove::clear;

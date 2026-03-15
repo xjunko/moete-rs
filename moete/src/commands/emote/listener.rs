@@ -1,8 +1,14 @@
 use moete_core::MoeteError;
 use serenity::all::ExecuteWebhook;
-use tracing::{debug, error};
+use tracing::{
+    debug,
+    error,
+};
 
-use super::regexes::{RE_EMOTE_CLEAN, RE_EMOTE_TYPED};
+use super::regexes::{
+    RE_EMOTE_CLEAN,
+    RE_EMOTE_TYPED,
+};
 use crate::serenity;
 
 pub async fn on_message(

@@ -1,7 +1,10 @@
 use moete_core::MoeteError;
 use tracing::info;
 
-use crate::{commands, serenity};
+use crate::{
+    commands,
+    serenity,
+};
 
 pub async fn on_ready(
     _ctx: &serenity::Context,

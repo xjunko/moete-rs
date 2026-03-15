@@ -2,9 +2,15 @@
 use std::fmt::Write as _;
 
 use moete_core::MoeteContext;
-use poise::{CreateReply, serenity_prelude as serenity};
+use poise::{
+    CreateReply,
+    serenity_prelude as serenity,
+};
 
-use crate::{embed, poise_builtins};
+use crate::{
+    embed,
+    poise_builtins,
+};
 
 /// Optional configuration for how the help message from [`help()`] looks
 pub struct HelpConfiguration {

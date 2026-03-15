@@ -1,4 +1,7 @@
-use moete_core::{MoeteContext, MoeteError};
+use moete_core::{
+    MoeteContext,
+    MoeteError,
+};
 use moete_discord::checks::is_owner;
 
 /// Deletes an emoji from the bot's database.

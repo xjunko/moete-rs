@@ -4,8 +4,14 @@ use moete_ext::Currencies;
 use tokio::sync::Mutex;
 use tracing::error;
 
-use super::{Config, EmoteManager};
-use crate::{MoeteError, serenity};
+use super::{
+    Config,
+    EmoteManager,
+};
+use crate::{
+    MoeteError,
+    serenity,
+};
 
 #[derive(Debug)]
 pub struct State {

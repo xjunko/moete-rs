@@ -1,9 +1,15 @@
 use std::sync::Arc;
 
-use moete_core::{MoeteContext, MoeteError};
+use moete_core::{
+    MoeteContext,
+    MoeteError,
+};
 use poise::CreateReply;
 use rand::Rng;
-use serenity::all::{ExecuteWebhook, UserId};
+use serenity::all::{
+    ExecuteWebhook,
+    UserId,
+};
 use tracing::info;
 
 use super::ALLOWED;

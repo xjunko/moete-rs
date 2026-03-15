@@ -1,7 +1,14 @@
 use std::sync::Arc;
 
-use chrono::{Datelike, Local};
-use serenity::all::{CreateAttachment, EditGuild, GuildId};
+use chrono::{
+    Datelike,
+    Local,
+};
+use serenity::all::{
+    CreateAttachment,
+    EditGuild,
+    GuildId,
+};
 use tracing::info;
 
 use super::data::SERVER_THEME;

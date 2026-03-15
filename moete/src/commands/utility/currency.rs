@@ -1,11 +1,21 @@
 use chrono::Duration;
-use moete_core::{MoeteContext, MoeteError};
+use moete_core::{
+    MoeteContext,
+    MoeteError,
+};
 use moete_discord as discord;
 use once_cell::sync::Lazy;
 use plotters::prelude::*;
 use plotters::style::Color as PlotColor;
-use poise::{CreateReply, ReplyHandle};
-use serenity::all::{Color, CreateAttachment, CreateEmbedFooter};
+use poise::{
+    CreateReply,
+    ReplyHandle,
+};
+use serenity::all::{
+    Color,
+    CreateAttachment,
+    CreateEmbedFooter,
+};
 use tokio::sync::Mutex;
 
 static FMT_NUMBER: Lazy<human_format::Formatter> = Lazy::new(|| {

@@ -1,4 +1,7 @@
-use moete_core::{MoeteContext, MoeteError};
+use moete_core::{
+    MoeteContext,
+    MoeteError,
+};
 use serde::Deserialize;
 use serenity::all::CreateEmbedFooter;
 

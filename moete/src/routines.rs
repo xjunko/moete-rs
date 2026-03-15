@@ -2,10 +2,16 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use rand::rngs::StdRng;
-use rand::{Rng, SeedableRng};
+use rand::{
+    Rng,
+    SeedableRng,
+};
 use tokio::time::sleep;
 
-use crate::{commands, serenity};
+use crate::{
+    commands,
+    serenity,
+};
 
 pub async fn status_rotate(
     ctx: Arc<serenity::Context>,

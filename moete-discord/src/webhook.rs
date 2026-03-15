@@ -1,7 +1,10 @@
 use std::collections::HashMap;
 
 use once_cell::sync::Lazy;
-use serenity::all::{CreateWebhook, WebhookType};
+use serenity::all::{
+    CreateWebhook,
+    WebhookType,
+};
 use tokio::sync::Mutex;
 
 use crate::serenity;

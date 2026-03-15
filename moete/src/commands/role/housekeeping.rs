@@ -1,9 +1,16 @@
 use std::collections::HashMap;
-use std::time::{Duration, Instant};
+use std::time::{
+    Duration,
+    Instant,
+};
 
 use moete_core::MoeteError;
 use once_cell::sync::Lazy;
-use serenity::all::{GuildId, Role, RoleId};
+use serenity::all::{
+    GuildId,
+    Role,
+    RoleId,
+};
 use tokio::sync::Mutex;
 use tracing::error;
 

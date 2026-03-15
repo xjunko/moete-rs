@@ -5,7 +5,10 @@ use std::sync::Arc;
 use poise::serenity_prelude as serenity;
 use tracing::info;
 use tracing_subscriber::prelude::*;
-use tracing_subscriber::{EnvFilter, fmt};
+use tracing_subscriber::{
+    EnvFilter,
+    fmt,
+};
 
 // =======================================================
 mod commands;

@@ -1,6 +1,12 @@
-use moete_core::{MoeteContext, MoeteError};
+use moete_core::{
+    MoeteContext,
+    MoeteError,
+};
 use poise::CreateReply;
-use serenity::all::{Color, CreateEmbed};
+use serenity::all::{
+    Color,
+    CreateEmbed,
+};
 
 /// Lists all possible shortcut created by the Admin(s) for this server.
 #[poise::command(
