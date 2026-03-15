@@ -4,7 +4,7 @@ use moete_discord as discord;
 use once_cell::sync::Lazy;
 use plotters::prelude::*;
 use plotters::style::Color as PlotColor;
-use poise::CreateReply;
+use poise::{CreateReply, ReplyHandle};
 use serenity::all::{Color, CreateAttachment, CreateEmbedFooter};
 use tokio::sync::Mutex;
 
@@ -88,14 +88,40 @@ pub async fn convert(
     #[description = "Target currency"] target_currency: Option<String>,
     #[description = "Amount to convert"] amount: Option<String>,
 ) -> Result<(), MoeteError> {
+    // NOTE: we might get stuck for a while somewhere, would be nice to let the user know what's happening.
+    let progress_update_msg: ReplyHandle = ctx
+        .send(CreateReply::default().content("Loading...").reply(true))
+        .await?;
+
     // refresh if needed
     {
         let mut last_refresh = LAST_REFRESH.lock().await;
         match *last_refresh {
             Some(t) if t.elapsed() < REFRESH_INTERVAL => {},
             _ => {
+                // tell the user that we're refreshing the data
+                progress_update_msg
+                    .edit(
+                        ctx,
+                        CreateReply::default()
+                            .content("Refreshing initial currency data, please wait...")
+                            .reply(true),
+                    )
+                    .await?;
+
+                // this might take a while
                 let mut currency = ctx.data().currency.lock().await;
                 currency.refresh().await;
+
+                //
+                progress_update_msg
+                    .edit(
+                        ctx,
+                        CreateReply::default()
+                            .content("Currency data refreshed, processing your request...")
+                            .reply(true),
+                    )
+                    .await?;
 
                 *last_refresh = Some(std::time::Instant::now());
             },
@@ -132,7 +158,12 @@ pub async fn convert(
                     base
                 ))
                 .color(Color::from_rgb(255, 0, 0));
-            ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
+            progress_update_msg
+                .edit(
+                    ctx,
+                    CreateReply::default().content("").embed(embed).reply(true),
+                )
+                .await?;
             return Ok(());
         }
 
@@ -143,7 +174,12 @@ pub async fn convert(
                     target
                 ))
                 .color(Color::from_rgb(255, 0, 0));
-            ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
+            progress_update_msg
+                .edit(
+                    ctx,
+                    CreateReply::default().content("").embed(embed).reply(true),
+                )
+                .await?;
             return Ok(());
         }
 
@@ -158,7 +194,12 @@ pub async fn convert(
                     base_currency.name, target_currency.name
                 ))
                 .color(Color::from_rgb(255, 0, 0));
-            ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
+            progress_update_msg
+                .edit(
+                    ctx,
+                    CreateReply::default().content("").embed(embed).reply(true),
+                )
+                .await?;
             return Ok(());
         }
 
@@ -184,10 +225,28 @@ pub async fn convert(
 
         // generate plots
         // fetches history over the past 7 days
+        // NOTE: this might be slow, so tell the user we're fetching the data
+        progress_update_msg
+                .edit(
+                    ctx,
+                    CreateReply::default()
+                        .content("Fetching historical data for the past 7 days, please wait...")
+                        .reply(true),
+                ).await?;
+
         let mut rates = Vec::new();
         for days_ago in (0..7).rev() {
             let date = today - Duration::days(days_ago);
             let date_fmt = get_date_string(Some(date));
+
+            if !currency.is_cached(&base_currency.name, Some(&date_fmt))
+                || !currency.is_cached(&target_currency.name, Some(&date_fmt))
+            {
+                progress_update_msg
+                        .edit(ctx, CreateReply::default().content(format!("Fetching historical data for {} and {}, please wait. ({}%)", base_currency.name.to_uppercase(), target_currency.name.to_uppercase(), (7 - days_ago) * 100 / 7)))
+                        .await?;
+            }
+
             if let Some(base_rate) =
                 currency.fetch(&base_currency.name, Some(&date_fmt)).await?
                 && currency
@@ -238,7 +297,7 @@ pub async fn convert(
                 let mut chart = ChartBuilder::on(&root)
                     .margin(40)
                     .x_label_area_size(40)
-                    .y_label_area_size(60)
+                    .y_label_area_size(70)
                     .caption(
                         format!(
                             "{} → {} (Last 7 Days)",
@@ -295,13 +354,16 @@ pub async fn convert(
         let attachment = CreateAttachment::bytes(bytes, "greg.png");
         embed = embed.image("attachment://greg.png");
 
-        ctx.send(
-            CreateReply::default()
-                .embed(embed)
-                .attachment(attachment)
-                .reply(true),
-        )
-        .await?;
+        progress_update_msg
+            .edit(
+                ctx,
+                CreateReply::default()
+                    .content("")
+                    .embed(embed)
+                    .attachment(attachment)
+                    .reply(true),
+            )
+            .await?;
 
         // should safe ot delete now
         std::fs::remove_file(&path)?;

@@ -69,6 +69,13 @@ impl Currencies {
             .unwrap_or_else(|| currency.to_string())
     }
 
+    /// Checks if the currency and date combination is already cached.
+    pub fn is_cached(&self, currency: &str, date_opt: Option<&str>) -> bool {
+        let date = date_opt.unwrap_or(DEFAULT_DATE);
+        let key: String = format!("{}-{}", currency, date);
+        self.rates.contains_key(&key)
+    }
+
     /// Fetches the exchange rates for a specific currency if not already loaded.
     pub async fn fetch(
         &mut self,
