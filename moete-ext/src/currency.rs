@@ -4,7 +4,8 @@ use serde::Deserialize;
 use serde_json::json;
 use tracing::debug;
 
-const API_URL: &str = "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@{date}/v1";
+const API_URL: &str =
+    "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@{date}/v1";
 const DEFAULT_DATE: &str = "latest";
 
 fn get_api_url(date: Option<&str>) -> String {
@@ -34,9 +35,7 @@ pub struct Currencies {
 }
 
 impl Currencies {
-    pub fn new() -> Self {
-        Self::default()
-    }
+    pub fn new() -> Self { Self::default() }
 
     /// Loads the supported currencies from the API.
     pub async fn load(&mut self) -> Result<(), reqwest::Error> {
@@ -79,7 +78,9 @@ impl Currencies {
         let date = date_opt.unwrap_or(DEFAULT_DATE);
         let key: String = format!("{}-{}", currency, date);
 
-        if let std::collections::hash_map::Entry::Vacant(e) = self.rates.entry(key.clone()) {
+        if let std::collections::hash_map::Entry::Vacant(e) =
+            self.rates.entry(key.clone())
+        {
             debug!(
                 "Fetching currency rate for {}: {}",
                 currency,
@@ -99,7 +100,8 @@ impl Currencies {
             let rate = CurrencyRate {
                 name: currency.to_string(),
                 date: data["date"].as_str().unwrap_or_default().to_string(),
-                rates: serde_json::from_value(json!(data[currency])).unwrap_or_default(),
+                rates: serde_json::from_value(json!(data[currency]))
+                    .unwrap_or_default(),
             };
 
             e.insert(rate);
@@ -109,9 +111,7 @@ impl Currencies {
     }
 
     /// Clears the cached exchange rates.
-    pub fn clear_cache(&mut self) {
-        self.rates.clear();
-    }
+    pub fn clear_cache(&mut self) { self.rates.clear(); }
 
     /// Refreshes the exchange rates for all cached currencies.
     pub async fn refresh(&mut self) {

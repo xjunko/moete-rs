@@ -1,7 +1,6 @@
+use moete_core::{MoeteContext, MoeteError};
 use poise::CreateReply;
 use serenity::all::{Color, CreateEmbed};
-
-use moete_core::{MoeteContext, MoeteError};
 
 /// Lists all possible shortcut created by the Admin(s) for this server.
 #[poise::command(
@@ -16,9 +15,8 @@ pub async fn shortcut(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let state: &moete_core::State = ctx.data();
 
     if let Some(database) = state.database.as_ref() {
-        let shortcuts = database
-            .get_all_shortcuts(ctx.guild_id().unwrap().into())
-            .await?;
+        let shortcuts =
+            database.get_all_shortcuts(ctx.guild_id().unwrap().into()).await?;
 
         let icon_url = {
             if let Some(guild) = ctx.guild()
@@ -63,7 +61,8 @@ moete_discord::embed::create_embed()
         }
 
         // dynamically generate pages until all of the shortcuts are filled.
-        let mut shortcuts_page = moete_discord::embed::create_embed().title("Shortcuts | List");
+        let mut shortcuts_page =
+            moete_discord::embed::create_embed().title("Shortcuts | List");
         let mut shortcuts_text = String::new();
         shortcuts_text.push_str("```\n");
 
@@ -80,15 +79,17 @@ moete_discord::embed::create_embed()
                     .join("\n")
             );
 
-            if (shortcuts_text.len() + current_shortcut.len()) > super::MAX_LENGTH {
+            if (shortcuts_text.len() + current_shortcut.len())
+                > super::MAX_LENGTH
+            {
                 // push current page
                 shortcuts_text.push_str("```\n");
                 shortcuts_page = shortcuts_page.description(shortcuts_text);
                 embeds.push(shortcuts_page);
 
                 // reset for next page
-                shortcuts_page =
-                    moete_discord::embed::create_embed().title("Shortcuts | List (cont.)");
+                shortcuts_page = moete_discord::embed::create_embed()
+                    .title("Shortcuts | List (cont.)");
                 shortcuts_text = String::new();
                 shortcuts_text.push_str("```\n");
             }
@@ -127,8 +128,7 @@ pub async fn add(
     let database = match state.database.as_ref() {
         Some(p) => p,
         None => {
-            ctx.say("Database is not connected, cannot add shortcut.")
-                .await?;
+            ctx.say("Database is not connected, cannot add shortcut.").await?;
             return Ok(());
         },
     };
@@ -179,8 +179,7 @@ pub async fn add(
                 )
                 .color(Color::RED);
 
-            ctx.send(CreateReply::default().embed(embed).reply(true))
-                .await?;
+            ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
             return Ok(());
         }
     }
@@ -195,8 +194,7 @@ pub async fn add(
                 ))
                 .color(Color::RED);
 
-            ctx.send(CreateReply::default().embed(embed).reply(true))
-                .await?;
+            ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
             return Ok(());
         }
     }
@@ -210,13 +208,21 @@ pub async fn add(
         {
             Err(e) => {
                 embed = embed
-                    .field("Error", format!("Failed to add shortcut: {}", e), false)
+                    .field(
+                        "Error",
+                        format!("Failed to add shortcut: {}", e),
+                        false,
+                    )
                     .color(Color::RED);
                 error_occurred = true;
             },
             Ok(Some(_)) => {
                 embed = embed
-                    .field("Error", "Shortcut with that trigger already exists.", false)
+                    .field(
+                        "Error",
+                        "Shortcut with that trigger already exists.",
+                        false,
+                    )
                     .color(Color::RED);
                 error_occurred = true;
             },
@@ -224,8 +230,7 @@ pub async fn add(
         }
 
         if error_occurred {
-            ctx.send(CreateReply::default().embed(embed).reply(true))
-                .await?;
+            ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
             return Ok(());
         }
     }
@@ -233,12 +238,21 @@ pub async fn add(
     // add shortcut
     {
         match database
-            .add_shortcut(ctx.guild_id().unwrap().into(), &trigger, &response, cache)
+            .add_shortcut(
+                ctx.guild_id().unwrap().into(),
+                &trigger,
+                &response,
+                cache,
+            )
             .await
         {
             Err(e) => {
                 embed = embed
-                    .field("Error", format!("Failed to add shortcut: {}", e), false)
+                    .field(
+                        "Error",
+                        format!("Failed to add shortcut: {}", e),
+                        false,
+                    )
                     .color(Color::RED);
             },
             Ok(_) => {
@@ -251,15 +265,17 @@ pub async fn add(
                     .color(Color::DARK_GREEN)
                     .field(
                         "Info",
-                        format!("**Trigger**: `{}`\n**Response**: `{}`", trigger, response),
+                        format!(
+                            "**Trigger**: `{}`\n**Response**: `{}`",
+                            trigger, response
+                        ),
                         false,
                     );
             },
         }
     }
 
-    ctx.send(CreateReply::default().embed(embed).reply(true))
-        .await?;
+    ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
 
     Ok(())
 }
@@ -311,18 +327,23 @@ pub async fn remove(
         Ok(deleted) => {
             if deleted {
                 embed = embed
-                    .description(format!("Shortcut `{}` removed successfully.", trigger))
+                    .description(format!(
+                        "Shortcut `{}` removed successfully.",
+                        trigger
+                    ))
                     .color(Color::DARK_GREEN);
             } else {
                 embed = embed
-                    .description(format!("No shortcut found with the trigger: `{}`", trigger))
+                    .description(format!(
+                        "No shortcut found with the trigger: `{}`",
+                        trigger
+                    ))
                     .color(Color::DARK_RED);
             }
         },
     }
 
-    ctx.send(CreateReply::default().embed(embed).reply(true))
-        .await?;
+    ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
 
     Ok(())
 }
@@ -375,8 +396,7 @@ pub async fn update(
                 ))
                 .color(Color::RED);
 
-            ctx.send(CreateReply::default().embed(embed).reply(true))
-                .await?;
+            ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
             return Ok(());
         }
     }
@@ -405,14 +425,16 @@ pub async fn update(
                     .color(Color::DARK_GREEN);
             } else {
                 embed = embed
-                    .description(format!("No shortcut found with the trigger: `{}`", trigger))
+                    .description(format!(
+                        "No shortcut found with the trigger: `{}`",
+                        trigger
+                    ))
                     .color(Color::DARK_RED);
             }
         },
     }
 
-    ctx.send(CreateReply::default().embed(embed).reply(true))
-        .await?;
+    ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
 
     Ok(())
 }

@@ -33,7 +33,6 @@ pub async fn factorial(
             result
         });
 
-    ctx.send(CreateReply::default().embed(embed).reply(true))
-        .await?;
+    ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
     Ok(())
 }

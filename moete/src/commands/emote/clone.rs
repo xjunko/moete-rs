@@ -15,7 +15,8 @@ use crate::serenity;
 )]
 pub async fn clone(
     ctx: MoeteContext<'_>,
-    #[description = "Message URL, ID, Reply or Emote"] message_or_emote_opt: Option<String>,
+    #[description = "Message URL, ID, Reply or Emote"]
+    message_or_emote_opt: Option<String>,
 ) -> Result<(), MoeteError> {
     // only support prefix command for now
     if let poise::Context::Prefix(prefix_ctx) = ctx {
@@ -36,10 +37,14 @@ pub async fn clone(
             .into();
         } else if message_or_emote.trim().parse::<f64>().is_ok() {
             channel_id = ctx.channel_id().into();
-            message_id = serenity::MessageId::new(message_or_emote.trim().parse().unwrap()).into();
+            message_id = serenity::MessageId::new(
+                message_or_emote.trim().parse().unwrap(),
+            )
+            .into();
         } else if prefix_ctx.msg.referenced_message.is_some() {
             channel_id = ctx.channel_id().into();
-            message_id = prefix_ctx.msg.referenced_message.as_ref().map(|m| m.id);
+            message_id =
+                prefix_ctx.msg.referenced_message.as_ref().map(|m| m.id);
         } else if message_or_emote.trim().is_empty() {
             ctx.reply("Supports: Direct URL, Reply, Emote").await?;
             return Ok(());
@@ -49,7 +54,8 @@ pub async fn clone(
         if let (Some(message_id), Some(channel_id)) = (message_id, channel_id) {
             let channel = channel_id.to_channel(&ctx.http()).await?;
             if let serenity::Channel::Guild(guild_channel) = channel {
-                let message = guild_channel.message(&ctx.http(), message_id).await?;
+                let message =
+                    guild_channel.message(&ctx.http(), message_id).await?;
                 content = message.content.clone();
             }
         }
@@ -87,7 +93,8 @@ pub async fn clone(
                 }
             };
 
-            if let Some(image_data) = moete_discord::cdn::to_base64(&link).await {
+            if let Some(image_data) = moete_discord::cdn::to_base64(&link).await
+            {
                 match ctx
                     .serenity_context()
                     .create_application_emoji(

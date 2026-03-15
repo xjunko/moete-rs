@@ -1,8 +1,8 @@
-use crate::serenity;
+use moete_core::MoeteError;
 use rand::Rng;
 use serenity::all::CacheHttp;
 
-use moete_core::MoeteError;
+use crate::serenity;
 
 pub async fn on_message(
     ctx: &serenity::Context,
@@ -18,19 +18,20 @@ pub async fn on_message(
         None => return Ok(()),
     };
 
-    let shortcuts = if let Some(cached) = data.shortcut_cache.get(guild_id.into()) {
-        cached
-    } else {
-        let database = match data.database.as_ref() {
-            Some(p) => p,
-            None => return Ok(()),
+    let shortcuts =
+        if let Some(cached) = data.shortcut_cache.get(guild_id.into()) {
+            cached
+        } else {
+            let database = match data.database.as_ref() {
+                Some(p) => p,
+                None => return Ok(()),
+            };
+            let rows = database.get_all_shortcuts(guild_id.into()).await?;
+            data.shortcut_cache.insert(guild_id.into(), rows);
+            data.shortcut_cache
+                .get(guild_id.into())
+                .expect("missing cache after insertion")
         };
-        let rows = database.get_all_shortcuts(guild_id.into()).await?;
-        data.shortcut_cache.insert(guild_id.into(), rows);
-        data.shortcut_cache
-            .get(guild_id.into())
-            .expect("missing cache after insertion")
-    };
 
     // NOTE: This is the modified implementation to match KAGI's behavior.
     // It triggers the shortcut response when the message content exactly matches the trigger.

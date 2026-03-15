@@ -2,7 +2,8 @@ use moete_core::{MoeteContext, MoeteError};
 use poise::CreateReply;
 use serenity::all::{EditRole, Role};
 
-use super::{list::list, remove::clear};
+use super::list::list;
+use super::remove::clear;
 use crate::serenity;
 
 pub const MOETE_ANCHOR: &str = "=== Moete: Colors ===";
@@ -93,15 +94,16 @@ pub async fn color(
                     .unwrap_or(ctx.author().face()),
             ).field("Info", format!("Unable to create color role as this server has not set up Moete color roles.\n\nAn administrator can create a role named \n```{}```\n(without quotes) to enable this feature.\n\n*Do note that the both of the role must be above pretty much everything that has colors, `Moete` comes first before the anchor.", MOETE_ANCHOR), false)
             .image("https://cdn.discordapp.com/attachments/835878856611069952/1438883253829369927/image.png");
-        ctx.send(CreateReply::default().embed(embed).reply(true))
-            .await?;
+        ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
         return Ok(());
     }
 
     // If valid colors, we set them
     if let Some(color_str) = optional_color_hex
         && let Some(color) = moete_discord::color::from_string(&color_str)
-        && let Some(role) = get_colour_role_from_server_if_exists_else_make_one(ctx, color).await
+        && let Some(role) =
+            get_colour_role_from_server_if_exists_else_make_one(ctx, color)
+                .await
     {
         let data: &moete_core::State = ctx.data();
         let mut embed = moete_discord::embed::create_embed()
@@ -131,9 +133,13 @@ pub async fn color(
             if let Some(user_role) = roles.get(user_role_id) {
                 // Have we already got the role?
                 if user_role.id == role.id {
-                    embed = embed.field("Progress", "```Already applied```", false);
-                    msg.edit(ctx, CreateReply::default().embed(embed).reply(true))
-                        .await?;
+                    embed =
+                        embed.field("Progress", "```Already applied```", false);
+                    msg.edit(
+                        ctx,
+                        CreateReply::default().embed(embed).reply(true),
+                    )
+                    .await?;
                     return Ok(());
                 }
 
@@ -149,8 +155,7 @@ pub async fn color(
         // // Erm, add the role.
         member.add_role(ctx.http(), role.id).await?;
         embed = embed.field("Progress", "```Added!```", false);
-        msg.edit(ctx, CreateReply::default().embed(embed).reply(true))
-            .await?;
+        msg.edit(ctx, CreateReply::default().embed(embed).reply(true)).await?;
         return Ok(());
     }
 
@@ -184,8 +189,7 @@ pub async fn color(
             .field("Tutorial", "_ _", false)
             .image("https://cdn.discordapp.com/attachments/1390250982855938172/1392011529599193108/weHwReg.png");
 
-    ctx.send(CreateReply::default().embed(embed).reply(true))
-        .await?;
+    ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
 
     Ok(())
 }

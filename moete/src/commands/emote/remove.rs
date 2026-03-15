@@ -9,7 +9,10 @@ use moete_discord::checks::is_owner;
     check = "is_owner",
     aliases("delete", "del", "rm")
 )]
-pub async fn remove(ctx: MoeteContext<'_>, emote_name: String) -> Result<(), MoeteError> {
+pub async fn remove(
+    ctx: MoeteContext<'_>,
+    emote_name: String,
+) -> Result<(), MoeteError> {
     // now we have to resolve this to an actual emoji.
     // sometimes the user sends the actual emoji, sometimes just the name.
     let data: &moete_core::State = ctx.data();

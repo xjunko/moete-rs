@@ -10,7 +10,8 @@ pub async fn on_message(
     message: &serenity::Message,
     data: &moete_core::State,
 ) -> Result<(), MoeteError> {
-    if data.config.flag.debug && message.author.id != data.config.discord.owner {
+    if data.config.flag.debug && message.author.id != data.config.discord.owner
+    {
         debug!("Message received: {:?}", message);
         return Ok(());
     }
@@ -21,11 +22,8 @@ pub async fn on_message(
     }
 
     let mut found_emote = false;
-    let mut words: Vec<String> = message
-        .content
-        .split_whitespace()
-        .map(|s| s.to_string())
-        .collect();
+    let mut words: Vec<String> =
+        message.content.split_whitespace().map(|s| s.to_string()).collect();
 
     for word in &mut words {
         if RE_EMOTE_TYPED.is_match(word) {
@@ -47,8 +45,11 @@ pub async fn on_message(
         }
 
         // Try to send thru webhook, if failed, send thru text
-        if let Some(webhook) =
-            moete_discord::webhook::get_or_create_webhook(ctx, message.channel_id).await
+        if let Some(webhook) = moete_discord::webhook::get_or_create_webhook(
+            ctx,
+            message.channel_id,
+        )
+        .await
         {
             if let Err(err) = webhook
                 .execute(

@@ -9,7 +9,8 @@ mod server;
 mod urban;
 
 /// Collect all commands into a single Vec
-pub fn commands() -> Vec<poise::Command<moete_core::State, moete_core::MoeteError>> {
+pub fn commands()
+-> Vec<poise::Command<moete_core::State, moete_core::MoeteError>> {
     vec![
         help::help(),
         google::google(),

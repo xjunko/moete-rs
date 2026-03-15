@@ -33,9 +33,7 @@ impl ShortcutCache {
         self.data.insert(guild_id, Arc::new(shortcuts));
     }
 
-    pub fn remove(&self, guild_id: i64) {
-        self.data.remove(&guild_id);
-    }
+    pub fn remove(&self, guild_id: i64) { self.data.remove(&guild_id); }
 }
 
 pub async fn build(pool: &postgres::PgPool) -> Result<(), sqlx::Error> {
@@ -91,11 +89,13 @@ pub async fn remove_shortcut(
     trigger: &str,
     cache: &ShortcutCache,
 ) -> Result<bool, sqlx::Error> {
-    let res = sqlx::query("DELETE FROM shortcuts WHERE guild_id = $1 AND trigger = $2")
-        .bind(guild_id)
-        .bind(trigger)
-        .execute(pool)
-        .await?;
+    let res = sqlx::query(
+        "DELETE FROM shortcuts WHERE guild_id = $1 AND trigger = $2",
+    )
+    .bind(guild_id)
+    .bind(trigger)
+    .execute(pool)
+    .await?;
 
     if res.rows_affected() > 0 {
         cache.remove(guild_id);
@@ -154,10 +154,13 @@ pub async fn edit_shortcut(
     Ok(false)
 }
 
-pub async fn get_guild_ids(pool: &postgres::PgPool) -> Result<Vec<i64>, sqlx::Error> {
-    let guild_ids: Vec<(i64,)> = sqlx::query_as("SELECT DISTINCT guild_id FROM shortcuts")
-        .fetch_all(pool)
-        .await?;
+pub async fn get_guild_ids(
+    pool: &postgres::PgPool,
+) -> Result<Vec<i64>, sqlx::Error> {
+    let guild_ids: Vec<(i64,)> =
+        sqlx::query_as("SELECT DISTINCT guild_id FROM shortcuts")
+            .fetch_all(pool)
+            .await?;
 
     Ok(guild_ids.into_iter().map(|(id,)| id).collect())
 }

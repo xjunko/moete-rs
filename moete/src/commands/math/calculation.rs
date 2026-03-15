@@ -2,10 +2,8 @@ use std::sync::{Arc, RwLock};
 
 use moete_core::{MoeteContext, MoeteError};
 use poise::CreateReply;
-use rhai::{
-    Engine,
-    packages::{BasicMathPackage, Package},
-};
+use rhai::Engine;
+use rhai::packages::{BasicMathPackage, Package};
 
 /// Creates a barebones Rhai engine.
 fn create_engine() -> Engine {
@@ -78,11 +76,7 @@ pub async fn calc(
         let output = {
             let result = logs.read().unwrap().join("\n");
 
-            if result.is_empty() {
-                "No output.".to_string()
-            } else {
-                result
-            }
+            if result.is_empty() { "No output.".to_string() } else { result }
         };
 
         let data: &moete_core::State = ctx.data();
@@ -91,8 +85,7 @@ pub async fn calc(
             .field("Input", format!("```{}```", cleaned_code), false)
             .field("Result", format!("```{}```", output), false);
 
-        ctx.send(CreateReply::default().embed(embed).reply(true))
-            .await?;
+        ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
 
         // dont need output anymore
         std::mem::drop(output);

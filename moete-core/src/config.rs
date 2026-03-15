@@ -98,7 +98,8 @@ impl Default for Discord {
             name: env::var("INSTANCE_NAME").unwrap_or("Moete".to_string()),
             token: env::var("INSTANCE_TOKEN_DISCORD")
                 .expect("Error: INSTANCE_TOKEN_DISCORD not set"),
-            token_cdn: env::var("INSTANCE_TOKEN_CDN").expect("Error: INSTANCE_TOKEN_CDN not set"),
+            token_cdn: env::var("INSTANCE_TOKEN_CDN")
+                .expect("Error: INSTANCE_TOKEN_CDN not set"),
             prefixes: env::var("INSTANCE_PREFIXES")
                 .unwrap_or(";".to_string())
                 .split(" ")

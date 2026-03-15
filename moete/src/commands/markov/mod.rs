@@ -4,7 +4,8 @@ mod learn;
 mod random;
 mod text;
 
-pub fn commands() -> Vec<poise::Command<moete_core::State, moete_core::MoeteError>> {
+pub fn commands()
+-> Vec<poise::Command<moete_core::State, moete_core::MoeteError>> {
     vec![text::markov()]
 }
 
@@ -33,6 +34,6 @@ const ALLOWED: &[u64] = &[
 ];
 
 const COMMON_BOT_PREFIXES: &[&str] = &[
-    ";", "t!", "pls ", "please ", "p ", "->", "!", "`", "``", ";;", "~>", ">", "<", "$", "k!",
-    ".calc", ".ss", ".google", ".",
+    ";", "t!", "pls ", "please ", "p ", "->", "!", "`", "``", ";;", "~>", ">",
+    "<", "$", "k!", ".calc", ".ss", ".google", ".",
 ];

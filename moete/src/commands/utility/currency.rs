@@ -15,11 +15,15 @@ static FMT_NUMBER: Lazy<human_format::Formatter> = Lazy::new(|| {
     formatter
 });
 
-static LAST_REFRESH: Lazy<Mutex<Option<std::time::Instant>>> = Lazy::new(|| Mutex::new(None));
-const REFRESH_INTERVAL: std::time::Duration = std::time::Duration::from_secs(60 * 60 * 6); // 6 hours
+static LAST_REFRESH: Lazy<Mutex<Option<std::time::Instant>>> =
+    Lazy::new(|| Mutex::new(None));
+const REFRESH_INTERVAL: std::time::Duration =
+    std::time::Duration::from_secs(60 * 60 * 6); // 6 hours
 
 /// Returns the date string in "YYYY-MM-DD" format for a given optional date else uses today's date.
-fn get_date_string(date_opt: Option<chrono::DateTime<chrono::Local>>) -> String {
+fn get_date_string(
+    date_opt: Option<chrono::DateTime<chrono::Local>>,
+) -> String {
     if let Some(date) = date_opt {
         date.format("%Y-%m-%d").to_string()
     } else {
@@ -112,15 +116,14 @@ pub async fn convert(
         let today_fmt = get_date_string(Some(today));
 
         let mut currency = ctx.data().currency.lock().await;
-        let base_currency = currency
-            .fetch(&base.to_lowercase(), Some(&today_fmt))
-            .await?;
-        let target_currency = currency
-            .fetch(&target.to_lowercase(), Some(&today_fmt))
-            .await?;
+        let base_currency =
+            currency.fetch(&base.to_lowercase(), Some(&today_fmt)).await?;
+        let target_currency =
+            currency.fetch(&target.to_lowercase(), Some(&today_fmt)).await?;
 
         // default is green
-        let mut embed = discord::embed::create_embed().color(Color::from_rgb(0, 255, 0));
+        let mut embed =
+            discord::embed::create_embed().color(Color::from_rgb(0, 255, 0));
 
         if base_currency.is_none() {
             embed = embed
@@ -129,8 +132,7 @@ pub async fn convert(
                     base
                 ))
                 .color(Color::from_rgb(255, 0, 0));
-            ctx.send(CreateReply::default().embed(embed).reply(true))
-                .await?;
+            ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
             return Ok(());
         }
 
@@ -141,8 +143,7 @@ pub async fn convert(
                     target
                 ))
                 .color(Color::from_rgb(255, 0, 0));
-            ctx.send(CreateReply::default().embed(embed).reply(true))
-                .await?;
+            ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
             return Ok(());
         }
 
@@ -157,8 +158,7 @@ pub async fn convert(
                     base_currency.name, target_currency.name
                 ))
                 .color(Color::from_rgb(255, 0, 0));
-            ctx.send(CreateReply::default().embed(embed).reply(true))
-                .await?;
+            ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
             return Ok(());
         }
 
@@ -188,7 +188,8 @@ pub async fn convert(
         for days_ago in (0..7).rev() {
             let date = today - Duration::days(days_ago);
             let date_fmt = get_date_string(Some(date));
-            if let Some(base_rate) = currency.fetch(&base_currency.name, Some(&date_fmt)).await?
+            if let Some(base_rate) =
+                currency.fetch(&base_currency.name, Some(&date_fmt)).await?
                 && currency
                     .fetch(&target_currency.name, Some(&date_fmt))
                     .await?
@@ -199,11 +200,10 @@ pub async fn convert(
             }
         }
 
-        let smallest_rate = rates.iter().cloned().fold(f64::INFINITY, |a, b| a.min(b));
-        let largest_rate = rates
-            .iter()
-            .cloned()
-            .fold(f64::NEG_INFINITY, |a, b| a.max(b));
+        let smallest_rate =
+            rates.iter().cloned().fold(f64::INFINITY, |a, b| a.min(b));
+        let largest_rate =
+            rates.iter().cloned().fold(f64::NEG_INFINITY, |a, b| a.max(b));
         let plot_id = ctx.id();
 
         let path = format!(
@@ -215,7 +215,8 @@ pub async fn convert(
         // plot the rates
         tokio::task::spawn_blocking(
             move || -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-                let root = BitMapBackend::new(&plot_path, (1024, 768)).into_drawing_area();
+                let root = BitMapBackend::new(&plot_path, (1024, 768))
+                    .into_drawing_area();
                 root.fill(&RGBColor(56, 58, 64))?;
 
                 let (to_date, from_date) = (today, today - Duration::days(6));
@@ -226,7 +227,9 @@ pub async fn convert(
                 let y_max = largest_rate + padding;
 
                 // use red/green based on rate change
-                let rate_color = if rates.last().unwrap_or(&0.0) >= rates.first().unwrap_or(&0.0) {
+                let rate_color = if rates.last().unwrap_or(&0.0)
+                    >= rates.first().unwrap_or(&0.0)
+                {
                     RGBColor(0, 128, 255)
                 } else {
                     RGBColor(255, 0, 0)
@@ -250,7 +253,9 @@ pub async fn convert(
                     .configure_mesh()
                     .x_labels(7)
                     .x_label_style(("sans-serif", 25).into_font().color(&WHITE))
-                    .x_label_formatter(&|date| format!("{}", date.format("%m/%d")))
+                    .x_label_formatter(&|date| {
+                        format!("{}", date.format("%m/%d"))
+                    })
                     .y_labels(16)
                     .y_label_style(("sans-serif", 25).into_font().color(&WHITE))
                     .y_label_formatter(&|rate| readable_number(*rate))
@@ -266,14 +271,18 @@ pub async fn convert(
                     })
                     .collect();
 
-                chart.draw_series(AreaSeries::new(data.clone(), y_min, rate_color.mix(0.15)))?;
+                chart.draw_series(AreaSeries::new(
+                    data.clone(),
+                    y_min,
+                    rate_color.mix(0.15),
+                ))?;
 
-                chart.draw_series(LineSeries::new(data.clone(), &rate_color))?;
+                chart
+                    .draw_series(LineSeries::new(data.clone(), &rate_color))?;
 
-                chart.draw_series(
-                    data.iter()
-                        .map(|(date, rate)| Circle::new((*date, *rate), 5, rate_color.filled())),
-                )?;
+                chart.draw_series(data.iter().map(|(date, rate)| {
+                    Circle::new((*date, *rate), 5, rate_color.filled())
+                }))?;
 
                 root.present()?;
                 Ok(())
@@ -337,8 +346,7 @@ pub async fn convert(
                 ),
                 false,
             );
-        ctx.send(CreateReply::default().embed(embed).reply(true))
-            .await?;
+        ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
     }
 
     Ok(())

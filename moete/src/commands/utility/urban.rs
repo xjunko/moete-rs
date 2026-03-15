@@ -21,10 +21,8 @@ impl Urban {
             "https://api.urbandictionary.com/v0/define?term={}",
             term.replace(" ", "%20")
         );
-        let resp = reqwest::get(&url)
-            .await?
-            .json::<serde_json::Value>()
-            .await?;
+        let resp =
+            reqwest::get(&url).await?.json::<serde_json::Value>().await?;
 
         if resp["list"].as_array().unwrap().is_empty() {
             return Err("No results found".into());
@@ -45,7 +43,8 @@ impl Urban {
             })
             .collect();
 
-        entry.sort_by(|a, b| a._like.cmp(&b._like));
+        // entry.sort_by(|a, b| a._like.cmp(&b._like));
+        entry.sort_by_key(|a| a._like);
 
         Ok(entry)
     }
@@ -97,8 +96,11 @@ pub async fn urban(
             moete_discord::paginate::paginate_embed(ctx, pages).await?;
         },
         Err(reason) => {
-            ctx.say(format!("failed to get urban dictionary entry: {}", reason))
-                .await?;
+            ctx.say(format!(
+                "failed to get urban dictionary entry: {}",
+                reason
+            ))
+            .await?;
         },
     }
 

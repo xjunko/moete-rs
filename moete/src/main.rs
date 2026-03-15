@@ -1,9 +1,11 @@
 // =======================================================
-use std::{env, sync::Arc};
+use std::env;
+use std::sync::Arc;
 
 use poise::serenity_prelude as serenity;
 use tracing::info;
-use tracing_subscriber::{EnvFilter, fmt, prelude::*};
+use tracing_subscriber::prelude::*;
+use tracing_subscriber::{EnvFilter, fmt};
 
 // =======================================================
 mod commands;
@@ -17,7 +19,8 @@ async fn main() {
         Ok(env) => env,
         Err(err) => panic!("Failed to load enviroment: {}", err),
     };
-    moete_core::create_required_folders().expect("Failed to create required folders");
+    moete_core::create_required_folders()
+        .expect("Failed to create required folders");
 
     logging_init().await;
 
@@ -32,7 +35,8 @@ async fn main() {
     let framework_options = poise::FrameworkOptions {
         event_handler: |ctx, event, _framework, data: &moete_core::State| {
             Box::pin(async move {
-                if let serenity::FullEvent::Ready { data_about_bot, .. } = event {
+                if let serenity::FullEvent::Ready { data_about_bot, .. } = event
+                {
                     events::on_ready(ctx, data_about_bot).await?;
                     {
                         // this is slightly hacked in, but it works.
@@ -52,14 +56,20 @@ async fn main() {
         on_error: |err| {
             Box::pin(async move {
                 match err {
-                    poise::FrameworkError::UnknownCommand { .. } => { /* noop */ },
+                    poise::FrameworkError::UnknownCommand { .. } => { /* noop */
+                    },
 
                     poise::FrameworkError::ArgumentParse {
-                        ctx, input, error, ..
+                        ctx,
+                        input,
+                        error,
+                        ..
                     } => {
                         let usage = match &ctx.command().help_text {
                             Some(help_text) => &**help_text,
-                            None => "Please check the help menu for usage information",
+                            None => {
+                                "Please check the help menu for usage information"
+                            },
                         };
 
                         let response = if let Some(input) = input {
@@ -72,11 +82,18 @@ async fn main() {
                         };
 
                         if response.contains("Too many arguments were passed")
-                            || response.contains("Too few arguments were passed")
+                            || response
+                                .contains("Too few arguments were passed")
                         {
                             let command_name = {
-                                if let Some(parent) = ctx.parent_commands().last() {
-                                    format!("{} {}", parent.name, ctx.command().name)
+                                if let Some(parent) =
+                                    ctx.parent_commands().last()
+                                {
+                                    format!(
+                                        "{} {}",
+                                        parent.name,
+                                        ctx.command().name
+                                    )
                                 } else {
                                     ctx.command().name.to_string()
                                 }
@@ -86,7 +103,8 @@ async fn main() {
                             let _ = moete_discord::help::help(
                                 ctx,
                                 Some(&command_name),
-                                moete_discord::help::HelpConfiguration::default(),
+                                moete_discord::help::HelpConfiguration::default(
+                                ),
                             )
                             .await;
                         } else {
@@ -130,7 +148,11 @@ async fn main() {
                 }
 
                 // poise thingamajig
-                poise::builtins::register_globally(ctx, &framework.options().commands).await?;
+                poise::builtins::register_globally(
+                    ctx,
+                    &framework.options().commands,
+                )
+                .await?;
 
                 Ok(state)
             })
@@ -143,9 +165,8 @@ async fn main() {
         | serenity::GatewayIntents::GUILD_PRESENCES
         | serenity::GatewayIntents::MESSAGE_CONTENT;
 
-    let client = serenity::ClientBuilder::new(token, intents)
-        .framework(framework)
-        .await;
+    let client =
+        serenity::ClientBuilder::new(token, intents).framework(framework).await;
 
     info!("Starting Moete..");
 
@@ -155,13 +176,7 @@ async fn main() {
 async fn logging_init() {
     let filter = EnvFilter::from_env("MOETE_FILTER");
 
-    tracing_subscriber::registry()
-        .with(fmt::layer())
-        .with(filter)
-        .init();
+    tracing_subscriber::registry().with(fmt::layer()).with(filter).init();
 
-    info!(
-        "Logger ready - Filter {:?}",
-        env::var("MOETE_FILTER").unwrap()
-    );
+    info!("Logger ready - Filter {:?}", env::var("MOETE_FILTER").unwrap());
 }

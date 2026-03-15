@@ -1,7 +1,12 @@
 use moete_core::{MoeteContext, MoeteError};
 
 /// Replies with a nhentai link for a given code.
-#[poise::command(prefix_command, slash_command, category = "Utility", nsfw_only)]
+#[poise::command(
+    prefix_command,
+    slash_command,
+    category = "Utility",
+    nsfw_only
+)]
 pub async fn nhentai(
     ctx: MoeteContext<'_>,
     #[description = "Doujin code"]

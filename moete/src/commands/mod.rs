@@ -10,7 +10,8 @@ pub mod utility;
 #[cfg(feature = "macros")]
 pub mod macros;
 
-pub fn commands() -> Vec<poise::Command<moete_core::State, moete_core::MoeteError>> {
+pub fn commands()
+-> Vec<poise::Command<moete_core::State, moete_core::MoeteError>> {
     let mut cmds = Vec::new();
     cmds.extend(emote::commands());
     cmds.extend(math::commands());

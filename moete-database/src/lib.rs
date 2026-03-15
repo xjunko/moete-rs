@@ -33,12 +33,25 @@ impl Database {
         models::counter::get_counters(self.0.as_ref(), word).await
     }
 
-    pub async fn increment_counter(&self, user_id: i64, word: &str) -> Result<(), sqlx::Error> {
-        models::counter::increment_word_for_user_id(self.0.as_ref(), user_id, word).await
+    pub async fn increment_counter(
+        &self,
+        user_id: i64,
+        word: &str,
+    ) -> Result<(), sqlx::Error> {
+        models::counter::increment_word_for_user_id(
+            self.0.as_ref(),
+            user_id,
+            word,
+        )
+        .await
     }
 
     // Markov API
-    pub async fn add_message(&self, user_id: i64, content: &str) -> Result<(), sqlx::Error> {
+    pub async fn add_message(
+        &self,
+        user_id: i64,
+        content: &str,
+    ) -> Result<(), sqlx::Error> {
         models::markov::add_message(self.0.as_ref(), user_id, content).await
     }
 
@@ -49,7 +62,10 @@ impl Database {
         models::markov::get_user(self.0.as_ref(), user_id).await
     }
 
-    pub async fn get_user_count(&self, user_id: i64) -> Result<Option<i64>, sqlx::Error> {
+    pub async fn get_user_count(
+        &self,
+        user_id: i64,
+    ) -> Result<Option<i64>, sqlx::Error> {
         models::markov::get_user_count(self.0.as_ref(), user_id).await
     }
 
@@ -61,7 +77,14 @@ impl Database {
         response: &str,
         cache: Arc<models::shortcut::ShortcutCache>,
     ) -> Result<(), sqlx::Error> {
-        models::shortcut::add_shortcut(self.0.as_ref(), guild_id, trigger, response, &cache).await
+        models::shortcut::add_shortcut(
+            self.0.as_ref(),
+            guild_id,
+            trigger,
+            response,
+            &cache,
+        )
+        .await
     }
 
     pub async fn remove_shortcut(
@@ -70,7 +93,13 @@ impl Database {
         trigger: &str,
         cache: Arc<models::shortcut::ShortcutCache>,
     ) -> Result<bool, sqlx::Error> {
-        models::shortcut::remove_shortcut(self.0.as_ref(), guild_id, trigger, &cache).await
+        models::shortcut::remove_shortcut(
+            self.0.as_ref(),
+            guild_id,
+            trigger,
+            &cache,
+        )
+        .await
     }
 
     pub async fn edit_shortcut(
@@ -80,8 +109,14 @@ impl Database {
         new_response: &str,
         cache: Arc<models::shortcut::ShortcutCache>,
     ) -> Result<bool, sqlx::Error> {
-        models::shortcut::edit_shortcut(self.0.as_ref(), guild_id, trigger, new_response, &cache)
-            .await
+        models::shortcut::edit_shortcut(
+            self.0.as_ref(),
+            guild_id,
+            trigger,
+            new_response,
+            &cache,
+        )
+        .await
     }
 
     pub async fn get_shortcut(
@@ -96,6 +131,7 @@ impl Database {
         &self,
         guild_id: i64,
     ) -> Result<Vec<models::shortcut::Shortcut>, sqlx::Error> {
-        models::shortcut::get_all_shortcuts_for_guild(self.0.as_ref(), guild_id).await
+        models::shortcut::get_all_shortcuts_for_guild(self.0.as_ref(), guild_id)
+            .await
     }
 }

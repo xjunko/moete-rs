@@ -9,10 +9,8 @@ async fn send_message(
     msg: String,
 ) -> Result<(), MoeteError> {
     if let poise::Context::Prefix(prefix_ctx) = ctx
-        && let Err(e) = prefix_ctx
-            .msg
-            .delete(&ctx.serenity_context().http.clone())
-            .await
+        && let Err(e) =
+            prefix_ctx.msg.delete(&ctx.serenity_context().http.clone()).await
     {
         error!("Failed to delete message: {:?}", e);
     }
@@ -20,9 +18,11 @@ async fn send_message(
     let data: &moete_core::State = ctx.data();
     let msg = data.emotes.lock().await.text(&msg);
 
-    if let Some(webhook) =
-        moete_discord::webhook::get_or_create_webhook(ctx.serenity_context(), ctx.channel_id())
-            .await
+    if let Some(webhook) = moete_discord::webhook::get_or_create_webhook(
+        ctx.serenity_context(),
+        ctx.channel_id(),
+    )
+    .await
     {
         let user = who;
 
@@ -50,7 +50,12 @@ async fn send_message(
 }
 
 /// Send a message through Moete's emote system.
-#[poise::command(prefix_command, slash_command, category = "Emote", aliases("txt", "t"))]
+#[poise::command(
+    prefix_command,
+    slash_command,
+    category = "Emote",
+    aliases("txt", "t")
+)]
 pub async fn text(
     ctx: MoeteContext<'_>,
     #[description = "Text to send"]

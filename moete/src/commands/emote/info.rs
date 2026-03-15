@@ -16,7 +16,8 @@ pub async fn info(
     #[rest]
     emote: Emoji,
 ) -> Result<(), MoeteError> {
-    let mut embed = moete_discord::embed::create_embed().title("Emotes | Info (Emote)");
+    let mut embed =
+        moete_discord::embed::create_embed().title("Emotes | Info (Emote)");
 
     // main
     embed = embed.field(

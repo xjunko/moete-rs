@@ -8,7 +8,10 @@ use tracing::info;
 
 use super::ALLOWED;
 
-async fn load_data(id: u64, database: &moete_database::Database) -> Option<String> {
+async fn load_data(
+    id: u64,
+    database: &moete_database::Database,
+) -> Option<String> {
     info!("Loading data for user {}", id);
 
     if let Ok(user_data) = database.get_user(id.try_into().ok()?).await
@@ -76,7 +79,9 @@ pub async fn generate(
 
             info!("Using starter word: {}", last_word);
 
-            if let Some(generated) = text.generate_with_start(&last_word, options.clone()) {
+            if let Some(generated) =
+                text.generate_with_start(&last_word, options.clone())
+            {
                 Some(format!("{} {}", others, generated))
             } else {
                 text.generate(options)
@@ -102,7 +107,12 @@ pub async fn generate(
 }
 
 /// Generates a random text based on the user's messages.
-#[poise::command(prefix_command, slash_command, category = "Markov", aliases("deep"))]
+#[poise::command(
+    prefix_command,
+    slash_command,
+    category = "Markov",
+    aliases("deep")
+)]
 pub async fn markov(
     ctx: MoeteContext<'_>,
     #[description = "User to generate text for"] picked: Option<i32>,
@@ -114,18 +124,21 @@ pub async fn markov(
 
     if let Some(database) = state.database.as_ref()
         && let Some(picked) = picked
-        && let Some((content, user_id)) = generate(picked, starter, database).await
+        && let Some((content, user_id)) =
+            generate(picked, starter, database).await
     {
         // handle empty content
-        let content =
-            content.unwrap_or("Generation failed, must've been insufficient data.".to_string());
+        let content = content.unwrap_or(
+            "Generation failed, must've been insufficient data.".to_string(),
+        );
 
         if let Ok(user) = UserId::new(user_id).to_user(ctx.http()).await
-            && let Some(webhook) = moete_discord::webhook::get_or_create_webhook(
-                ctx.serenity_context(),
-                ctx.channel_id(),
-            )
-            .await
+            && let Some(webhook) =
+                moete_discord::webhook::get_or_create_webhook(
+                    ctx.serenity_context(),
+                    ctx.channel_id(),
+                )
+                .await
         {
             let _ = webhook
                 .execute(
@@ -155,17 +168,26 @@ pub async fn markov(
 
             // Gets user from discord cache
             if let Some(user) = cache.user(*id) {
-                available_users.push(format!("{}. {} | {} messages", n + 1, user.name, count));
+                available_users.push(format!(
+                    "{}. {} | {} messages",
+                    n + 1,
+                    user.name,
+                    count
+                ));
             } else {
-                available_users.push(format!("{}. {} | {} messages", n + 1, id, count));
+                available_users.push(format!(
+                    "{}. {} | {} messages",
+                    n + 1,
+                    id,
+                    count
+                ));
             }
         }
 
         let embed = moete_discord::embed::create_embed()
             .title("Markovify | Main")
             .field("Available", available_users.join("\n"), true);
-        ctx.send(CreateReply::default().embed(embed).reply(true))
-            .await?;
+        ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
     }
 
     Ok(())

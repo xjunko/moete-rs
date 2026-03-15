@@ -31,9 +31,7 @@ struct TwoColumnList(Vec<(String, Option<String>)>);
 
 impl TwoColumnList {
     /// Creates a new [`TwoColumnList`]
-    fn new() -> Self {
-        Self(Vec::new())
-    }
+    fn new() -> Self { Self(Vec::new()) }
 
     /// Add a line that needs the padding between the columns
     fn push_two_colums(&mut self, command: String, description: String) {
@@ -46,11 +44,7 @@ impl TwoColumnList {
             .0
             .iter()
             .filter_map(|(command, description)| {
-                if description.is_some() {
-                    Some(command.len())
-                } else {
-                    None
-                }
+                if description.is_some() { Some(command.len()) } else { None }
             })
             .max()
             .unwrap_or(0);
@@ -58,7 +52,8 @@ impl TwoColumnList {
         for (command, description) in self.0 {
             if let Some(description) = description {
                 let padding = " ".repeat(longest_command - command.len() + 3);
-                writeln!(text, "{}{}{}", command, padding, description).unwrap();
+                writeln!(text, "{}{}{}", command, padding, description)
+                    .unwrap();
             } else {
                 writeln!(text, "{}", command).unwrap();
             }
@@ -68,13 +63,17 @@ impl TwoColumnList {
 }
 
 /// Get the prefix from options
-async fn get_prefix_from_options<U, E>(ctx: poise::Context<'_, U, E>) -> Option<String> {
+async fn get_prefix_from_options<U, E>(
+    ctx: poise::Context<'_, U, E>,
+) -> Option<String> {
     let options = &ctx.framework().options().prefix_options;
     match &options.prefix {
         Some(fixed_prefix) => Some(fixed_prefix.clone()),
         None => match options.dynamic_prefix {
             Some(dynamic_prefix_callback) => {
-                match dynamic_prefix_callback(poise::PartialContext::from(ctx)).await {
+                match dynamic_prefix_callback(poise::PartialContext::from(ctx))
+                    .await
+                {
                     Ok(Some(dynamic_prefix)) => Some(dynamic_prefix),
                     _ => None,
                 }
@@ -85,19 +84,20 @@ async fn get_prefix_from_options<U, E>(ctx: poise::Context<'_, U, E>) -> Option<
 }
 
 /// Format context menu command name
-fn format_context_menu_name<U, E>(command: &poise::Command<U, E>) -> Option<String> {
+fn format_context_menu_name<U, E>(
+    command: &poise::Command<U, E>,
+) -> Option<String> {
     let kind = match command.context_menu_action {
         Some(poise::ContextMenuCommandAction::User(_)) => "user",
         Some(poise::ContextMenuCommandAction::Message(_)) => "message",
-        Some(poise::ContextMenuCommandAction::__NonExhaustive) => unreachable!(),
+        Some(poise::ContextMenuCommandAction::__NonExhaustive) => {
+            unreachable!()
+        },
         None => return None,
     };
     Some(format!(
         "{} (on {})",
-        command
-            .context_menu_name
-            .as_deref()
-            .unwrap_or(&command.name),
+        command.context_menu_name.as_deref().unwrap_or(&command.name),
         kind
     ))
 }
@@ -120,7 +120,8 @@ async fn help_single_command(
     });
     // Then interpret command name as a normal command (possibly nested subcommand)
     if command.is_none()
-        && let Some((c, _, _)) = poise::find_command(commands, command_name, true, &mut vec![])
+        && let Some((c, _, _)) =
+            poise::find_command(commands, command_name, true, &mut vec![])
     {
         command = Some(c);
     }
@@ -145,7 +146,9 @@ async fn help_single_command(
                 subprefix = Some(format!("  {}{}", prefix, command.name));
             }
         }
-        if command.context_menu_name.is_some() && command.context_menu_action.is_some() {
+        if command.context_menu_name.is_some()
+            && command.context_menu_action.is_some()
+        {
             // Since command.context_menu_action is Some, this unwrap is safe
             invocations.push(format_context_menu_name(command).unwrap());
             if subprefix.is_none() {
@@ -179,8 +182,8 @@ async fn help_single_command(
         // Everything should be fine now
         // Construct embed for the help message.
         let data: &moete_core::State = ctx.data();
-        let mut embed =
-            embed::create_embed().title(format!("{} | {}", data.config.discord.name, command_name));
+        let mut embed = embed::create_embed()
+            .title(format!("{} | {}", data.config.discord.name, command_name));
 
         embed = embed.field(
             "Category",
@@ -195,14 +198,11 @@ async fn help_single_command(
             let mut parameterlist = TwoColumnList::new();
             for parameter in &command.parameters {
                 let name = parameter.name.clone();
-                let description = parameter.description.as_deref().unwrap_or("");
+                let description =
+                    parameter.description.as_deref().unwrap_or("");
                 let description = format!(
                     "({}) {}",
-                    if parameter.required {
-                        "required"
-                    } else {
-                        "optional"
-                    },
+                    if parameter.required { "required" } else { "optional" },
                     description,
                 );
                 parameterlist.push_two_colums(name, description);
@@ -249,7 +249,8 @@ fn preformat_subcommands<U, E>(
     command: &poise::Command<U, E>,
     prefix: &str,
 ) {
-    let as_context_command = command.slash_action.is_none() && command.prefix_action.is_none();
+    let as_context_command =
+        command.slash_action.is_none() && command.prefix_action.is_none();
     for subcommand in &command.subcommands {
         let command = if as_context_command {
             let name = format_context_menu_name(subcommand);
@@ -260,7 +261,8 @@ fn preformat_subcommands<U, E>(
         } else {
             format!("{} {}", prefix, subcommand.name)
         };
-        let description = subcommand.description.as_deref().unwrap_or("").to_string();
+        let description =
+            subcommand.description.as_deref().unwrap_or("").to_string();
         commands.push_two_colums(command, description);
         // We could recurse here, but things can get cluttered quickly.
         // Instead, we show (using this function) subsubcommands when
@@ -329,13 +331,13 @@ async fn generate_all_commands(
 
     // Any other pages
     let mut page_len = 0;
-    let mut embed = embed::create_embed().title(format!(
-        "{} | {}",
-        data.config.discord.name, "Help [Commands]"
-    ));
+    let mut embed = embed::create_embed()
+        .title(format!("{} | {}", data.config.discord.name, "Help [Commands]"));
 
-    let mut categories =
-        poise_builtins::util::OrderedMap::<Option<&str>, Vec<&poise::Command<_, _>>>::new();
+    let mut categories = poise_builtins::util::OrderedMap::<
+        Option<&str>,
+        Vec<&poise::Command<_, _>>,
+    >::new();
     for cmd in &ctx.framework().options().commands {
         categories
             .get_or_insert_with(cmd.category.as_deref(), Vec::new)
@@ -346,7 +348,9 @@ async fn generate_all_commands(
         let commands = commands
             .into_iter()
             .filter(|cmd| {
-                !cmd.hide_in_help && (cmd.prefix_action.is_some() || cmd.slash_action.is_some())
+                !cmd.hide_in_help
+                    && (cmd.prefix_action.is_some()
+                        || cmd.slash_action.is_some())
             })
             .collect::<Vec<_>>();
 
@@ -411,7 +415,11 @@ async fn generate_all_commands(
         embed = embed
             .field(
                 "",
-                format!("__**{}**__\n{}", category_name.unwrap_or("Commands"), text),
+                format!(
+                    "__**{}**__\n{}",
+                    category_name.unwrap_or("Commands"),
+                    text
+                ),
                 false,
             )
             .thumbnail(ctx.serenity_context().cache.current_user().face());

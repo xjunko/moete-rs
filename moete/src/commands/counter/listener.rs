@@ -1,4 +1,5 @@
-use std::{collections::HashMap, env};
+use std::collections::HashMap;
+use std::env;
 
 use moete_core::MoeteError;
 use once_cell::sync::Lazy;
@@ -42,9 +43,7 @@ pub async fn on_message(
         return Ok(());
     }
 
-    if FLATTEN_WORDS
-        .iter()
-        .any(|w| message.content.to_lowercase().contains(w))
+    if FLATTEN_WORDS.iter().any(|w| message.content.to_lowercase().contains(w))
     {
         // ok great, now we just have to find the main word.
         let mut to_increment: Vec<String> = Vec::new();

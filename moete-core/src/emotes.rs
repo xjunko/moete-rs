@@ -14,9 +14,7 @@ pub struct EmoteManager {
 }
 
 impl EmoteManager {
-    pub fn new() -> Self {
-        Self::default()
-    }
+    pub fn new() -> Self { Self::default() }
 
     /// Adds an emoji to the manager.
     pub fn add_emoji(&mut self, emoji: serenity::Emoji) {
@@ -31,7 +29,9 @@ impl EmoteManager {
     pub fn remove_emoji_by_id(&mut self, id: u64) -> Option<serenity::Emoji> {
         if let Some(pos) = self.internal.iter().position(|e| e.id.get() == id) {
             Some(self.internal.remove(pos))
-        } else if let Some(pos) = self.external.iter().position(|e| e.id.get() == id) {
+        } else if let Some(pos) =
+            self.external.iter().position(|e| e.id.get() == id)
+        {
             Some(self.external.remove(pos))
         } else {
             None
@@ -44,9 +44,12 @@ impl EmoteManager {
     }
 
     /// Fetches the bot emojis from Discord.
-    async fn fetch_bot_emojis(ctx: &serenity::Context) -> Result<Vec<serenity::Emoji>, MoeteError> {
+    async fn fetch_bot_emojis(
+        ctx: &serenity::Context,
+    ) -> Result<Vec<serenity::Emoji>, MoeteError> {
         let http: &serenity::Http = &ctx.http;
-        let emojis: Vec<serenity::Emoji> = http.get_application_emojis().await?;
+        let emojis: Vec<serenity::Emoji> =
+            http.get_application_emojis().await?;
         Ok(emojis)
     }
 
@@ -56,7 +59,8 @@ impl EmoteManager {
         id: u64,
     ) -> Result<Vec<serenity::Emoji>, MoeteError> {
         let http: &serenity::Http = &ctx.http;
-        let emojis: Vec<serenity::Emoji> = http.get_emojis(serenity::GuildId::new(id)).await?;
+        let emojis: Vec<serenity::Emoji> =
+            http.get_emojis(serenity::GuildId::new(id)).await?;
         Ok(emojis)
     }
 
@@ -91,18 +95,16 @@ impl EmoteManager {
     ) -> Result<Vec<serenity::Emoji>, MoeteError> {
         let mut emojis: Vec<serenity::Emoji> = Vec::new();
 
-        for query in config
-            .moete
-            .whitelisted
-            .iter()
-            .chain(config.moete.owned.iter())
+        for query in
+            config.moete.whitelisted.iter().chain(config.moete.owned.iter())
         {
             if let Ok(id) = query.parse::<u64>() {
                 let found = Self::fetch_guild_emojis_by_id(ctx, id).await?;
                 debug!("Found {} emojis in guild ID={}", found.len(), id);
                 emojis.extend(found);
             } else {
-                let found = Self::fetch_guild_emojis_by_name(ctx, query).await?;
+                let found =
+                    Self::fetch_guild_emojis_by_name(ctx, query).await?;
                 debug!("Found {} emojis in guild Query={}", found.len(), query);
                 emojis.extend(found);
             }
@@ -119,11 +121,14 @@ impl EmoteManager {
     }
 
     /// The inner load function.
-    async fn load_inner(&mut self, ctx: &serenity::Context, config: Arc<Config>) {
+    async fn load_inner(
+        &mut self,
+        ctx: &serenity::Context,
+        config: Arc<Config>,
+    ) {
         self.internal = Self::fetch_bot_emojis(ctx).await.unwrap_or_default();
-        self.external = Self::fetch_guild_emojis(ctx, config)
-            .await
-            .unwrap_or_default();
+        self.external =
+            Self::fetch_guild_emojis(ctx, config).await.unwrap_or_default();
 
         self.internal.sort_by(|a, b| a.name.cmp(&b.name));
         self.external.sort_by(|a, b| a.name.cmp(&b.name));
@@ -140,7 +145,11 @@ impl EmoteManager {
 
     /// Refresh the emojis we can use.
     /// This will re-fetch all emojis from Discord.
-    pub async fn refresh(&mut self, ctx: &serenity::Context, config: Arc<Config>) {
+    pub async fn refresh(
+        &mut self,
+        ctx: &serenity::Context,
+        config: Arc<Config>,
+    ) {
         self.load_inner(ctx, config).await;
     }
 

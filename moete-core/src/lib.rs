@@ -1,6 +1,10 @@
 use poise::serenity_prelude as serenity;
 
-pub use self::{branding::*, config::Config, emotes::EmoteManager, state::State, types::*};
+pub use self::branding::*;
+pub use self::config::Config;
+pub use self::emotes::EmoteManager;
+pub use self::state::State;
+pub use self::types::*;
 
 pub mod memory;
 

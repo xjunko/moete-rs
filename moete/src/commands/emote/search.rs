@@ -15,7 +15,8 @@ pub async fn search(
 ) -> Result<(), MoeteError> {
     let query_or_all = query.unwrap_or_default();
     let data: &moete_core::State = ctx.data();
-    let emotes_page_estimated = data.emotes.lock().await.get_many(&query_or_all).len() / 20 + 1;
+    let emotes_page_estimated =
+        data.emotes.lock().await.get_many(&query_or_all).len() / 20 + 1;
     let emotes = data
         .emotes
         .lock()
@@ -30,11 +31,8 @@ pub async fn search(
                 .collect::<Vec<_>>()
                 .join("\n");
 
-            let query_display = if query_or_all.is_empty() {
-                "All"
-            } else {
-                &query_or_all
-            };
+            let query_display =
+                if query_or_all.is_empty() { "All" } else { &query_or_all };
 
             format!(
                 "**Emote | List [Page: {}/{}]**\n**Query**: `{}`\n{}",

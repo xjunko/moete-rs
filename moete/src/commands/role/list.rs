@@ -10,8 +10,7 @@ use crate::serenity;
 pub async fn list(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let roles: Vec<Role> = {
         let Some(guild) = ctx.guild() else {
-            ctx.say("This command can only be used in a server.")
-                .await?;
+            ctx.say("This command can only be used in a server.").await?;
             return Ok(());
         };
 
@@ -24,8 +23,7 @@ pub async fn list(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     };
 
     if roles.is_empty() {
-        ctx.say("No custom color roles found in this server.")
-            .await?;
+        ctx.say("No custom color roles found in this server.").await?;
         return Ok(());
     }
 
@@ -50,8 +48,7 @@ pub async fn list(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
         false,
     );
 
-    ctx.send(CreateReply::default().embed(embed).reply(true))
-        .await?;
+    ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
 
     Ok(())
 }

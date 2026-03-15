@@ -96,8 +96,7 @@ pub async fn server(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
             )
     };
 
-    ctx.send(CreateReply::default().embed(embed).reply(true))
-        .await?;
+    ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
     Ok(())
 }
 
@@ -120,15 +119,17 @@ pub async fn emote(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
         if guild.emojis.is_empty() {
             embed = embed.description("No emotes found in this server.");
         } else {
-            let emotes: Vec<String> = guild.emojis.values().map(|e| e.to_string()).collect();
-            embed = embed.description(emotes.join("").chars().take(1900).collect::<String>());
+            let emotes: Vec<String> =
+                guild.emojis.values().map(|e| e.to_string()).collect();
+            embed = embed.description(
+                emotes.join("").chars().take(1900).collect::<String>(),
+            );
         }
 
         embed
     };
 
-    ctx.send(CreateReply::default().embed(embed).reply(true))
-        .await?;
+    ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
     Ok(())
 }
 
@@ -156,12 +157,13 @@ pub async fn role(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
                 .values()
                 .map(|r| format!("{}", r.mention()))
                 .collect();
-            embed = embed.description(roles.join(", ").chars().take(1900).collect::<String>());
+            embed = embed.description(
+                roles.join(", ").chars().take(1900).collect::<String>(),
+            );
         }
 
         embed
     };
-    ctx.send(CreateReply::default().embed(embed).reply(true))
-        .await?;
+    ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
     Ok(())
 }

@@ -10,9 +10,7 @@ struct MacroDef {
     reply: Vec<String>,
 }
 fn string_or_vec<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
-where
-    D: Deserializer<'de>,
-{
+where D: Deserializer<'de> {
     #[derive(Deserialize)]
     #[serde(untagged)]
     enum OneOrMany {
@@ -36,11 +34,12 @@ fn main() {
     let json = std::fs::read_to_string(json_path).unwrap_or_else(|_| {
         panic!(
             "{}",
-            format!("Failed to read moete's commands: {:?}", json_path).to_string()
+            format!("Failed to read moete's commands: {:?}", json_path)
+                .to_string()
         )
     });
-    let data: HashMap<String, MacroDef> =
-        serde_json::from_str(&json).expect("Failed to parse moete's commands JSON");
+    let data: HashMap<String, MacroDef> = serde_json::from_str(&json)
+        .expect("Failed to parse moete's commands JSON");
 
     // generate code
     let mut out = String::new();
@@ -102,8 +101,10 @@ fn main() {
     }
     out.push_str("    ]\n}");
 
-    let dest_path = std::path::Path::new("../moete/src/commands/macros").join("commands.rs");
-    std::fs::write(&dest_path, out.clone()).expect("Failed to write macro_commands.rs");
+    let dest_path = std::path::Path::new("../moete/src/commands/macros")
+        .join("commands.rs");
+    std::fs::write(&dest_path, out.clone())
+        .expect("Failed to write macro_commands.rs");
 
     println!("cargo:rerun-if-changed=files/commands.json");
 }

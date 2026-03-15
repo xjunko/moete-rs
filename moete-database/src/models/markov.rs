@@ -50,8 +50,12 @@ pub async fn build(pool: &postgres::PgPool) -> Result<(), sqlx::Error> {
 
     match (res_users.rows_affected(), res_messages.rows_affected()) {
         (0, 0) => info!("Tables 'users' and 'messages' already exist."),
-        (0, _) => info!("Table 'users' already exists. Created table 'messages'."),
-        (_, 0) => info!("Created table 'users'. Table 'messages' already exists."),
+        (0, _) => {
+            info!("Table 'users' already exists. Created table 'messages'.")
+        },
+        (_, 0) => {
+            info!("Created table 'users'. Table 'messages' already exists.")
+        },
         _ => info!("Created tables 'users' and 'messages'."),
     }
 
@@ -62,10 +66,11 @@ pub async fn get_user(
     pool: &postgres::PgPool,
     user_id: i64,
 ) -> Result<Option<MarkovUser>, sqlx::Error> {
-    let user: User = sqlx::query_as("SELECT id, count FROM users WHERE id = $1")
-        .bind(user_id)
-        .fetch_one(pool)
-        .await?;
+    let user: User =
+        sqlx::query_as("SELECT id, count FROM users WHERE id = $1")
+            .bind(user_id)
+            .fetch_one(pool)
+            .await?;
 
     let messages: Vec<Message> = sqlx::query_as::<_, Message>(
         "SELECT id, user_id, content FROM messages WHERE user_id = $1",
@@ -74,21 +79,18 @@ pub async fn get_user(
     .fetch_all(pool)
     .await?;
 
-    Ok(Some(MarkovUser {
-        id: user.id,
-        count: user.count,
-        messages,
-    }))
+    Ok(Some(MarkovUser { id: user.id, count: user.count, messages }))
 }
 
 pub async fn get_user_count(
     pool: &postgres::PgPool,
     user_id: i64,
 ) -> Result<Option<i64>, sqlx::Error> {
-    let user: User = sqlx::query_as("SELECT id, count FROM users WHERE id = $1")
-        .bind(user_id)
-        .fetch_one(pool)
-        .await?;
+    let user: User =
+        sqlx::query_as("SELECT id, count FROM users WHERE id = $1")
+            .bind(user_id)
+            .fetch_one(pool)
+            .await?;
 
     Ok(Some(user.count))
 }
@@ -100,10 +102,12 @@ pub async fn add_message(
 ) -> Result<(), sqlx::Error> {
     // tries to get user from database, if not found create new user
     let user: User = {
-        match sqlx::query_as::<_, User>("SELECT id, count FROM users WHERE id = $1")
-            .bind(user_id)
-            .fetch_optional(pool)
-            .await?
+        match sqlx::query_as::<_, User>(
+            "SELECT id, count FROM users WHERE id = $1",
+        )
+        .bind(user_id)
+        .fetch_optional(pool)
+        .await?
         {
             Some(u) => u,
             None => {

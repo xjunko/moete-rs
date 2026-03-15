@@ -1,9 +1,13 @@
 use std::sync::Arc;
 
-use base64::{Engine as _, engine::general_purpose};
+use base64::Engine as _;
+use base64::engine::general_purpose;
 use serde_json::json;
 
-pub async fn get_cdn_url(url: &str, config: Arc<moete_core::Config>) -> Option<String> {
+pub async fn get_cdn_url(
+    url: &str,
+    config: Arc<moete_core::Config>,
+) -> Option<String> {
     let client = reqwest::Client::new();
 
     if let Ok(res) = client

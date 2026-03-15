@@ -4,13 +4,11 @@ use serenity::all::CreateEmbedFooter;
 
 /// Subcommands
 use super::add::add;
-use super::{
-    clone::clone,
-    info::info,
-    remove::remove,
-    search::search,
-    text::{text, text_as},
-};
+use super::clone::clone;
+use super::info::info;
+use super::remove::remove;
+use super::search::search;
+use super::text::{text, text_as};
 
 /// Help command for the emote system.
 #[allow(clippy::useless_vec)]
@@ -46,7 +44,6 @@ pub async fn emote(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
         .footer(CreateEmbedFooter::new(
             "You need to be whitelisted to use the command with the *.",
         ));
-    ctx.send(CreateReply::default().embed(embed).reply(true))
-        .await?;
+    ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
     Ok(())
 }

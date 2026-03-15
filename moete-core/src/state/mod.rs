@@ -41,28 +41,32 @@ impl State {
             emotes: Arc::new(Mutex::new(EmoteManager::new())),
             database: None,
             currency: Arc::new(Mutex::new(Currencies::new())),
-            shortcut_cache: Arc::new(moete_database::shortcut::ShortcutCache::default()),
+            shortcut_cache: Arc::new(
+                moete_database::shortcut::ShortcutCache::default(),
+            ),
         }
     }
 
-    pub async fn load(&mut self, ctx: &serenity::Context) -> Result<(), MoeteError> {
-        self.database =
-            match moete_database::Database::connect(&self.config.services.database).await {
-                Ok(db) => Some(db),
-                Err(err) => {
-                    error!(
-                        "Failed to connect to database: {}, continuing without database.",
-                        err
-                    );
-                    None
-                },
-            };
+    pub async fn load(
+        &mut self,
+        ctx: &serenity::Context,
+    ) -> Result<(), MoeteError> {
+        self.database = match moete_database::Database::connect(
+            &self.config.services.database,
+        )
+        .await
+        {
+            Ok(db) => Some(db),
+            Err(err) => {
+                error!(
+                    "Failed to connect to database: {}, continuing without database.",
+                    err
+                );
+                None
+            },
+        };
 
-        self.emotes
-            .lock()
-            .await
-            .load(ctx, Arc::clone(&self.config))
-            .await;
+        self.emotes.lock().await.load(ctx, Arc::clone(&self.config)).await;
 
         let mut currency = self.currency.lock().await;
         currency.load().await?;
@@ -70,7 +74,5 @@ impl State {
         Ok(())
     }
 
-    pub fn uptime(&self) -> std::time::Duration {
-        self.started_at.elapsed()
-    }
+    pub fn uptime(&self) -> std::time::Duration { self.started_at.elapsed() }
 }

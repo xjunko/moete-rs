@@ -1,7 +1,5 @@
-use std::{
-    collections::HashMap,
-    time::{Duration, Instant},
-};
+use std::collections::HashMap;
+use std::time::{Duration, Instant};
 
 use moete_core::MoeteError;
 use once_cell::sync::Lazy;
@@ -84,7 +82,8 @@ pub async fn on_message(
                 && !is_role_in_use(ctx, guild_id, role.id).await?
             {
                 // most likely we made it, can be safely delete.
-                if let Err(err) = guild_id.delete_role(&ctx.http, role.id).await {
+                if let Err(err) = guild_id.delete_role(&ctx.http, role.id).await
+                {
                     error!("Failed to delete role {}: {:?}", role.name, err);
                 }
             }

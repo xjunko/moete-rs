@@ -3,14 +3,13 @@ use std::collections::HashMap;
 use ::serenity::all::GetMessages;
 use moete_core::MoeteError;
 use once_cell::sync::Lazy;
-use rand::{
-    random, rng,
-    seq::{IndexedRandom, SliceRandom},
-};
+use rand::seq::{IndexedRandom, SliceRandom};
+use rand::{random, rng};
 use serenity::all::{ChannelId, ExecuteWebhook};
 use tokio::sync::Mutex;
 
-use super::{ALLOWED, text::generate};
+use super::ALLOWED;
+use super::text::generate;
 use crate::serenity;
 
 const RATE: f32 = 0.05; // 5% 
@@ -77,7 +76,8 @@ pub async fn on_message(
                 .into_iter()
                 .find(|m| !m.author.bot && !m.content.is_empty())
                 .and_then(|m| {
-                    let words: Vec<&str> = m.content.split_whitespace().collect();
+                    let words: Vec<&str> =
+                        m.content.split_whitespace().collect();
                     words.choose(&mut rng).map(|s| s.to_string())
                 })
         } else {
@@ -98,11 +98,16 @@ pub async fn on_message(
             .map(|idx| idx as i32 + 1); // offset by one since generate uses 1-based index.
 
         // safe to assume we can generate now.
-        if let Some((content, _)) = generate(picked_option.unwrap_or(1), seed_word, database).await
+        if let Some((content, _)) =
+            generate(picked_option.unwrap_or(1), seed_word, database).await
             && let Some(content) = content
             && let Ok(user) = target_member.to_user(ctx.http.clone()).await
             && let Some(webhook) =
-                moete_discord::webhook::get_or_create_webhook(ctx, message.channel_id).await
+                moete_discord::webhook::get_or_create_webhook(
+                    ctx,
+                    message.channel_id,
+                )
+                .await
         {
             let _ = webhook
                 .execute(

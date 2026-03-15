@@ -12,11 +12,8 @@ use super::color::is_moete_supported;
 )]
 pub async fn clear(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     if is_moete_supported(ctx).await.is_some() {
-        let member = ctx
-            .guild_id()
-            .unwrap()
-            .member(ctx.http(), ctx.author().id)
-            .await?;
+        let member =
+            ctx.guild_id().unwrap().member(ctx.http(), ctx.author().id).await?;
 
         let roles = {
             let guild = ctx.guild().unwrap();
@@ -36,8 +33,7 @@ pub async fn clear(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
         }
 
         if removed {
-            ctx.say("Your custom color roles have been removed.")
-                .await?;
+            ctx.say("Your custom color roles have been removed.").await?;
         } else {
             ctx.say("You have no custom color roles to remove.").await?;
         }
