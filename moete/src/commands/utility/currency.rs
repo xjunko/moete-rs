@@ -20,7 +20,7 @@ use tokio::sync::Mutex;
 
 static FMT_NUMBER: Lazy<human_format::Formatter> = Lazy::new(|| {
     let mut formatter = human_format::Formatter::new();
-    formatter.with_decimals(2);
+    formatter.with_decimals(4);
     formatter.with_separator("");
     formatter
 });
@@ -43,10 +43,25 @@ fn get_date_string(
 
 /// Returns a number in a human readable format.
 fn readable_number(num: f64) -> String {
-    match num {
-        n if n >= 1.00 => FMT_NUMBER.format(num),
-        _ => format!("{:.6}", num),
+    let abs = num.abs();
+
+    if abs >= 1.0 {
+        return FMT_NUMBER.format(num);
     }
+
+    // we handle small numbers with fixed decimal places, but we don't want to show too many zeros, so we trim them.
+    if abs == 0.0 {
+        return "0".to_string();
+    }
+
+    if abs >= 1e-4 {
+        return format!("{:.8}", num)
+            .trim_end_matches('0')
+            .trim_end_matches('.')
+            .to_string();
+    }
+
+    format!("{:.4e}", num)
 }
 
 /// Parses a shorthand number (e.g., 1k, 2.5M) into a f64.
