@@ -14,6 +14,8 @@ use tracing::info;
 
 use super::ALLOWED;
 
+const OPTIMAL_AMOUNT_MESSAGES: usize = 1 << 16;
+
 async fn load_data(
     id: u64,
     database: &moete_database::Database,
@@ -36,6 +38,14 @@ async fn load_data(
     None
 }
 
+pub fn get_user_id_from_index(index: i32) -> Option<u64> {
+    if index <= 0 || index > ALLOWED.len() as i32 {
+        return None;
+    }
+
+    Some(ALLOWED[index as usize - 1])
+}
+
 pub async fn generate(
     picked: i32,
     starter: Option<String>,
@@ -46,7 +56,7 @@ pub async fn generate(
     }
 
     let outer = std::time::Instant::now();
-    let user_id = ALLOWED[picked as usize - 1];
+    let user_id = get_user_id_from_index(picked)?;
     let result: Option<String> = {
         // load data
         let start = std::time::Instant::now();
@@ -128,6 +138,17 @@ pub async fn markov(
 ) -> Result<(), MoeteError> {
     let state: &moete_core::State = ctx.data();
 
+    if let Some(picked) = picked
+        && let Some(user_id) = get_user_id_from_index(picked)
+    {
+        // skip if the user is not in the guild
+        if let Some(guild) = ctx.guild() {
+            if !guild.members.contains_key(&UserId::new(user_id)) {
+                return Ok(()); // quietly ignore
+            }
+        }
+    }
+
     if let Some(database) = state.database.as_ref()
         && let Some(picked) = picked
         && let Some((content, user_id)) =
@@ -160,6 +181,12 @@ pub async fn markov(
     } else {
         // Show everyone's stats on error.
         let mut available_users = Vec::new();
+
+        {
+            available_users
+                .push(format!("{:<3} {:<20} | {:>7}%", "ID", "Name", "Cmp"));
+        }
+
         let cache = Arc::clone(&ctx.serenity_context().cache);
         for (n, id) in ALLOWED.iter().enumerate() {
             // Filter out if the user is not in the guild.
@@ -182,24 +209,24 @@ pub async fn markov(
             // Gets user from discord cache
             if let Some(user) = cache.user(*id) {
                 available_users.push(format!(
-                    "{}. {} | {} messages",
+                    "{:<3} {:<20} | {:>7.2}%",
                     n + 1,
                     user.name,
-                    count
+                    (count as f64 / OPTIMAL_AMOUNT_MESSAGES as f64) * 100.0
                 ));
             } else {
                 available_users.push(format!(
-                    "{}. {} | {} messages",
+                    "{:<3} {:<20} | {:>7.2}%",
                     n + 1,
                     id,
-                    count
+                    (count as f64 / OPTIMAL_AMOUNT_MESSAGES as f64) * 100.0
                 ));
             }
         }
 
         let embed = moete_discord::embed::create_embed()
             .title("Markovify | Main")
-            .field("Available", available_users.join("\n"), true);
+            .field("", format!("```{}```", available_users.join("\n")), true);
         ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
     }
 
