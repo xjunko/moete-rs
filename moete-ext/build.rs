@@ -104,7 +104,7 @@ fn main() {
     }
     out.push_str("    ]\n}");
 
-    let dest_path = std::path::Path::new("../moete/src/commands/macros")
+    let dest_path = std::path::Path::new("../moete/src/commands/user_macros")
         .join("commands.rs");
     std::fs::write(&dest_path, out.clone())
         .expect("Failed to write macro_commands.rs");

@@ -7,9 +7,6 @@ pub mod role;
 pub mod user_macros;
 pub mod utility;
 
-#[cfg(feature = "macros")]
-pub mod macros;
-
 pub fn commands()
 -> Vec<poise::Command<moete_core::State, moete_core::MoeteError>> {
     let mut cmds = Vec::new();
@@ -23,7 +20,7 @@ pub fn commands()
     cmds.extend(user_macros::commands());
 
     #[cfg(feature = "macros")]
-    cmds.extend(macros::commands());
+    cmds.extend(user_macros::commands::macro_commands());
 
     cmds
 }
