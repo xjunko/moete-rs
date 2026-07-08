@@ -162,6 +162,13 @@ pub async fn markov(
         let mut available_users = Vec::new();
         let cache = Arc::clone(&ctx.serenity_context().cache);
         for (n, id) in ALLOWED.iter().enumerate() {
+            // Filter out if the user is not in the guild.
+            if let Some(guild) = ctx.guild() {
+                if !guild.members.contains_key(&UserId::new(*id)) {
+                    continue;
+                }
+            }
+
             // Get user count
             let count = if let Some(database) = state.database.as_ref() {
                 match database.get_user_count(*id as i64).await {
