@@ -107,12 +107,12 @@ pub async fn convert(
 
     // NOTE: because some people are dumb, user might give commas in the amount
     // IE: 1,000 -> 1000
-    let amount = amount.map(|a| a.replace(",", ""));
+    // also default to 1 if no amount is given
+    let amount = amount.map(|a| a.replace(",", "")).unwrap_or("1".to_string());
 
     // if all argument is valid
     if let Some(base) = base_currency
         && let Some(target) = target_currency
-        && let Some(amount) = amount
         && let Some(amount) = parse_shorthand(&amount)
     {
         let mut currency = ctx.data().currency.lock().await;
@@ -133,8 +133,6 @@ pub async fn convert(
             .fetch_range(&base, &target, &a_week_ago_str, &tomorrow_str)
             .await
         {
-            println!("Rates: {:?}", rates);
-
             if let Some(latest_rate) = rates.get(&get_date_string(Some(today)))
             {
                 // NOTE: optimally if we can get the latest rate, that should mean get all the rates.
