@@ -1,3 +1,5 @@
+#![allow(clippy::result_large_err)] // whatever
+
 use poise::serenity_prelude as serenity;
 
 pub mod cdn;

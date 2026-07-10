@@ -20,7 +20,7 @@ pub async fn count(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let data: &moete_core::State = ctx.data();
     let mut embeds: Vec<serenity::CreateEmbed> = Vec::new();
 
-    for (word, _) in WORDS.iter() {
+    for word in WORDS.keys() {
         let mut embed = moete_discord::embed::create_embed()
             .title(format!(
                 "{} | {}-word counter",

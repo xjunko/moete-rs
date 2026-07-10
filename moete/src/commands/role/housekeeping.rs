@@ -27,7 +27,7 @@ async fn is_moete_supported(
     {
         let roles = guild.roles.clone();
 
-        for (_, role) in roles.iter() {
+        for role in roles.values() {
             if role.name.to_lowercase() == MOETE_ANCHOR.to_lowercase() {
                 return Some(roles.values().cloned().collect());
             }

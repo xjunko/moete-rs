@@ -123,6 +123,7 @@ pub async fn generate(
 }
 
 /// Generates a random text based on the user's messages.
+#[allow(clippy::collapsible_if)]
 #[poise::command(
     prefix_command,
     slash_command,
@@ -190,10 +191,10 @@ pub async fn markov(
         let cache = Arc::clone(&ctx.serenity_context().cache);
         for (n, id) in ALLOWED.iter().enumerate() {
             // Filter out if the user is not in the guild.
-            if let Some(guild) = ctx.guild() {
-                if !guild.members.contains_key(&UserId::new(*id)) {
-                    continue;
-                }
+            if let Some(guild) = ctx.guild()
+                && !guild.members.contains_key(&UserId::new(*id))
+            {
+                continue;
             }
 
             // Get user count

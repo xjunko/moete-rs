@@ -24,7 +24,7 @@ pub async fn is_moete_supported(ctx: MoeteContext<'_>) -> Option<Role> {
         guild.roles.clone()
     };
 
-    for (_, role) in roles.iter() {
+    for role in roles.values() {
         if role.name.to_lowercase() == MOETE_ANCHOR.to_lowercase() {
             return Some(role.clone());
         }
@@ -48,7 +48,7 @@ pub async fn get_colour_role_from_server_if_exists_else_make_one(
         let name = format!("M{}", color_to_hex(color));
 
         // Use existing role if it exists
-        for (_, role) in roles.iter() {
+        for role in roles.values() {
             if role.name == name {
                 return Some(role.clone());
             }
