@@ -202,19 +202,19 @@ pub async fn convert(
                     .into_drawing_area();
                 root.fill(&RGBColor(56, 58, 64))?;
 
-                    // chart fitting
-                    let chart_start = data
-    .first()
-    .map(|(date, _)| *date)
-    .unwrap_or(a_week_ago);
+                // chart fitting
+                let chart_start = data
+                    .first()
+                    .map(|(date, _)| *date)
+                    .unwrap_or(a_week_ago);
 
-    let chart_end = data
-    .last()
-    .map(|(date, _)| *date)
-    .unwrap_or(today);
+                let chart_end = data
+                    .last()
+                    .map(|(date, _)| *date)
+                    .unwrap_or(today);
 
 
-                  // padding
+                // padding
                 let padding = (largest_rate - smallest_rate) * 0.05;
                 let y_min = smallest_rate - padding;
                 let y_max = largest_rate + padding;
@@ -228,7 +228,7 @@ pub async fn convert(
                     RGBColor(255, 0, 0)
                 };
 
-                 let mut chart = ChartBuilder::on(&root)
+                let mut chart = ChartBuilder::on(&root)
                     .margin(40)
                     .x_label_area_size(40)
                     .y_label_area_size(70)
@@ -255,10 +255,10 @@ pub async fn convert(
                     .light_line_style(RGBAColor(1, 1, 1, 0.1))
                     .draw()?;
 
-                  chart
+                chart
                     .draw_series(LineSeries::new(data.clone(), &rate_color))?;
 
-                  chart.draw_series(AreaSeries::new(
+                chart.draw_series(AreaSeries::new(
                     data.clone(),
                     y_min,
                     rate_color.mix(0.15),
