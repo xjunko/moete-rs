@@ -1,4 +1,7 @@
-use chrono::Duration;
+use chrono::{
+    Duration,
+    TimeZone,
+};
 use moete_core::{
     MoeteContext,
     MoeteError,
@@ -16,7 +19,6 @@ use serenity::all::{
     CreateAttachment,
     CreateEmbedFooter,
 };
-use tokio::sync::Mutex;
 
 static FMT_NUMBER: Lazy<human_format::Formatter> = Lazy::new(|| {
     let mut formatter = human_format::Formatter::new();
@@ -24,11 +26,6 @@ static FMT_NUMBER: Lazy<human_format::Formatter> = Lazy::new(|| {
     formatter.with_separator("");
     formatter
 });
-
-static LAST_REFRESH: Lazy<Mutex<Option<std::time::Instant>>> =
-    Lazy::new(|| Mutex::new(None));
-const REFRESH_INTERVAL: std::time::Duration =
-    std::time::Duration::from_secs(60 * 60 * 6); // 6 hours
 
 /// Returns the date string in "YYYY-MM-DD" format for a given optional date else uses today's date.
 fn get_date_string(
@@ -90,21 +87,11 @@ fn parse_shorthand(input: &str) -> Option<f64> {
     Some(num * multiplier)
 }
 
-/// Refreshes the currencies information.
-#[poise::command(prefix_command, slash_command, category = "Utility")]
-pub async fn refresh(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
-    let mut currency = ctx.data().currency.lock().await;
-    currency.refresh().await;
-    ctx.say("Currency rates refreshed").await?;
-    Ok(())
-}
-
 /// Converts a currency from one to another.
 #[poise::command(
     prefix_command,
     slash_command,
     category = "Utility",
-    subcommands("refresh"),
     aliases("cvt")
 )]
 pub async fn convert(
@@ -118,41 +105,6 @@ pub async fn convert(
         .send(CreateReply::default().content("Loading...").reply(true))
         .await?;
 
-    // refresh if needed
-    {
-        let mut last_refresh = LAST_REFRESH.lock().await;
-        match *last_refresh {
-            Some(t) if t.elapsed() < REFRESH_INTERVAL => {},
-            _ => {
-                // tell the user that we're refreshing the data
-                progress_update_msg
-                    .edit(
-                        ctx,
-                        CreateReply::default()
-                            .content("Refreshing initial currency data, please wait...")
-                            .reply(true),
-                    )
-                    .await?;
-
-                // this might take a while
-                let mut currency = ctx.data().currency.lock().await;
-                currency.refresh().await;
-
-                //
-                progress_update_msg
-                    .edit(
-                        ctx,
-                        CreateReply::default()
-                            .content("Currency data refreshed, processing your request...")
-                            .reply(true),
-                    )
-                    .await?;
-
-                *last_refresh = Some(std::time::Instant::now());
-            },
-        }
-    }
-
     // NOTE: because some people are dumb, user might give commas in the amount
     // IE: 1,000 -> 1000
     let amount = amount.map(|a| a.replace(",", ""));
@@ -163,175 +115,134 @@ pub async fn convert(
         && let Some(amount) = amount
         && let Some(amount) = parse_shorthand(&amount)
     {
-        let today = chrono::Local::now();
-        let today_fmt = get_date_string(Some(today));
-
         let mut currency = ctx.data().currency.lock().await;
-        let base_currency =
-            currency.fetch(&base.to_lowercase(), Some(&today_fmt)).await?;
-        let target_currency =
-            currency.fetch(&target.to_lowercase(), Some(&today_fmt)).await?;
+
+        let today = chrono::Local::now();
+        let tomorrow = today + Duration::days(1); // QUIRKS: needs to offset this by a day
+        let a_week_ago = today - Duration::days(7);
+
+        let today_str = get_date_string(Some(today));
+        let tomorrow_str = get_date_string(Some(tomorrow));
+        let a_week_ago_str = get_date_string(Some(a_week_ago));
 
         // default is green
         let mut embed =
             discord::embed::create_embed().color(Color::from_rgb(0, 255, 0));
 
-        if base_currency.is_none() {
-            embed = embed
-                .description(format!(
-                    "Base: Couldn't find a currency info with the name: {}",
-                    base
-                ))
-                .color(Color::from_rgb(255, 0, 0));
-            progress_update_msg
-                .edit(
-                    ctx,
-                    CreateReply::default().content("").embed(embed).reply(true),
-                )
-                .await?;
-            return Ok(());
-        }
+        if let Ok((rates, level_of_accuracy)) = currency
+            .fetch_range(&base, &target, &a_week_ago_str, &tomorrow_str)
+            .await
+        {
+            println!("Rates: {:?}", rates);
 
-        if target_currency.is_none() {
-            embed = embed
-                .description(format!(
-                    "Target: Couldn't find a currency info with the name: {}",
-                    target
-                ))
-                .color(Color::from_rgb(255, 0, 0));
-            progress_update_msg
-                .edit(
-                    ctx,
-                    CreateReply::default().content("").embed(embed).reply(true),
-                )
-                .await?;
-            return Ok(());
-        }
-
-        let base_currency = base_currency.unwrap(); // safe due to the is_none check above.
-        let target_currency = target_currency.unwrap(); // same as above.
-        let rate = base_currency.get_rate_to(&target_currency.name);
-
-        if rate.is_none() {
-            embed = embed
-                .description(format!(
-                    "No exchange rate found from {} to {}",
-                    base_currency.name, target_currency.name
-                ))
-                .color(Color::from_rgb(255, 0, 0));
-            progress_update_msg
-                .edit(
-                    ctx,
-                    CreateReply::default().content("").embed(embed).reply(true),
-                )
-                .await?;
-            return Ok(());
-        }
-
-        let rate = rate.unwrap(); // safe due to the is_none check above.
-        let converted_amount = readable_number(amount * rate);
-        embed = embed
-            .title(format!(
-                "{} | Currency Conversion",
-                ctx.data().config.discord.name
-            ))
-            .field(
-                "Latest",
-                format!(
-                    "**{} {} = {} {}**",
-                    readable_number(amount),
-                    base_currency.name.to_uppercase(),
-                    converted_amount,
-                    target_currency.name.to_uppercase()
-                ),
-                false,
-            )
-            .footer(CreateEmbedFooter::new(""));
-
-        // generate plots
-        // fetches history over the past 7 days
-        // NOTE: this might be slow, so tell the user we're fetching the data
-        progress_update_msg
-                .edit(
-                    ctx,
-                    CreateReply::default()
-                        .content("Fetching historical data for the past 7 days, please wait...")
-                        .reply(true),
-                ).await?;
-
-        let mut rates = Vec::new();
-        for days_ago in (0..7).rev() {
-            let date = today - Duration::days(days_ago);
-            let date_fmt = get_date_string(Some(date));
-
-            if !currency.is_cached(&base_currency.name, Some(&date_fmt))
-                || !currency.is_cached(&target_currency.name, Some(&date_fmt))
+            if let Some(latest_rate) = rates.get(&get_date_string(Some(today)))
             {
-                progress_update_msg
-                        .edit(ctx, CreateReply::default().content(format!("Fetching historical data for {} and {}, please wait. ({}%)", base_currency.name.to_uppercase(), target_currency.name.to_uppercase(), (7 - days_ago) * 100 / 7)))
-                        .await?;
-            }
+                // NOTE: optimally if we can get the latest rate, that should mean get all the rates.
+                embed = embed
+                    .title(format!(
+                        "{} | Currency Conversion",
+                        ctx.data().config.discord.name
+                    ))
+                    .field(
+                        "Latest",
+                        format!(
+                            "**{} {} = {} {}**",
+                            readable_number(amount),
+                            base.to_uppercase(),
+                            readable_number(amount * latest_rate),
+                            target.to_uppercase(),
+                        ),
+                        true,
+                    )
+                    .field(
+                        "Accuracy",
+                        format!("**{}**", level_of_accuracy),
+                        true,
+                    )
+                    .footer(CreateEmbedFooter::new("The accuracy might be off by a few margins due to the data source."));
 
-            if let Some(base_rate) =
-                currency.fetch(&base_currency.name, Some(&date_fmt)).await?
-                && currency
-                    .fetch(&target_currency.name, Some(&date_fmt))
-                    .await?
-                    .is_some()
-                && let Some(rate) = base_rate.get_rate_to(&target_currency.name)
-            {
-                rates.push(rate);
-            }
-        }
+                // build the data
 
-        let smallest_rate =
-            rates.iter().cloned().fold(f64::INFINITY, |a, b| a.min(b));
-        let largest_rate =
-            rates.iter().cloned().fold(f64::NEG_INFINITY, |a, b| a.max(b));
-        let plot_id = ctx.id();
+                let mut data: Vec<_> = rates
+                    .iter()
+                    .map(|(date_str, rate)| {
+                        let date = chrono::NaiveDate::parse_from_str(
+                            date_str, "%Y-%m-%d",
+                        )
+                        .unwrap_or_else(|_| today.naive_local().date());
 
-        let path = format!(
-            ".tmp/charts/{}_{}-{}.png",
-            plot_id, base_currency.name, target_currency.name
-        );
-        let plot_path = path.clone();
+                        let datetime = chrono::Local
+                            .from_local_datetime(
+                                &date.and_hms_opt(0, 0, 0).unwrap(),
+                            )
+                            .unwrap();
 
-        // plot the rates
-        tokio::task::spawn_blocking(
-            move || -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-                let root = BitMapBackend::new(&plot_path, (1024, 768))
+                        (datetime, *rate)
+                    })
+                    .collect();
+
+                data.sort_by_key(|(datetime, _)| *datetime);
+
+                // graph hell here we go
+                let smallest_rate = rates
+                    .values()
+                    .cloned()
+                    .fold(f64::INFINITY, |a, b| a.min(b));
+                let largest_rate = rates
+                    .values()
+                    .cloned()
+                    .fold(f64::NEG_INFINITY, |a, b| a.max(b));
+
+                let plot_id = ctx.id();
+
+                let path =
+                    format!(".tmp/charts/{}_{}-{}.png", plot_id, base, target);
+                let plot_path = path.clone();
+
+                tokio::task::spawn_blocking( move || -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+                      let root = BitMapBackend::new(&plot_path, (1024, 768))
                     .into_drawing_area();
                 root.fill(&RGBColor(56, 58, 64))?;
 
-                let (to_date, from_date) = (today, today - Duration::days(6));
+                    // chart fitting
+                    let chart_start = data
+    .first()
+    .map(|(date, _)| *date)
+    .unwrap_or(a_week_ago);
 
-                // padding
+    let chart_end = data
+    .last()
+    .map(|(date, _)| *date)
+    .unwrap_or(today);
+
+
+                  // padding
                 let padding = (largest_rate - smallest_rate) * 0.05;
                 let y_min = smallest_rate - padding;
                 let y_max = largest_rate + padding;
 
                 // use red/green based on rate change
-                let rate_color = if rates.last().unwrap_or(&0.0)
-                    >= rates.first().unwrap_or(&0.0)
+                let rate_color =  if rates.get(&today_str).unwrap_or(&0.0)
+                    >= rates.get(&a_week_ago_str).unwrap_or(&0.0)
                 {
                     RGBColor(0, 128, 255)
                 } else {
                     RGBColor(255, 0, 0)
                 };
 
-                let mut chart = ChartBuilder::on(&root)
+                 let mut chart = ChartBuilder::on(&root)
                     .margin(40)
                     .x_label_area_size(40)
                     .y_label_area_size(70)
                     .caption(
                         format!(
                             "{} → {} (Last 7 Days)",
-                            base_currency.name.to_uppercase(),
-                            target_currency.name.to_uppercase()
+                            base.to_uppercase(),
+                            target.to_uppercase()
                         ),
                         ("sans-serif", 40).into_font().color(&WHITE),
                     )
-                    .build_cartesian_2d(from_date..to_date, y_min..y_max)?;
+                    .build_cartesian_2d(chart_start..chart_end, y_min..y_max)?;
 
                 chart
                     .configure_mesh()
@@ -346,52 +257,74 @@ pub async fn convert(
                     .light_line_style(RGBAColor(1, 1, 1, 0.1))
                     .draw()?;
 
-                let data: Vec<_> = rates
-                    .iter()
-                    .enumerate()
-                    .map(|(i, rate)| {
-                        let date = today - Duration::days((6 - i) as i64);
-                        (date, *rate)
-                    })
-                    .collect();
+                  chart
+                    .draw_series(LineSeries::new(data.clone(), &rate_color))?;
 
-                chart.draw_series(AreaSeries::new(
+                  chart.draw_series(AreaSeries::new(
                     data.clone(),
                     y_min,
                     rate_color.mix(0.15),
                 ))?;
 
-                chart
-                    .draw_series(LineSeries::new(data.clone(), &rate_color))?;
-
                 chart.draw_series(data.iter().map(|(date, rate)| {
                     Circle::new((*date, *rate), 5, rate_color.filled())
                 }))?;
+                  root.present()?;
+                  Ok(())
+                },).await??;
 
-                root.present()?;
-                Ok(())
-            },
-        )
-        .await??;
+                // attach the picture
+                let bytes = std::fs::read(&path)?;
+                let attachment = CreateAttachment::bytes(bytes, "greg.png");
+                embed = embed.image("attachment://greg.png");
 
-        // attach the picture
-        let bytes = std::fs::read(&path)?;
-        let attachment = CreateAttachment::bytes(bytes, "greg.png");
-        embed = embed.image("attachment://greg.png");
+                progress_update_msg
+                    .edit(
+                        ctx,
+                        CreateReply::default()
+                            .content("")
+                            .embed(embed)
+                            .attachment(attachment)
+                            .reply(true),
+                    )
+                    .await?;
 
-        progress_update_msg
-            .edit(
-                ctx,
-                CreateReply::default()
-                    .content("")
-                    .embed(embed)
-                    .attachment(attachment)
-                    .reply(true),
-            )
-            .await?;
-
-        // should safe ot delete now
-        std::fs::remove_file(&path)?;
+                // should safe ot delete now
+                std::fs::remove_file(&path)?;
+            } else {
+                embed = embed
+                    .description(format!(
+                        "No exchange rate data available for {} to {} on {}.",
+                        base.to_uppercase(),
+                        target.to_uppercase(),
+                        get_date_string(Some(today))
+                    ))
+                    .color(Color::from_rgb(255, 0, 0));
+                progress_update_msg
+                    .edit(
+                        ctx,
+                        CreateReply::default()
+                            .content("")
+                            .embed(embed)
+                            .reply(true),
+                    )
+                    .await?;
+                return Ok(());
+            }
+        } else {
+            embed = embed
+                .description(
+                    "Something went wrong while fetching rates. Please try again later.",
+                )
+                .color(Color::from_rgb(255, 0, 0));
+            progress_update_msg
+                .edit(
+                    ctx,
+                    CreateReply::default().content("").embed(embed).reply(true),
+                )
+                .await?;
+            return Ok(());
+        }
     } else {
         let embed = discord::embed::create_embed()
             .title(format!(
@@ -419,20 +352,7 @@ pub async fn convert(
                 false,
             )
             .field("Note", "```You can use shorthand notation for amounts (e.g., 1k = 1000, 2.5M = 2500000, etc.)\nIt only goes up to 1Q (quadrillion).```", false)
-            .field(
-                "Last updated",
-                format!(
-                    "```{} ago```",
-                    humantime::format_duration(
-                        LAST_REFRESH
-                            .lock()
-                            .await
-                            .unwrap_or(std::time::Instant::now())
-                            .elapsed()
-                    )
-                ),
-                false,
-            );
+            ;
         ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
     }
 

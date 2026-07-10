@@ -1,3 +1,3 @@
-mod currency;
+mod currencies;
 
-pub use currency::*;
+pub use currencies::*;

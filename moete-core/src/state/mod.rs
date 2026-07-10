@@ -74,9 +74,6 @@ impl State {
 
         self.emotes.lock().await.load(ctx, Arc::clone(&self.config)).await;
 
-        let mut currency = self.currency.lock().await;
-        currency.load().await?;
-
         Ok(())
     }
 
