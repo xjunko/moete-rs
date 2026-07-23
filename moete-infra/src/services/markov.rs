@@ -12,7 +12,7 @@ pub async fn get_user(
         && let Ok(messages) =
             repositories::markov::find_messages(pool, user_id).await
     {
-        Ok(Some(MarkovUser { id: user.id, count: user.count, messages }))
+        Ok(Some(MarkovUser::from((user, messages))))
     } else {
         Ok(None)
     }
