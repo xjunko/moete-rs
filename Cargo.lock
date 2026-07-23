@@ -1495,7 +1495,7 @@ dependencies = [
 
 [[package]]
 name = "moete"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "chrono",
  "dotenv",
@@ -1503,9 +1503,9 @@ dependencies = [
  "humantime",
  "marukov",
  "moete-core",
- "moete-database",
  "moete-discord",
  "moete-ext",
+ "moete-infra",
  "once_cell",
  "plotters",
  "poise",
@@ -1524,11 +1524,11 @@ dependencies = [
 
 [[package]]
 name = "moete-core"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "libc",
- "moete-database",
  "moete-ext",
+ "moete-infra",
  "once_cell",
  "poise",
  "serenity",
@@ -1538,17 +1538,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "moete-database"
-version = "0.2.0"
-dependencies = [
- "dashmap 6.1.0",
- "sqlx",
- "tracing",
-]
-
-[[package]]
 name = "moete-discord"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "base64",
  "moete-core",
@@ -1564,11 +1555,20 @@ dependencies = [
 
 [[package]]
 name = "moete-ext"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "reqwest",
  "serde",
  "serde_json",
+ "tracing",
+]
+
+[[package]]
+name = "moete-infra"
+version = "0.3.0"
+dependencies = [
+ "dashmap 6.1.0",
+ "sqlx",
  "tracing",
 ]
 

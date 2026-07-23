@@ -62,9 +62,12 @@ pub async fn on_message(
         // increment in database
         if let Some(database) = data.database.as_ref() {
             for word in to_increment {
-                database
-                    .increment_counter(message.author.id.into(), &word)
-                    .await?;
+                moete_infra::services::counter::increment_word_for_user_id(
+                    database,
+                    message.author.id.into(),
+                    &word,
+                )
+                .await?;
             }
         }
     }

@@ -13,5 +13,5 @@ serenity = { workspace = true }
 tokio.workspace = true
 tracing = { workspace = true }
 libc.workspace = true
-moete-database = { path = "../moete-database" }
+moete-infra = { path = "../moete-infra" }
 sqlx.workspace = true

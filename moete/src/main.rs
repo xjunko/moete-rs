@@ -147,7 +147,7 @@ async fn main() {
 
                 // build sql
                 if let Some(database) = state.database.as_ref() {
-                    database.build().await?;
+                    moete_infra::db::schema::build(database).await?;
                 }
 
                 // poise thingamajig

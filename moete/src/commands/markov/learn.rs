@@ -42,9 +42,12 @@ pub async fn on_message(
             return Ok(());
         }
 
-        database
-            .add_message(message.author.id.into(), &message.content)
-            .await?;
+        moete_infra::services::markov::add_message(
+            database,
+            message.author.id.into(),
+            &message.content,
+        )
+        .await?;
     }
 
     Ok(())

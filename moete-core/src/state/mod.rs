@@ -1,6 +1,8 @@
 use std::sync::Arc;
 
 use moete_ext::Currencies;
+use moete_infra::services::shortcut::ShortcutCache;
+use sqlx::postgres;
 use tokio::sync::Mutex;
 use tracing::error;
 
@@ -19,10 +21,10 @@ pub struct State {
 
     pub config: Arc<Config>,
     pub emotes: Arc<Mutex<EmoteManager>>,
-    pub database: Option<moete_database::Database>,
+    pub database: Option<Arc<postgres::PgPool>>,
     pub currency: Arc<Mutex<Currencies>>,
 
-    pub shortcut_cache: Arc<moete_database::shortcut::ShortcutCache>,
+    pub shortcut_cache: Arc<ShortcutCache>,
 }
 
 impl Clone for State {
@@ -47,9 +49,7 @@ impl State {
             emotes: Arc::new(Mutex::new(EmoteManager::new())),
             database: None,
             currency: Arc::new(Mutex::new(Currencies::new())),
-            shortcut_cache: Arc::new(
-                moete_database::shortcut::ShortcutCache::default(),
-            ),
+            shortcut_cache: Arc::new(ShortcutCache::default()),
         }
     }
 
@@ -57,12 +57,12 @@ impl State {
         &mut self,
         ctx: &serenity::Context,
     ) -> Result<(), MoeteError> {
-        self.database = match moete_database::Database::connect(
-            &self.config.services.database,
-        )
-        .await
+        self.database = match postgres::PgPoolOptions::new()
+            .max_connections(5)
+            .connect(&self.config.services.database)
+            .await
         {
-            Ok(db) => Some(db),
+            Ok(db) => Some(Arc::new(db)),
             Err(err) => {
                 error!(
                     "Failed to connect to database: {}, continuing without database.",

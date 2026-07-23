@@ -21,8 +21,11 @@ pub async fn shortcut(ctx: MoeteContext<'_>) -> Result<(), MoeteError> {
     let state: &moete_core::State = ctx.data();
 
     if let Some(database) = state.database.as_ref() {
-        let shortcuts =
-            database.get_all_shortcuts(ctx.guild_id().unwrap().into()).await?;
+        let shortcuts = moete_infra::services::shortcut::get_all(
+            database,
+            ctx.guild_id().unwrap().into(),
+        )
+        .await?;
 
         let icon_url = {
             if let Some(guild) = ctx.guild()
@@ -208,9 +211,12 @@ pub async fn add(
     // error handling
     {
         let mut error_occurred = false;
-        match database
-            .get_shortcut(ctx.guild_id().unwrap().into(), &trigger)
-            .await
+        match moete_infra::services::shortcut::get(
+            database,
+            ctx.guild_id().unwrap().into(),
+            &trigger,
+        )
+        .await
         {
             Err(e) => {
                 embed = embed
@@ -243,14 +249,14 @@ pub async fn add(
 
     // add shortcut
     {
-        match database
-            .add_shortcut(
-                ctx.guild_id().unwrap().into(),
-                &trigger,
-                &response,
-                cache,
-            )
-            .await
+        match moete_infra::services::shortcut::add(
+            database,
+            ctx.guild_id().unwrap().into(),
+            &trigger,
+            &response,
+            &cache,
+        )
+        .await
         {
             Err(e) => {
                 embed = embed
@@ -321,9 +327,13 @@ pub async fn remove(
             }
         });
 
-    match database
-        .remove_shortcut(ctx.guild_id().unwrap().into(), &trigger, cache)
-        .await
+    match moete_infra::services::shortcut::remove(
+        database,
+        ctx.guild_id().unwrap().into(),
+        &trigger,
+        &cache,
+    )
+    .await
     {
         Err(e) => {
             embed = embed
@@ -407,14 +417,14 @@ pub async fn update(
         }
     }
 
-    match database
-        .edit_shortcut(
-            ctx.guild_id().unwrap().into(),
-            &trigger,
-            &new_response,
-            cache,
-        )
-        .await
+    match moete_infra::services::shortcut::edit(
+        database,
+        ctx.guild_id().unwrap().into(),
+        &trigger,
+        &new_response,
+        &cache,
+    )
+    .await
     {
         Err(e) => {
             embed = embed

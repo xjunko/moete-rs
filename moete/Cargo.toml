@@ -31,4 +31,4 @@ sys-info = "0.9.1"
 humantime = "2.3.0"
 human_format = "1.1.0"
 plotters.workspace = true
-moete-database = { path = "../moete-database" }
+moete-infra = { path = "../moete-infra" }

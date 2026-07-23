@@ -10,6 +10,7 @@ use serenity::all::{
     ExecuteWebhook,
     UserId,
 };
+use sqlx::postgres;
 use tracing::info;
 
 use super::ALLOWED;
@@ -18,11 +19,13 @@ const OPTIMAL_AMOUNT_MESSAGES: usize = 1 << 16;
 
 async fn load_data(
     id: u64,
-    database: &moete_database::Database,
+    database: &Arc<postgres::PgPool>,
 ) -> Option<String> {
     info!("Loading data for user {}", id);
 
-    if let Ok(user_data) = database.get_user(id.try_into().ok()?).await
+    if let Ok(user_data) =
+        moete_infra::services::markov::get_user(database, id.try_into().ok()?)
+            .await
         && let Some(data) = user_data
     {
         info!("Loaded {} messages for user {}", data.messages.len(), id);
@@ -49,7 +52,7 @@ pub fn get_user_id_from_index(index: i32) -> Option<u64> {
 pub async fn generate(
     picked: i32,
     starter: Option<String>,
-    database: &moete_database::Database,
+    database: &Arc<postgres::PgPool>,
 ) -> Option<(Option<String>, u64)> {
     if picked <= 0 || picked > ALLOWED.len() as i32 {
         return None;
@@ -199,7 +202,11 @@ pub async fn markov(
 
             // Get user count
             let count = if let Some(database) = state.database.as_ref() {
-                match database.get_user_count(*id as i64).await {
+                match moete_infra::services::markov::get_user_count(
+                    database, *id as i64,
+                )
+                .await
+                {
                     Ok(Some(c)) => c,
                     _ => 0,
                 }
