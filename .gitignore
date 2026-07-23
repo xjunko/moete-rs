@@ -3,7 +3,7 @@
 
 # internals
 moete-ext/files/commands.json
-moete/src/commands/macros/*
+moete/src/commands/user_macros/commands.rs
 
 # cloud 
 fly.toml
