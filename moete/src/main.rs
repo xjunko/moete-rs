@@ -13,6 +13,7 @@ use tracing_subscriber::{
 // =======================================================
 mod commands;
 mod events;
+mod handler;
 mod routines;
 
 #[tokio::main]
@@ -36,89 +37,14 @@ async fn main() {
 
     // options
     let framework_options = poise::FrameworkOptions {
-        event_handler: |ctx, event, _framework, data: &moete_core::State| {
+        event_handler: |ctx, event, framework, data: &moete_core::State| {
             Box::pin(async move {
-                if let serenity::FullEvent::Ready { data_about_bot, .. } = event
-                {
-                    events::on_ready(ctx, data_about_bot).await?;
-                    {
-                        // this is slightly hacked in, but it works.
-                        // starts up the background tasks
-                        let ctx_arc = Arc::new(ctx.clone());
-                        routines::start(ctx_arc.clone(), data.clone()).await;
-                    }
-                }
-
-                if let serenity::FullEvent::Message { new_message } = event {
-                    events::on_message(ctx, new_message, data).await?;
-                }
-
-                Ok(())
+                handler::event_handler(ctx, event, framework, data).await
             })
         },
-        on_error: |err| {
+        on_error: |error| {
             Box::pin(async move {
-                match err {
-                    poise::FrameworkError::UnknownCommand { .. } => { /* noop */
-                    },
-
-                    poise::FrameworkError::ArgumentParse {
-                        ctx,
-                        input,
-                        error,
-                        ..
-                    } => {
-                        let usage = match &ctx.command().help_text {
-                            Some(help_text) => &**help_text,
-                            None => {
-                                "Please check the help menu for usage information"
-                            },
-                        };
-
-                        let response = if let Some(input) = input {
-                            format!(
-                                "**Cannot parse `{}` as argument: {}**\n{}",
-                                input, error, usage
-                            )
-                        } else {
-                            format!("**{}**\n{}", error, usage)
-                        };
-
-                        if response.contains("Too many arguments were passed")
-                            || response
-                                .contains("Too few arguments were passed")
-                        {
-                            let command_name = {
-                                if let Some(parent) =
-                                    ctx.parent_commands().last()
-                                {
-                                    format!(
-                                        "{} {}",
-                                        parent.name,
-                                        ctx.command().name
-                                    )
-                                } else {
-                                    ctx.command().name.to_string()
-                                }
-                            };
-
-                            // custom handler for this scenario
-                            let _ = moete_discord::help::help(
-                                ctx,
-                                Some(&command_name),
-                                moete_discord::help::HelpConfiguration::default(
-                                ),
-                            )
-                            .await;
-                        } else {
-                            let _ = ctx.say(response).await;
-                        }
-                    },
-
-                    _ => {
-                        let _ = poise::builtins::on_error(err).await;
-                    },
-                }
+                handler::on_error(error).await;
             })
         },
         prefix_options: poise::PrefixFrameworkOptions {
