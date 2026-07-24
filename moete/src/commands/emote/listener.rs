@@ -16,6 +16,20 @@ pub async fn on_message(
     message: &serenity::Message,
     data: &moete_core::State,
 ) -> Result<(), MoeteError> {
+    if let Some(guild_id) = message.guild_id
+        && let Some(database) = data.database.as_ref()
+    {
+        let configuration = moete_infra::services::configuration::get(
+            database,
+            guild_id.into(),
+        )
+        .await?;
+
+        if !configuration.server.allow_emote_fix.value {
+            return Ok(());
+        }
+    }
+
     if data.config.flag.debug && message.author.id != data.config.discord.owner
     {
         debug!("Message received: {:?}", message);

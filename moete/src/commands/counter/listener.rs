@@ -43,6 +43,20 @@ pub async fn on_message(
         return Ok(());
     }
 
+    if let Some(guild_id) = message.guild_id
+        && let Some(database) = data.database.as_ref()
+    {
+        let configuration = moete_infra::services::configuration::get(
+            database,
+            guild_id.into(),
+        )
+        .await?;
+
+        if !configuration.server.allow_word_counter.value {
+            return Ok(());
+        }
+    }
+
     if FLATTEN_WORDS.iter().any(|w| message.content.to_lowercase().contains(w))
     {
         // ok great, now we just have to find the main word.

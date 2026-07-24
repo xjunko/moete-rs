@@ -1,3 +1,4 @@
+mod configuration;
 mod currency;
 mod google;
 mod help;
@@ -13,6 +14,7 @@ pub fn commands()
 -> Vec<poise::Command<moete_core::State, moete_core::MoeteError>> {
     vec![
         help::help(),
+        configuration::configuration(),
         google::google(),
         nhentai::nhentai(),
         ping::ping(),

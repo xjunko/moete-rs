@@ -154,88 +154,109 @@ pub async fn markov(
     }
 
     if let Some(database) = state.database.as_ref()
-        && let Some(picked) = picked
-        && let Some((content, user_id)) =
-            generate(picked, starter, database).await
+        && let Some(guild_id) = ctx.guild_id()
     {
-        // handle empty content
-        let content = content.unwrap_or(
-            "Generation failed, must've been insufficient data.".to_string(),
-        );
+        let configuration = moete_infra::services::configuration::get(
+            database,
+            guild_id.into(),
+        )
+        .await?;
 
-        if let Ok(user) = UserId::new(user_id).to_user(ctx.http()).await
-            && let Some(webhook) =
-                moete_discord::webhook::get_or_create_webhook(
-                    ctx.serenity_context(),
-                    ctx.channel_id(),
-                )
-                .await
-        {
-            let _ = webhook
-                .execute(
-                    ctx.serenity_context(),
-                    true,
-                    ExecuteWebhook::new()
-                        .username(user.display_name())
-                        .avatar_url(user.face())
-                        .content(content),
-                )
-                .await;
-        }
-    } else {
-        // Show everyone's stats on error.
-        let mut available_users = Vec::new();
-
-        {
-            available_users
-                .push(format!("{:<3} {:<20} | {:>7}%", "ID", "Name", "Cmp"));
+        if !configuration.server.allow_markov_generation.value {
+            ctx.reply("Markov generation is disabled on this server.").await?;
+            return Ok(());
         }
 
-        let cache = Arc::clone(&ctx.serenity_context().cache);
-        for (n, id) in ALLOWED.iter().enumerate() {
-            // Filter out if the user is not in the guild.
-            if let Some(guild) = ctx.guild()
-                && !guild.members.contains_key(&UserId::new(*id))
+        if let Some(picked) = picked
+            && let Some((content, user_id)) =
+                generate(picked, starter, database).await
+        {
+            // handle empty content
+            let content = content.unwrap_or(
+                "Generation failed, must've been insufficient data."
+                    .to_string(),
+            );
+
+            if let Ok(user) = UserId::new(user_id).to_user(ctx.http()).await
+                && let Some(webhook) =
+                    moete_discord::webhook::get_or_create_webhook(
+                        ctx.serenity_context(),
+                        ctx.channel_id(),
+                    )
+                    .await
             {
-                continue;
+                let _ = webhook
+                    .execute(
+                        ctx.serenity_context(),
+                        true,
+                        ExecuteWebhook::new()
+                            .username(user.display_name())
+                            .avatar_url(user.face())
+                            .content(content),
+                    )
+                    .await;
+            }
+        } else {
+            // Show everyone's stats on error.
+            let mut available_users = Vec::new();
+
+            {
+                available_users.push(format!(
+                    "{:<3} {:<20} | {:>7}%",
+                    "ID", "Name", "Cmp"
+                ));
             }
 
-            // Get user count
-            let count = if let Some(database) = state.database.as_ref() {
-                match moete_infra::services::markov::get_user_count(
-                    database, *id as i64,
-                )
-                .await
+            let cache = Arc::clone(&ctx.serenity_context().cache);
+            for (n, id) in ALLOWED.iter().enumerate() {
+                // Filter out if the user is not in the guild.
+                if let Some(guild) = ctx.guild()
+                    && !guild.members.contains_key(&UserId::new(*id))
                 {
-                    Ok(Some(c)) => c,
-                    _ => 0,
+                    continue;
                 }
-            } else {
-                0
-            };
 
-            // Gets user from discord cache
-            if let Some(user) = cache.user(*id) {
-                available_users.push(format!(
-                    "{:<3} {:<20} | {:>7.2}%",
-                    n + 1,
-                    user.name,
-                    (count as f64 / OPTIMAL_AMOUNT_MESSAGES as f64) * 100.0
-                ));
-            } else {
-                available_users.push(format!(
-                    "{:<3} {:<20} | {:>7.2}%",
-                    n + 1,
-                    id,
-                    (count as f64 / OPTIMAL_AMOUNT_MESSAGES as f64) * 100.0
-                ));
+                // Get user count
+                let count = if let Some(database) = state.database.as_ref() {
+                    match moete_infra::services::markov::get_user_count(
+                        database, *id as i64,
+                    )
+                    .await
+                    {
+                        Ok(Some(c)) => c,
+                        _ => 0,
+                    }
+                } else {
+                    0
+                };
+
+                // Gets user from discord cache
+                if let Some(user) = cache.user(*id) {
+                    available_users.push(format!(
+                        "{:<3} {:<20} | {:>7.2}%",
+                        n + 1,
+                        user.name,
+                        (count as f64 / OPTIMAL_AMOUNT_MESSAGES as f64) * 100.0
+                    ));
+                } else {
+                    available_users.push(format!(
+                        "{:<3} {:<20} | {:>7.2}%",
+                        n + 1,
+                        id,
+                        (count as f64 / OPTIMAL_AMOUNT_MESSAGES as f64) * 100.0
+                    ));
+                }
             }
-        }
 
-        let embed = moete_discord::embed::create_embed()
-            .title("Markovify | Main")
-            .field("", format!("```{}```", available_users.join("\n")), true);
-        ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
+            let embed = moete_discord::embed::create_embed()
+                .title("Markovify | Main")
+                .field(
+                    "",
+                    format!("```{}```", available_users.join("\n")),
+                    true,
+                );
+            ctx.send(CreateReply::default().embed(embed).reply(true)).await?;
+        }
     }
 
     Ok(())
