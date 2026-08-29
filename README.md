@@ -40,17 +40,25 @@ then you can run with
 ```
 MOETE_FILTER=info cargo run
 ```
-or if you had `moete-ext` set up
+there is feature flags that you can use to enable more features of the bot
 ```
-MOETE_FILTER=info cargo run --features macros
+MOETE_FILTER=info cargo run --features macros,music
 ```
 
-## using moete-ext
+## feature flags (aka ranting)
+### `macros`
 for a more serious release of the bot, `macros` might be used, of which is not set up by default, due to it's private nature and very specific usecase.
 
 its basically used for memes macro in my case, but it can be used for anything, so a config is not supplied, but an example of it exists [[here]](moete-ext/files/commands.sample.json), make use of it if you want and compile the bot with `--features "macros"` and it'll sort itself out.
 
 the rust compiler will do it's job by first converting the json file into a loads of generated command with [[this]](moete-ext/build.rs).
+
+### `music`
+this adds a new section of commands to be, namely `Music`, basically it lets the bot play music from youtube, really cool stuff.
+
+the "playing music" part of the code is really simple and lightweight (40mb ram usage on average), it's the "getting music" part that was heavy since it has to go through yt-dlp and then deno or whatever js runtime there is to solve verification stuff and other crap, that part is really heavy, and i'm using some cheap 128mb vps instance so it aint gonna work, even with swap enabled.
+
+and also the deps for it: `songbird` and `symphonia` is really heavy, so, best to put it under a feature flag for those who wants want it.
 
 ## disclaimer
 the source code is public but i don't intend to provide support ever as this is only a personal bot of mine, feel free to make use of the code though, its [[MIT]](LICENSE).
