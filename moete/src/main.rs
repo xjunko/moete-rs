@@ -3,6 +3,7 @@ use std::env;
 use std::sync::Arc;
 
 use poise::serenity_prelude as serenity;
+#[cfg(feature = "music")]
 use songbird::SerenityInit;
 use tracing::info;
 use tracing_subscriber::prelude::*;
@@ -96,10 +97,15 @@ async fn main() {
         | serenity::GatewayIntents::MESSAGE_CONTENT
         | serenity::GatewayIntents::GUILD_VOICE_STATES;
 
+    #[cfg(feature = "music")]
     let client = serenity::ClientBuilder::new(token, intents)
         .framework(framework)
         .register_songbird()
         .await;
+
+    #[cfg(not(feature = "music"))]
+    let client =
+        serenity::ClientBuilder::new(token, intents).framework(framework).await;
 
     info!("Starting Moete..");
 

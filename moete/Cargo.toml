@@ -7,6 +7,7 @@ edition.workspace = true
 [features]
 default = []
 macros = ["moete-ext/macros"]
+music = ["moete-core/music", "dep:songbird", "dep:symphonia"]
 
 [dependencies]
 moete-core = { path = "../moete-core" }
@@ -29,8 +30,9 @@ dotenv.workspace = true
 sqlx.workspace = true
 chrono.workspace = true
 plotters.workspace = true
-songbird.workspace = true
-symphonia.workspace = true
+
+songbird = { workspace = true, optional = true }
+symphonia = { workspace = true, optional = true }
 
 sys-info = "0.9.1"
 humantime = "2.3.0"

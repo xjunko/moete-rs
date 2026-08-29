@@ -2,11 +2,14 @@ pub mod counter;
 pub mod emote;
 pub mod markov;
 pub mod math;
-pub mod music;
+
 pub mod pakb;
 pub mod role;
 pub mod user_macros;
 pub mod utility;
+
+#[cfg(feature = "music")]
+pub mod music;
 
 pub fn commands()
 -> Vec<poise::Command<moete_core::State, moete_core::MoeteError>> {
@@ -19,6 +22,8 @@ pub fn commands()
     cmds.extend(markov::commands());
     cmds.extend(role::commands());
     cmds.extend(user_macros::commands());
+
+    #[cfg(feature = "music")]
     cmds.extend(music::commands());
 
     #[cfg(feature = "macros")]

@@ -12,3 +12,4 @@ fly.toml
 .env
 data/*
 config.toml
+cookies.txt
