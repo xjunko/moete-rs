@@ -6,12 +6,12 @@ authors.workspace = true
 
 [dependencies]
 moete-core = { path = "../moete-core" }
-base64 = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
-rand = { workspace = true }
-serenity = { workspace = true }
-poise = { workspace = true }
-reqwest = { workspace = true }
-tokio = { workspace = true }
-once_cell = { workspace = true }
+base64.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+rand.workspace = true
+serenity.workspace = true
+poise.workspace = true
+reqwest.workspace = true
+tokio.workspace = true
+once_cell.workspace = true
