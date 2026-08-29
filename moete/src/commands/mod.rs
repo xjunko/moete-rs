@@ -2,6 +2,7 @@ pub mod counter;
 pub mod emote;
 pub mod markov;
 pub mod math;
+pub mod music;
 pub mod pakb;
 pub mod role;
 pub mod user_macros;
@@ -18,6 +19,7 @@ pub fn commands()
     cmds.extend(markov::commands());
     cmds.extend(role::commands());
     cmds.extend(user_macros::commands());
+    cmds.extend(music::commands());
 
     #[cfg(feature = "macros")]
     cmds.extend(user_macros::commands::macro_commands());

@@ -3,6 +3,7 @@ use std::env;
 use std::sync::Arc;
 
 use poise::serenity_prelude as serenity;
+use songbird::SerenityInit;
 use tracing::info;
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::{
@@ -92,10 +93,13 @@ async fn main() {
     let intents = serenity::GatewayIntents::non_privileged()
         | serenity::GatewayIntents::GUILD_MEMBERS
         | serenity::GatewayIntents::GUILD_PRESENCES
-        | serenity::GatewayIntents::MESSAGE_CONTENT;
+        | serenity::GatewayIntents::MESSAGE_CONTENT
+        | serenity::GatewayIntents::GUILD_VOICE_STATES;
 
-    let client =
-        serenity::ClientBuilder::new(token, intents).framework(framework).await;
+    let client = serenity::ClientBuilder::new(token, intents)
+        .framework(framework)
+        .register_songbird()
+        .await;
 
     info!("Starting Moete..");
 

@@ -6,6 +6,7 @@ pub use self::emotes::EmoteManager;
 pub use self::state::State;
 pub use self::types::*;
 
+pub mod errors;
 pub mod memory;
 
 mod branding;

@@ -12,23 +12,26 @@ macros = ["moete-ext/macros"]
 moete-core = { path = "../moete-core" }
 moete-discord = { path = "../moete-discord" }
 moete-ext = { path = "../moete-ext" }
-serenity = { workspace = true }
-poise = { workspace = true }
-tokio = { workspace = true }
+moete-infra = { path = "../moete-infra" }
+serenity.workspace = true
+poise.workspace = true
+tokio.workspace = true
 serde.workspace = true
-reqwest = { workspace = true }
+reqwest.workspace = true
 serde_json.workspace = true
-rand = { workspace = true }
-regex = { workspace = true }
-once_cell = { workspace = true }
-marukov = { workspace = true }
-tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
-dotenv = { workspace = true }
-sqlx = { workspace = true }
-chrono = { workspace = true }
+rand.workspace = true
+regex.workspace = true
+once_cell.workspace = true
+marukov.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+dotenv.workspace = true
+sqlx.workspace = true
+chrono.workspace = true
+plotters.workspace = true
+songbird.workspace = true
+symphonia.workspace = true
+
 sys-info = "0.9.1"
 humantime = "2.3.0"
 human_format = "1.1.0"
-plotters.workspace = true
-moete-infra = { path = "../moete-infra" }
