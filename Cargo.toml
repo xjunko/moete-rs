@@ -39,6 +39,13 @@ songbird = { version = "0.6", features = ["serenity", "builtin-queue"] }
 
 symphonia = { features = ["aac", "mp3", "isomp4", "alac"], version = "0.5.2" }
 
+[profile.dev]
+opt-level = 0
+debug = true
+incremental = true
+codegen-units = 256
+panic = "abort"
+
 [profile.release]
 opt-level = 3
 lto = "fat"
