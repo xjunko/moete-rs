@@ -41,9 +41,16 @@ pub async fn memory_trim() {
         sleep(Duration::from_secs(30)).await;
     }
 }
+pub async fn ping_status(config: Arc<moete_core::Config>) {
+    loop {
+        reqwest::get(&config.discord.ping_url).await.ok();
+        sleep(Duration::from_secs(30)).await;
+    }
+}
 
 pub async fn start(ctx: Arc<serenity::Context>, state: moete_core::State) {
     tokio::spawn(status_rotate(ctx.clone(), state.config.clone()));
+    tokio::spawn(ping_status(state.config.clone()));
     tokio::spawn(memory_trim());
     tokio::spawn(commands::emote::refresh(ctx.clone(), state.clone()));
     tokio::spawn(commands::pakb::banner_rotate(

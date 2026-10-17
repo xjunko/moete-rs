@@ -90,6 +90,7 @@ pub struct Discord {
     pub token_cdn: String,
     pub prefixes: Vec<String>,
     pub owner: u64,
+    pub ping_url: String,
 }
 
 impl Default for Discord {
@@ -109,6 +110,8 @@ impl Default for Discord {
                 .expect("Error: INSTANCE_OWNER_DISCORD not set")
                 .parse()
                 .expect("Error: INSTANCE_OWNER_DISCORD must be a valid u64"),
+            ping_url: env::var("INSTANCE_PING_URL")
+                .expect("Error: INSTANCE_PING_URL not set"),
         }
     }
 }
