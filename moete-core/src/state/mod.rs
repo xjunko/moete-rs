@@ -4,7 +4,10 @@ use moete_ext::Currencies;
 use moete_infra::services::shortcut::ShortcutCache;
 use sqlx::postgres;
 use tokio::sync::Mutex;
-use tracing::error;
+use tracing::{
+    error,
+    warn,
+};
 
 use super::{
     Config,
@@ -42,14 +45,17 @@ impl Clone for State {
 
 impl State {
     pub fn create() -> Self {
+        let config = Arc::new(Config::default());
         Self {
             started_at: std::time::Instant::now(),
-
-            config: Arc::new(Config::default()),
             emotes: Arc::new(Mutex::new(EmoteManager::new())),
             database: None,
-            currency: Arc::new(Mutex::new(Currencies::new())),
+            currency: Arc::new(Mutex::new(Currencies::new(
+                config.services.wise.clone(),
+                config.services.twelve.clone(),
+            ))),
             shortcut_cache: Arc::new(ShortcutCache::default()),
+            config,
         }
     }
 
@@ -57,20 +63,28 @@ impl State {
         &mut self,
         ctx: &serenity::Context,
     ) -> Result<(), MoeteError> {
-        self.database = match postgres::PgPoolOptions::new()
-            .max_connections(5)
-            .connect(&self.config.services.database)
-            .await
-        {
-            Ok(db) => Some(Arc::new(db)),
-            Err(err) => {
-                error!(
-                    "Failed to connect to database: {}, continuing without database.",
-                    err
-                );
-                None
-            },
-        };
+        let db_url = &self.config.services.database.trim();
+
+        if !db_url.is_empty() {
+            self.database = match postgres::PgPoolOptions::new()
+                .max_connections(5)
+                .connect(db_url)
+                .await
+            {
+                Ok(db) => Some(Arc::new(db)),
+                Err(err) => {
+                    error!(
+                        "Failed to connect to database: {}, continuing without database.",
+                        err
+                    );
+                    None
+                },
+            };
+        } else {
+            warn!(
+                "Database URL not properly set up, continuing without database."
+            )
+        }
 
         self.emotes.lock().await.load(ctx, Arc::clone(&self.config)).await;
 

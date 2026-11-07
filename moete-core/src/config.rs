@@ -110,8 +110,7 @@ impl Default for Discord {
                 .expect("Error: INSTANCE_OWNER_DISCORD not set")
                 .parse()
                 .expect("Error: INSTANCE_OWNER_DISCORD must be a valid u64"),
-            ping_url: env::var("INSTANCE_PING_URL")
-                .expect("Error: INSTANCE_PING_URL not set"),
+            ping_url: env::var("INSTANCE_PING_URL").unwrap_or("".to_string()),
         }
     }
 }
@@ -119,6 +118,8 @@ impl Default for Discord {
 #[derive(Debug)]
 pub struct Services {
     pub database: String,
+    pub wise: String,
+    pub twelve: String,
 }
 
 impl Default for Services {
@@ -126,6 +127,8 @@ impl Default for Services {
         Self {
             database: env::var("INSTANCE_DB_URL")
                 .expect("INSTANCE_DB_URL must be set in the environment"),
+            wise: env::var("WISE_API_TOKEN").unwrap_or_default(),
+            twelve: env::var("TWELVE_API_TOKEN").unwrap_or_default(),
         }
     }
 }
