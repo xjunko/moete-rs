@@ -7,6 +7,7 @@ use rand::{
     SeedableRng,
 };
 use tokio::time::sleep;
+use tracing::warn;
 
 use crate::{
     commands,
@@ -42,6 +43,12 @@ pub async fn memory_trim() {
     }
 }
 pub async fn ping_status(config: Arc<moete_core::Config>) {
+    let ping_url = &config.discord.ping_url.trim();
+    if ping_url.is_empty() {
+        warn!("Ping URL empty, skipping.");
+        return;
+    }
+
     loop {
         reqwest::get(&config.discord.ping_url).await.ok();
         sleep(Duration::from_secs(30)).await;
