@@ -9,7 +9,10 @@ use serenity::all::{
     EditGuild,
     GuildId,
 };
-use tracing::info;
+use tracing::{
+    info,
+    warn,
+};
 
 use super::data::SERVER_THEME;
 use crate::serenity;
@@ -21,6 +24,12 @@ pub async fn banner_rotate(
     ctx: Arc<serenity::Context>,
     config: Arc<moete_core::Config>,
 ) {
+    // NOTE: check if we're even in the server
+    if !ctx.cache.guilds().contains(&PAKB) {
+        warn!("Bot is not a part of the PAKB server, skipping banner_rotate");
+        return;
+    }
+
     loop {
         let custom_offset: i32 = 10;
         let current_day_of_year: i32 = Local::now().ordinal() as i32;
