@@ -5,11 +5,12 @@
 moete-ext/files/commands.json
 moete/src/commands/user_macros/commands.rs
 
-# cloud 
+# cloud
 fly.toml
 
 # dev
 .env
+.tmp/*
 data/*
 config.toml
 cookies.txt
